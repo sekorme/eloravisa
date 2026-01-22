@@ -11,7 +11,7 @@ import { FinalCTASection } from "./FinalCTASection"
 
 import {AnimatedTestimonialsPlus} from "@/components/landing/AnimatedTestimonials";
 import { Footer } from "./Footer"
-import { GlobeDemo } from "./GlobeDemo"
+
 
 
 export function LandingPage() {

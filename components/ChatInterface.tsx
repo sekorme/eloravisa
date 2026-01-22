@@ -16,7 +16,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose, key }) =>
         {
             id: '1',
             role: MessageRole.MODEL,
-            text: 'Hello! I am Elora, your Visa Assistant. How can I help you today?',
+            text: 'Hello! I am Elora, your Visa Assistant. How can I help you today? You can type your question or press on the microphone to ask me anything.',
             timestamp: new Date()
         }
     ]);
@@ -34,7 +34,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose, key }) =>
             const newChat = ai.chats.create({
                 model: 'gemini-3-flash-preview',
                 config: {
-                    systemInstruction: "You are Elora, a professional, warm, and helpful AI assistant for Elora Visa. You help users with visa applications, requirements, and status checks. Keep responses concise and easy to read. Use formatting like bullet points where appropriate.",
+                    systemInstruction: "You are Elora, a professional, warm, and helpful AI assistant for Elora Visa. You help users with visa applications, requirements, and status checks. Keep responses concise and easy to read. Use formatting like bullet points where appropriate. Avoid special formatting symbols such as asterisks or decorative characters.",
                 }
             });
             setChatSession(newChat);
@@ -153,7 +153,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose, key }) =>
     };
 
     return (
-        <div className="flex flex-col h-full w-full bg-white text-slate-800 rounded-2xl shadow-2xl overflow-hidden border border-slate-200 font-sans">
+        <div className="flex flex-col h-full w-full bg-white dark:bg-neutral-800 text-slate-800 rounded-2xl shadow-2xl overflow-hidden border border-slate-200 font-sans">
 
             {/* Header */}
             <div className="flex items-center justify-between p-4 bg-indigo-600 text-white shrink-0">
@@ -175,7 +175,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose, key }) =>
             </div>
 
             {/* Main Content Area */}
-            <div className="flex-1 overflow-hidden relative bg-slate-50">
+            <div className="flex-1 overflow-hidden relative bg-slate-50 ">
 
                 {/* TEXT MODE */}
                 <div className={`absolute inset-0 flex flex-col transition-opacity duration-300 ${mode === ChatMode.TEXT ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>

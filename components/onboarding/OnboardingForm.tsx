@@ -476,7 +476,7 @@ function StepFive({ data, update }: any) {
         <div className="space-y-5">
             <div className="space-y-2">
                 <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Experience & Concerns</h2>
-                <p className="text-slate-500 text-sm">We're here to ease your mind.</p>
+                <p className="text-slate-500 text-sm">We&#39;re here to ease your mind.</p>
             </div>
 
             <div className="space-y-6">

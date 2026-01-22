@@ -9,8 +9,8 @@ import { QuickStats } from "./QuickStats"
 import { ResourcesSection } from "./ResourcesSection"
 import { MessageCircle, X } from "lucide-react"
 import gsap from "gsap"
-import { ChatInterface } from "@/components/ChatInterface"
-import { DashboardChatWrapper } from "../DashboardChatWrapper"
+
+
 
 export function DashboardContent() {
     const containerRef = useRef<HTMLDivElement>(null)
@@ -58,7 +58,7 @@ export function DashboardContent() {
 
             {/* Floating Chat */}
             <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end">
-                <DashboardChatWrapper />
+
             </div>
         </div>
     )

@@ -3,9 +3,7 @@
 import React, { useEffect, useRef } from "react"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { Button } from "@/components/ui/button"
-import { ArrowRight } from "lucide-react"
-import Link from "next/link"
+
 import {AnimatedGridPattern} from "@/components/ui/animated-grid-pattern";
 import {cn} from "@/lib/utils";
 import {SignupSheet} from "@/components/auth/SignupSheet";

@@ -15,6 +15,19 @@ export async function getGeminiKey() {
     return apiKey;
 }
 
+export async function getGeminiKeys() {
+    // WARNING: This exposes the API key to the client.
+    // In a production app, you should use a proxy or a temporary token if available.
+    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+    if (!apiKey) {
+        console.error("GEMINI_API_KEY is not set in the environment variables.");
+        return null; // Return null if key is not found
+    }
+    return apiKey;
+}
+
+
+
 export async function analyzeDocument(documentUrl: string, documentType: string, userData: any, mimeType: string) {
   try {
     // 1. Fetch the file
