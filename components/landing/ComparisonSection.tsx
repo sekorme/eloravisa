@@ -33,7 +33,7 @@ export function ComparisonSection() {
     <section ref={containerRef} className="relative py-16 md:py-24">
       <div className="container px-4 mx-auto max-w-4xl">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">What Makes Us Different</h2>
+          <h2 className="bg-gradient-to-r from-[#00b7fa] to-[#01cfea] bg-clip-text text-transparent text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight ">What Makes Us Different</h2>
           <p className="text-muted-foreground text-lg">We don’t touch your application. We empower you.</p>
         </div>
 

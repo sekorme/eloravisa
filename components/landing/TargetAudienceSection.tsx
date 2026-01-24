@@ -121,7 +121,10 @@ export function TargetAudienceSection() {
 
             <div className="container px-4 mx-auto relative z-0">
                 <div className="text-center mb-16">
-                    <h2 className="text-3xl font-bold mb-4">Who This Is For</h2>
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-[#00b7fa] to-[#01cfea] bg-clip-text text-transparent">
+                        Who This Is{" "}
+                        <span className="text-primary">For.</span>
+                    </h2>
                     <p className="text-muted-foreground text-lg">
                         You stay in control. We guide, you apply.
                     </p>

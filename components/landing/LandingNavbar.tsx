@@ -32,8 +32,8 @@ export function LandingNavbar() {
       <div className="container flex h-16 items-center justify-between px-4 md:px-6 mx-auto">
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center gap-2">
-            <Image src="/eloravisa.PNG" alt="Elora Visa Logo" width={32} height={32} className="w-8 h-8" />
-            <span className="text-lg font-bold tracking-tight">Elora Visa</span>
+            <Image src="/eloravisa.PNG" alt="Elora Visa Logo" width={60} height={60} className="" />
+            <span className="hidden md:block text-lg font-bold tracking-tight">Elora Visa</span>
           </Link>
         </div>
 
@@ -79,7 +79,7 @@ export function LandingNavbar() {
 
               <LoginModal/>
               </div>
-              <SignupSheet desscription={"Get Started"} className={"font-semibold shadow-lg hover:shadow-xl transition-all"}/>
+              <SignupSheet desscription={"Sign Up"} className={"font-semibold shadow-lg hover:shadow-xl transition-all"}/>
           </div>
 
           {/* Mobile Menubar - visible below md */}
@@ -111,7 +111,7 @@ export function LandingNavbar() {
                        <LoginModal/>
                   </MenubarItem>
                   <MenubarItem asChild>
-                    <Link href="/dashboard">Get Started</Link>
+                      <SignupSheet desscription={"Sign Up"} className={"font-semibold shadow-lg hover:shadow-xl transition-all w-full"}/>
                   </MenubarItem>
                 </MenubarContent>
               </MenubarMenu>

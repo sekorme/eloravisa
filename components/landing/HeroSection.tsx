@@ -68,7 +68,7 @@ export function HeroSection() {
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10 hero-cta">
-                <SignupSheet desscription={"Get Started, It's Self Guided"} className="h-12 px-8 text-base bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all"/>
+                <SignupSheet desscription={"Sign Up Now, It's Self Guided"} className="h-12 px-8 text-base bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all"/>
           <Button variant="outline" size="lg" className="h-12 px-8 text-base rounded-full" asChild>
             <Link href="#how-it-works">
               See How It Works

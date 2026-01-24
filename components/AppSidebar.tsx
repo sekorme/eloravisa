@@ -85,7 +85,7 @@ const AppSidebar = () => {
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild>
                             <Link href="/">
-                                <Image src="/eloravisa.PNG" alt="logo" width={20} height={20} />
+                                <Image src="/eloravisa.PNG" alt="logo" width={40} height={40} />
                                 <span>Elora Visa</span>
                             </Link>
                         </SidebarMenuButton>

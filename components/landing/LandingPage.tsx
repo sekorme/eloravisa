@@ -8,9 +8,10 @@ import { FeaturesSection } from "./FeaturesSection"
 import { ComparisonSection } from "./ComparisonSection"
 import { TrustSection } from "./TrustSection"
 import { FinalCTASection } from "./FinalCTASection"
-
+import PricingSection from "@/components/PriceSection"
 import {AnimatedTestimonialsPlus} from "@/components/landing/AnimatedTestimonials";
 import { Footer } from "./Footer"
+
 
 
 
@@ -21,10 +22,12 @@ export function LandingPage() {
 
       <TargetAudienceSection />
       <HowItWorksSection />
+
       <FeaturesSection />
       <ComparisonSection />
       <AnimatedTestimonialsPlus />
       <TrustSection />
+      <PricingSection />
       <FinalCTASection />
       <Footer />
     </div>

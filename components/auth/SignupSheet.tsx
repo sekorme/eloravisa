@@ -154,7 +154,7 @@ export function SignupSheet({className, desscription}: {className?: string, dess
                             <Input
                                 id="full-name"
                                 placeholder="John Doe"
-                                className="pl-10 h-10 p-6"
+                                className="pl-10 h-10 p-6 ml-1"
                                 style={{ fontSize: "16px" }}
                                 value={formData.fullName}
                                 onChange={handleInputChange}
@@ -171,7 +171,7 @@ export function SignupSheet({className, desscription}: {className?: string, dess
                                 id="email"
                                 type="email"
                                 placeholder="name@example.com"
-                                className="pl-10 h-10 p-6"
+                                className="pl-10 h-10 p-6 ml-1"
                                 style={{ fontSize: "16px" }}
                                 value={formData.email}
                                 onChange={handleInputChange}
@@ -188,7 +188,7 @@ export function SignupSheet({className, desscription}: {className?: string, dess
                                 id="password"
                                 type="password"
                                 placeholder="Create a password"
-                                className="pl-10 h-10 p-6"
+                                className="pl-10 h-10 p-6 ml-1"
                                 style={{ fontSize: "16px" }}
                                 value={formData.password}
                                 onChange={handleInputChange}
@@ -206,7 +206,7 @@ export function SignupSheet({className, desscription}: {className?: string, dess
                                 <Input
                                     id="phone-number"
                                     placeholder="+1 234..."
-                                    className="pl-10 h-10 p-6"
+                                    className="pl-10 h-10 p-6 ml-1"
                                     style={{ fontSize: "16px" }}
                                     value={formData.phone}
                                     onChange={handleInputChange}

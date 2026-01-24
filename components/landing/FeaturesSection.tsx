@@ -63,7 +63,12 @@ export function FeaturesSection() {
     <section ref={containerRef} className="py-16 md:py-24 bg-slate-50 dark:bg-slate-900/20">
       <div className="container px-4 mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">Powerful Features</h2>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-[#FF1CF7] to-[#b249f8] bg-clip-text text-transparent ">
+                Powerful{" "}
+                <span className="bg-gradient-to-r from-[#00b7fa] to-[#01cfea] bg-clip-text text-transparent">
+              Features
+            </span>
+            </h2>
           <p className="text-muted-foreground text-lg">Everything you need to build a strong application.</p>
         </div>
 

@@ -43,7 +43,7 @@ export function AnimatedTestimonialsPlus() {
     ];
     return (
         <section  className="relative py-20 md:py-32 overflow-hidden">
-            <h1 className="text-3xl font-bold mb-4 text-center">Testimonials</h1>
+            <h1 className="bg-gradient-to-r from-[#00b7fa] to-[#01cfea] bg-clip-text text-transparent text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-center">Testimonials</h1>
             <AnimatedTestimonials testimonials={testimonials} />
             <AnimatedGridPattern
                 numSquares={30}

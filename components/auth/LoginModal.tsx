@@ -98,7 +98,7 @@ export function LoginModal() {
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button variant="ghost">Sign in</Button>
+                <Button variant="ghost" className="w-full">Sign in</Button>
             </DialogTrigger>
 
             <DialogContent className="sm:max-w-[425px]">
@@ -124,7 +124,7 @@ export function LoginModal() {
                                 name="email"
                                 type="email"
                                 placeholder="you@example.com"
-                                className="pl-10 h-10 p-6"
+                                className="pl-10 h-10 p-6 ml-1"
                                 required
                                 style={{ fontSize: "16px" }}
                                 value={email}
@@ -142,7 +142,7 @@ export function LoginModal() {
                                 name="password"
                                 type="password"
                                 placeholder="••••••••"
-                                className="pl-10 h-10 p-6"
+                                className="pl-10 h-10 p-6 ml-1 placeholder:ml-5"
                                 style={{ fontSize: "16px" }}
                                 required
                                 value={password}

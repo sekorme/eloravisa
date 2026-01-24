@@ -55,7 +55,7 @@ export function FinalCTASection() {
           </p>
           
           <div className="relative z-10">
-              <SignupSheet desscription={"Create Free Account"} className="h-12 px-8 text-base bg-amber-600 hover:bg-amber-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all"/>
+              <SignupSheet desscription={"Create Free Account"} className="h-12 px-8 text-base bg-primary text-white rounded-full shadow-lg hover:shadow-xl transition-all"/>
           </div>
         </div>
       </div>
