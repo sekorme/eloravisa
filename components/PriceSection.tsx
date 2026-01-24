@@ -23,9 +23,9 @@ const plans: Plan[] = [
     name: "Free",
     price: "$0",
     cadence: "",
-    description: "Basic resume + one AI interview",
+    description: "Basic Document Review + one AI interview",
     features: [
-      "Create 1 professional resume",
+      "Basic Document Review",
       "1 AI mock interview",
       "Basic feedback",
     ],
@@ -33,12 +33,12 @@ const plans: Plan[] = [
   },
   {
     name: "Pro",
-    price: "$19",
+    price: "$20",
     cadence: "/mo",
-    description: "Unlimited resumes + 10 interviews",
+    description: "100 Tokens + 10 AI Mock interviews",
     features: [
-      "Unlimited resumes",
-      "10 AI mock interviews / month",
+      "Multiple Document Review",
+      "10 AI mock interviews ",
       "Priority support",
     ],
     cta: "Upgrade to Pro",
@@ -46,17 +46,19 @@ const plans: Plan[] = [
     badge: "Most Popular",
   },
   {
-    name: "Career Boost",
-    price: "$49",
-    cadence: "/3mo",
+    name: "Full Features",
+    price: "$30",
+    cadence: "/mo",
     description:
-      "Includes personalized feedback, voice AI, and job recommendations",
+      "Includes personalized feedback, personal voice AI assistant, Telegram support  ",
     features: [
+        "200 Tokens",
+        "20 AI Mock interviews",
       "Personalized expert feedback",
       "Voice AI interview practice",
       "Smart job recommendations",
     ],
-    cta: "Boost your career",
+    cta: "Boost your application",
   },
 ];
 
