@@ -28,10 +28,10 @@ export function AnimatedTestimonialsPlus() {
         },
         {
             quote:
-                "Outstanding support and robust features. It's rare to find a product that delivers on all its promises.",
-            name: "James Kim",
-            designation: "Engineering Lead at DataPro",
-            src: "https://images.unsplash.com/photo-1636041293178-808a6762ab39?q=80&w=3464&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+                "Elora Visa has been a game-changer for me. The AI tools have made the process so much easier and the expert guidance has been invaluable.",
+            name: "Sweet Akyere",
+            designation: "Student - UK",
+            src: "/akyere.jpg",
         },
         {
             quote:
