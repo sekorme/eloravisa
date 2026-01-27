@@ -135,6 +135,16 @@ export default function RootLayout({
           `}
             </Script>
 
+
+            <Script id="gtag-init" strategy="afterInteractive">
+                {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'AW-17910098280');
+          `}
+            </Script>
+
         </head>
         <body
             className={`${geistSans.variable} ${geistMono.variable} antialiased`}
