@@ -1,0 +1,77 @@
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/firebase/admin";
+import { SUBSCRIPTION_PLANS, PlanId } from "@/lib/subscriptions";
+
+export async function POST(req: NextRequest) {
+  try {
+    const { email, reference, planId } = await req.json();
+
+    if (!email || !reference || !planId) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    // Verify payment with Paystack API
+    const paystackRes = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
+      headers: {
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_PAYSTACK_SECRET_KEY}`,
+      },
+    });
+
+    const paymentData = await paystackRes.json();
+
+    if (!paymentData.status || paymentData.data.status !== "success") {
+      return NextResponse.json({ error: "Payment verification failed" }, { status: 400 });
+    }
+
+    // Get user from Firestore
+    const usersRef = db.collection("users");
+    const querySnapshot = await usersRef.where("email", "==", email).get();
+
+    if (querySnapshot.empty) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const userDoc = querySnapshot.docs[0];
+    const userData = userDoc.data();
+    const userId = userDoc.id;
+
+    const selectedPlan = SUBSCRIPTION_PLANS[planId as PlanId];
+    if (!selectedPlan) {
+      return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
+    }
+
+    // Calculate new tokens and expiration
+    const currentTokens = userData.tokens || 0;
+    const newTokens = currentTokens + selectedPlan.tokens;
+    
+    const now = Date.now();
+    const oneMonth = 30 * 24 * 60 * 60 * 1000;
+    const expiresAt = now + oneMonth;
+
+    // Update user document
+    await userDoc.ref.update({
+      tokens: newTokens,
+      planId: selectedPlan.id,
+      subscriptionExpiresAt: expiresAt,
+      lastPaymentReference: reference,
+      updatedAt: now,
+    });
+
+    // Save payment record
+    await db.collection("payments").add({
+      userId,
+      email,
+      reference,
+      amount: paymentData.data.amount / 100,
+      currency: paymentData.data.currency,
+      planId: selectedPlan.id,
+      status: "success",
+      createdAt: now,
+    });
+
+    return NextResponse.json({ success: true, tokens: newTokens });
+  } catch (error: any) {
+    console.error("Error processing payment:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}

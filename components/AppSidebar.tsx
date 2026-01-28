@@ -75,6 +75,11 @@ const items = [
         url: "/dashboard/information",
         icon: Info,
     },
+    {
+        title: "Subscription",
+        url: "/dashboard/subscription",
+        icon: CircleDollarSign,
+    },
 ];
 
 const AppSidebar = () => {

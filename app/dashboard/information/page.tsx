@@ -31,6 +31,9 @@ import { getVisaInformation } from "@/action/ai";
 import { auth, db } from "@/firebase/client";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
+import { TOKEN_COSTS, deductTokens } from "@/lib/subscriptions";
+import Link from "next/link";
+import { toast } from "sonner";
 
 const iconMap: Record<string, any> = {
   Book, Plane, CreditCard, Home, FileText, History, PenTool, MessageCircle,
@@ -91,8 +94,28 @@ export default function InformationPage() {
 
         // 3. Regenerate if cache is stale or missing
         if (!shouldUseCache) {
+            // Check for tokens
+            const infoDocRefUser = doc(db, "users", user.uid);
+            const userSnap = await getDoc(infoDocRefUser);
+            const tokens = userSnap.data()?.tokens || 0;
+
+            if (tokens < TOKEN_COSTS.INFORMATION_GENERATION) {
+              toast.error("Insufficient tokens", {
+                description: `You need ${TOKEN_COSTS.INFORMATION_GENERATION} tokens to generate new information.`,
+                action: {
+                  label: "Buy Tokens",
+                  onClick: () => window.location.href = "/dashboard/subscription"
+                }
+              });
+              setLoading(false);
+              return;
+            }
+
             const response = await getVisaInformation(userData);
             if (response.success) {
+              // Deduct tokens
+              await deductTokens(user.uid, TOKEN_COSTS.INFORMATION_GENERATION);
+              
               const newData = {
                   ...response.data,
                   metadata: {

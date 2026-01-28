@@ -9,8 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { Loader2, FileText, Download, Printer } from "lucide-react"
+import { FileText, Download, Printer, Coins } from "lucide-react"
 import { toast } from "sonner"
+import { TOKEN_COSTS, deductTokens } from '@/lib/subscriptions'
+import Link from 'next/link'
 
 export default function DraftPage() {
   const [user, setUser] = useState<any>(null)
@@ -48,10 +50,25 @@ export default function DraftPage() {
         return
     }
 
+    const currentTokens = userData?.tokens || 0;
+    if (currentTokens < TOKEN_COSTS.DOCUMENT_DRAFT) {
+      toast.error("Insufficient tokens", {
+        description: `You need ${TOKEN_COSTS.DOCUMENT_DRAFT} tokens to generate a document.`,
+        action: {
+          label: "Buy Tokens",
+          onClick: () => window.location.href = "/dashboard/subscription"
+        }
+      });
+      return;
+    }
+
     setLoading(true)
     setGenerated('')
 
     try {
+      // Deduct tokens before generation
+      await deductTokens(user.uid, TOKEN_COSTS.DOCUMENT_DRAFT);
+
       const res = await fetch('/api/generate-letter', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

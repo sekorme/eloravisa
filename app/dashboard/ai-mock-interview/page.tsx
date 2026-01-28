@@ -6,7 +6,11 @@ import { InterviewSetup } from "@/components/interview/InterviewSetup"
 import { InterviewFeedback } from "@/components/interview/InterviewFeedback"
 import { InterviewHistory } from "@/components/interview/InterviewHistory"
 import { gsap } from "gsap"
-import { Mic } from "lucide-react"
+import { Mic, Coins } from "lucide-react"
+import { auth, db } from "@/firebase/client"
+import { doc, getDoc } from "firebase/firestore"
+import { TOKEN_COSTS, deductTokens } from "@/lib/subscriptions"
+import { toast } from "sonner"
 
 export default function MockVisaInterviewPage() {
     const [step, setStep] = useState<"setup" | "interview" | "complete" | "feedback">("setup")
@@ -50,11 +54,39 @@ export default function MockVisaInterviewPage() {
         return () => ctx.revert()
     }, [step])
 
-    const startInterview = (questions: string[], voiceMode: boolean, contextData: any) => {
-        setSelectedQuestions(questions)
-        setIsVoiceMode(voiceMode)
-        setInterviewContext(contextData)
-        setStep("interview")
+    const startInterview = async (questions: string[], voiceMode: boolean, contextData: any) => {
+        const user = auth.currentUser;
+        if (!user) {
+            toast.error("Please sign in first");
+            return;
+        }
+
+        try {
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            const tokens = userDoc.data()?.tokens || 0;
+
+            if (tokens < TOKEN_COSTS.MOCK_INTERVIEW) {
+                toast.error("Insufficient tokens", {
+                    description: `You need ${TOKEN_COSTS.MOCK_INTERVIEW} tokens to start a mock interview.`,
+                    action: {
+                        label: "Buy Tokens",
+                        onClick: () => window.location.href = "/dashboard/subscription"
+                    }
+                });
+                return;
+            }
+
+            // Deduct tokens
+            await deductTokens(user.uid, TOKEN_COSTS.MOCK_INTERVIEW);
+
+            setSelectedQuestions(questions)
+            setIsVoiceMode(voiceMode)
+            setInterviewContext(contextData)
+            setStep("interview")
+        } catch (error: any) {
+            console.error(error);
+            toast.error(error.message || "An error occurred");
+        }
     }
 
     const handleComplete = (results: any[]) => {
