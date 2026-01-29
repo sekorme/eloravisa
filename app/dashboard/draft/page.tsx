@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import { FileText, Download, Printer, Coins } from "lucide-react"
+import {FileText, Download, Printer, Coins, Loader2} from "lucide-react"
 import { toast } from "sonner"
 import { TOKEN_COSTS, deductTokens } from '@/lib/subscriptions'
 import Link from 'next/link'
