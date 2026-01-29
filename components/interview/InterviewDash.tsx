@@ -13,6 +13,7 @@ import { collection, addDoc } from "firebase/firestore";
 import { toast } from "sonner";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import {useRouter} from "next/navigation";
+import { deductTokens, TOKEN_COSTS } from "@/lib/subscriptions";
 
 const InterviewDash =({apiKeys}: {apiKeys: string | null}) => {
     const [status, setStatus] = useState<SessionStatus>(SessionStatus.IDLE);
@@ -195,11 +196,24 @@ const InterviewDash =({apiKeys}: {apiKeys: string | null}) => {
     }, [micStream]);
 
     // Wrapper to handle saving
-    const handleStop = () => {
+    const handleStop = async () => {
         console.log("handleStop called. Entries:", entriesRef.current);
-        // Save first, then stop
-        saveSession(entriesRef.current, currentInputRef.current, currentOutputRef.current);
+        
+        // Stop the session immediately to release resources
         stopSession();
+
+        if (currentUser) {
+            try {
+                await deductTokens(currentUser.uid, TOKEN_COSTS.MOCK_INTERVIEW);
+            } catch (error) {
+                console.error("Failed to deduct tokens:", error);
+                toast.error("Failed to deduct tokens. Please check your balance.");
+            }
+        }
+
+        // Save session
+        await saveSession(entriesRef.current, currentInputRef.current, currentOutputRef.current);
+        
         setEntries([]); // Clear entries after saving
     };
 

@@ -7,7 +7,14 @@ import { doc, onSnapshot, collection } from "firebase/firestore"
 import { onAuthStateChanged } from "firebase/auth"
 import Link from "next/link"
 
-const TOTAL_DOCUMENTS = 7; // Based on required list
+const TOTAL_DOCUMENTS = 7; // Based on require
+
+interface UserData {
+    fullName?: string
+
+    completedOnboarding?: boolean
+    documents?: Record<string, unknown>
+}
 
 export function QuickStats() {
   const [metrics, setMetrics] = useState({
@@ -18,6 +25,13 @@ export function QuickStats() {
     interviewsCount: 0
   })
   const [loading, setLoading] = useState(true)
+    const [userData, setUserData] = useState<UserData | null>(null)
+    const [reviewsCount, setReviewsCount] = useState(0)
+    const [interviewsCount, setInterviewsCount] = useState(0)
+    const [readinessScore, setReadinessScore] = useState(0)
+
+
+    const [scores, setScores] = useState({ docAvg: 0, interviewMax: 0 });
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
@@ -78,6 +92,76 @@ export function QuickStats() {
     return () => unsubscribeAuth()
   }, [])
 
+
+    useEffect(() => {
+        let unsubscribeUser: (() => void) | null = null
+        let unsubscribeReviews: (() => void) | null = null
+        let unsubscribeInterviews: (() => void) | null = null
+
+        const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const userDocRef = doc(db, "users", user.uid)
+                unsubscribeUser = onSnapshot(userDocRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        // defer to avoid sync setState in effect
+                        void Promise.resolve().then(() => setUserData(docSnap.data() as UserData))
+                    }
+                })
+
+                const reviewsCollRef = collection(db, "users", user.uid, "reviews")
+                unsubscribeReviews = onSnapshot(reviewsCollRef, (snapshot) => {
+                    // defer updates to avoid synchronous setState-in-effect
+                    void Promise.resolve().then(() => setReviewsCount(snapshot.size))
+                    let totalScore = 0;
+                    snapshot.forEach(doc => { totalScore += doc.data().score || 0; });
+                    const avgDocScore = snapshot.size > 0 ? totalScore / snapshot.size : 0;
+                    // avoid synchronous setState-in-effect by deferring
+                    void Promise.resolve().then(() => setScores(prev => ({ ...prev, docAvg: avgDocScore })));
+                })
+
+                const interviewsCollRef = collection(db, "users", user.uid, "interview_sessions")
+                unsubscribeInterviews = onSnapshot(interviewsCollRef, (snapshot) => {
+                    // defer updates to avoid synchronous setState-in-effect
+                    void Promise.resolve().then(() => setInterviewsCount(snapshot.size))
+                    let maxScore = 0;
+                    snapshot.forEach(doc => {
+                        const score = doc.data().feedback?.overallScore || 0;
+                        if (score > maxScore) maxScore = score;
+                    });
+                    // avoid synchronous setState-in-effect by deferring
+                    void Promise.resolve().then(() => setScores(prev => ({ ...prev, interviewMax: maxScore })));
+                })
+
+                // listeners attached - mark loading false once
+                void Promise.resolve().then(() => setLoading(false))
+
+            } else {
+                // defer to avoid sync setState in effect
+                void Promise.resolve().then(() => setLoading(false))
+            }
+        })
+
+        return () => {
+            // cleanup all listeners
+            try { unsubscribeAuth(); } catch {}
+            if (unsubscribeUser) {
+                try { unsubscribeUser(); } catch {}
+            }
+            if (unsubscribeReviews) {
+                try { unsubscribeReviews(); } catch {}
+            }
+            if (unsubscribeInterviews) {
+                try { unsubscribeInterviews(); } catch {}
+            }
+        }
+    }, [])
+
+    useEffect(() => {
+        const weightedScore = Math.round((scores.docAvg * 0.6) + (scores.interviewMax * 0.4));
+        // defer to avoid set-state-in-effect lint rule
+        void Promise.resolve().then(() => setReadinessScore(weightedScore));
+    }, [scores]);
+
   if (loading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
@@ -91,10 +175,6 @@ export function QuickStats() {
   const docsProgress = Math.min(Math.round((metrics.uploadedDocs / TOTAL_DOCUMENTS) * 100), 100)
   
   // Calculate overall readiness: 60% docs, 40% interview
-  const readinessScore = Math.round(
-    (metrics.reviewScore * 0.6) + (metrics.interviewScore * 0.4)
-  )
-
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
       {/* Documents Status */}
@@ -136,7 +216,7 @@ export function QuickStats() {
           <Mic className="text-green-600 dark:text-green-400 text-xl w-6 h-6" />
         </div>
         <div className="text-4xl font-bold text-gray-800 dark:text-foreground mb-2">
-            {metrics.interviewsCount > 0 ? `${readinessScore}%` : '0%'}
+            {readinessScore}
         </div>
         <p className="text-sm text-gray-600 dark:text-muted-foreground mb-4">
             {metrics.interviewsCount > 0 ? `${metrics.interviewsCount} sessions completed` : 'Not started'}

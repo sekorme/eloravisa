@@ -20,6 +20,7 @@ import { signOut, onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "@/firebase/client";
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { Coins } from "lucide-react";
+import {NumberTicker} from "@/components/ui/number-ticker";
 
 function titleizeSegment(seg: string) {
     if (!seg) return "";
@@ -106,7 +107,7 @@ const Navbar = () => {
                 {userData && (
                     <Link href="/dashboard/subscription" className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 rounded-full border border-amber-200 dark:border-amber-800 transition-colors hover:bg-amber-200 dark:hover:bg-amber-900/50">
                         <Coins className="h-4 w-4" />
-                        <span className="text-sm font-bold">{userData.tokens || 0}</span>
+                        <span className="text-sm font-bold">{<NumberTicker value={userData.tokens || 0}/>}</span>
                     </Link>
                 )}
                 <Link href={pathname} className="font-semibold">
