@@ -32,6 +32,7 @@ import { doc, setDoc, getDoc } from "firebase/firestore"
 import { db } from "@/firebase/client"
 import { signInWithGoogle } from "@/lib/googleSignin"
 import { toast } from "sonner"
+import { SUBSCRIPTION_PLANS } from "@/lib/subscriptions"
 
 export function SignupSheet({className, desscription}: {className?: string, desscription?: string}) {
     const router = useRouter()
@@ -78,7 +79,9 @@ export function SignupSheet({className, desscription}: {className?: string, dess
                     dob: formData.dob ? formData.dob : null,
                     country: formData.country,
                     createdAt: new Date().toISOString(),
-                    completedOnboarding: false
+                    completedOnboarding: false,
+                    tokens: SUBSCRIPTION_PLANS.FREE.tokens,
+                    planId: SUBSCRIPTION_PLANS.FREE.id
                 });
 
                 toast.success("Account created successfully")
@@ -110,7 +113,9 @@ export function SignupSheet({className, desscription}: {className?: string, dess
                         dob: null,
                         country: "",
                         createdAt: new Date().toISOString(),
-                        completedOnboarding: false
+                        completedOnboarding: false,
+                        tokens: SUBSCRIPTION_PLANS.FREE.tokens,
+                        planId: SUBSCRIPTION_PLANS.FREE.id
                     });
                     toast.success("Account created successfully")
                     router.push("/onboarding")
