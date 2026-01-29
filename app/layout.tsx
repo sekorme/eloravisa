@@ -126,24 +126,16 @@ export default function RootLayout({
                 src="https://www.googletagmanager.com/gtag/js?id=G-M11K918X76"
                 strategy="afterInteractive"
             />
-            <Script id="google-analytics" strategy="afterInteractive">
-                {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-M11K918X76');
-          `}
-            </Script>
 
-           <Script src="https://www.googletagmanager.com/gtag/js?id=AW-17910098280"></Script>
-
-            <Script id="gtag-init" strategy="afterInteractive">
+            <Script id="google-tags" strategy="afterInteractive">
                 {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'AW-17910098280');
-          `}
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-M11K918X76'); // Google Analytics
+  gtag('config', 'AW-17910098280'); // Google Ads
+`}
             </Script>
 
         </head>
