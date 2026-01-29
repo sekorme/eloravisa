@@ -135,6 +135,15 @@ export default function RootLayout({
 
   gtag('config', 'G-M11K918X76'); // Google Analytics
   gtag('config', 'AW-17910098280'); // Google Ads
+
+  gtag('event', 'conversion', {
+      'send_to': 'AW-17910098280/4eIACJTZ8-0bEOjSmdxC',
+      'value': 1.0,
+      'currency': 'USD',
+      'transaction_id': ''
+  });
+
+
 `}
             </Script>
 
