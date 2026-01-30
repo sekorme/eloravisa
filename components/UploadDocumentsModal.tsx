@@ -112,13 +112,15 @@ export function UploadDocumentsModal() {
                         await setDoc(userDocRef, { documents: {} }, { merge: true });
                     }
 
-                    // Save URL, type, and name
+                    // Save URL, type, name, and timestamp
                     await updateDoc(userDocRef, {
                         [`documents.${currentDocument.key}`]: {
                             url: downloadURL,
                             type: file.type,
-                            name: file.name
+                            name: file.name,
+                            uploadedAt: new Date().toISOString()
                         },
+                        updatedAt: new Date().toISOString() // Keep updating the main doc timestamp too
                     })
 
                     setFile(null)
