@@ -33,7 +33,7 @@ export function Footer() {
   return (
     <footer ref={footerRef} className="bg-slate-50 dark:bg-slate-900/20 border-t border-slate-200 dark:border-slate-800">
       <div className="container px-4 mx-auto py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-8 lg:gap-12">
           <div className="col-span-1 md:col-span-2 footer-content">
             <Link href="/" className="flex items-center gap-2 mb-4">
               <Image src="/eloravisa.PNG" alt="Elora Visa Logo" width={32} height={32} className="w-8 h-8" />
@@ -80,6 +80,22 @@ export function Footer() {
               <li><Link href="/legal/terms-of-service" className="hover:text-foreground transition-colors">Terms of Service</Link></li>
               <li><Link href="/legal/cookie-policy" className="hover:text-foreground transition-colors">Cookie Policy</Link></li>
               <li><Link href="/legal/disclaimer" className="hover:text-foreground transition-colors">Disclaimer</Link></li>
+            </ul>
+          </div>
+
+          <div className="footer-content">
+            <h3 className="font-semibold mb-4 text-sm uppercase tracking-wider">Contact</h3>
+            <ul className="space-y-3 text-sm text-muted-foreground">
+              <li>
+                <a href="mailto:info@eloravisa.com" className="hover:text-foreground transition-colors">
+                  info@eloravisa.com
+                </a>
+              </li>
+              <li>
+                <a href="tel:+233553143196" className="hover:text-foreground transition-colors">
+                  +233 55 314 3196
+                </a>
+              </li>
             </ul>
           </div>
         </div>

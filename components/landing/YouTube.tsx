@@ -6,9 +6,12 @@ export function YouTube() {
   return (
     <section className="py-16 ">
       <div className="container px-4 md:px-4 mx-auto text-center">
-        <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-8">
-          Watch Our Tutorial
-        </h2>
+          <h2 className="text-3xl sm:text-4xl mb-10 md:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-[#FF1CF7] to-[#b249f8] bg-clip-text text-transparent ">
+              Watch{" "}
+              <span className="bg-gradient-to-r from-[#00b7fa] to-[#01cfea] bg-clip-text text-transparent">
+              Tutorial
+            </span>
+          </h2>
         <div className="max-w-4xl mx-auto aspect-video rounded-2xl overflow-hidden shadow-2xl">
           <iframe
             width="100%"
