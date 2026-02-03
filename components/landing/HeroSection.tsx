@@ -121,7 +121,7 @@ export function HeroSection() {
         </div>
 
         <p className="hero-trust text-sm text-muted-foreground font-medium">
-          Trusted by applicants across Ghana, Nigeria & Africa
+          Trusted by applicants across Africa
         </p>
       </div>
     </section>
