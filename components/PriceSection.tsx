@@ -7,12 +7,17 @@ import { title, subtitle } from "./primitives";
 
 import { useSectionReveal } from "@/hooks/useSectionReveal";
 
+type Feature = {
+  name: string;
+  included: boolean;
+};
+
 type Plan = {
   name: string;
   price: string;
   cadence?: string;
   description: string;
-  features: string[];
+  features: Feature[];
   cta: string;
   highlight?: boolean;
   badge?: string;
@@ -20,30 +25,32 @@ type Plan = {
 
 const plans: Plan[] = [
   {
-    name: "Free",
+    name: "Basic Plan",
     price: "$0",
     cadence: "/mo",
-    description: "Basic plan",
+    description: "Perfect for exploring the platform",
     features: [
-        "10 Tokens",
-        "1 AI Mock interview",
-      "Basic Document Review",
-      "1 AI mock interview",
-      "Basic feedback",
+      { name: "10 Tokens", included: true },
+      { name: "AI Chatbot Assistant", included: false },
+      { name: "Document Review", included: true },
+      { name: "Special Telegram Group", included: false },
+      { name: "One AI Mock Interview", included: true },
+      { name: "Document Storage", included: true },
     ],
     cta: "Get started",
   },
   {
-    name: "Pro",
+    name: "Pro Plan",
     price: "$20",
     cadence: "/mo",
-    description: "Pro plan",
+    description: "Most popular for active applicants",
     features: [
-        "100 Tokens",
-        "10 AI Mock interviews",
-      "Multiple Document Review",
-      "10 AI mock interviews ",
-      "Priority support",
+      { name: "100 AI Tokens", included: true },
+      { name: "Limited AI Chatbot Access", included: true },
+      { name: "Document Review", included: true },
+      { name: "Special Telegram Group", included: false },
+      { name: "Multiple AI Mock Interviews", included: true },
+      { name: "Document Storage", included: true },
     ],
     cta: "Upgrade to Pro",
     highlight: true,
@@ -51,16 +58,16 @@ const plans: Plan[] = [
   },
   {
     name: "Full Features",
-    price: "$30",
+    price: "$40",
     cadence: "/mo",
-    description:
-      "Includes personalized feedback, personal voice AI assistant, Telegram support  ",
+    description: "Everything you need for success",
     features: [
-        "200 Tokens",
-        "20 AI Mock interviews",
-      "Personalized expert feedback",
-      "Voice AI interview practice",
-      "Smart Personal Assistant",
+      { name: "200 AI Tokens", included: true },
+      { name: "Full AI Chatbot Access", included: true },
+      { name: "Document Review", included: true },
+      { name: "Special Telegram Group", included: true },
+      { name: "Multiple AI mock interviews", included: true },
+      { name: "Document Storage", included: true },
     ],
     cta: "Boost your application",
   },
@@ -86,7 +93,6 @@ export default function PriceSection() {
     const badges = Array.from(
       root.querySelectorAll<HTMLElement>("[data-badge]"),
     );
-    const glows = Array.from(root.querySelectorAll<HTMLElement>("[data-glow]"));
 
     if (prefersReduced) {
       gsap.set(cards, { opacity: 1, y: 0, scale: 1, clearProps: "transform" });
@@ -175,7 +181,7 @@ export default function PriceSection() {
           </h2>
           <p data-reveal className={subtitle({ fullWidth: true })}>
             Choose a plan that fits your journey. Start free, upgrade when
-            you're ready.
+            you&apos;re ready.
           </p>
         </div>
 
@@ -233,20 +239,35 @@ export default function PriceSection() {
 
               <ul className="mb-6 space-y-2 text-sm text-default-700">
                 {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2">
-                    <svg
-                      aria-hidden="true"
-                      className="mt-0.5 h-4 w-4 text-green-500"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
-                    <span>{f}</span>
+                  <li key={f.name} className={`flex items-start gap-2 ${!f.included ? "text-default-400" : ""}`}>
+                    {f.included ? (
+                      <svg
+                        aria-hidden="true"
+                        className="mt-0.5 h-4 w-4 text-green-500"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                    ) : (
+                      <svg
+                        aria-hidden="true"
+                        className="mt-0.5 h-4 w-4 text-default-400"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M18 6L6 18M6 6l12 12" />
+                      </svg>
+                    )}
+                    <span className={!f.included ? "line-through decoration-default-400/50" : ""}>{f.name}</span>
                   </li>
                 ))}
               </ul>
