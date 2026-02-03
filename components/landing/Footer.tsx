@@ -3,7 +3,7 @@
 import React, { useEffect, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { Twitter, Instagram, Linkedin, Github } from "lucide-react"
+import {Twitter,Facebook, Instagram, Linkedin, Github, Send} from "lucide-react"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 
@@ -44,7 +44,7 @@ export function Footer() {
             </p>
             <div className="flex gap-4">
               <Link href="#" className="text-slate-400 hover:text-blue-600 transition-colors">
-                <Twitter className="w-5 h-5" />
+                <Facebook className="w-5 h-5" />
                 <span className="sr-only">Twitter</span>
               </Link>
               <Link href="#" className="text-slate-400 hover:text-pink-600 transition-colors">
@@ -55,6 +55,11 @@ export function Footer() {
                 <Linkedin className="w-5 h-5" />
                 <span className="sr-only">LinkedIn</span>
               </Link>
+
+                <Link href="https://t.me/+wWazCHK2wEMzMzdk" className="text-slate-400 hover:text-blue-400 transition-colors">
+                    <Send className="w-5 h-5" />
+                    <span className="sr-only">Telegram</span>
+                </Link>
             </div>
           </div>
 

@@ -3,7 +3,7 @@
 import React, { useEffect, useRef } from "react"
 import { gsap } from "gsap"
 import { Button } from "@/components/ui/button"
-import { ArrowRight, ShieldCheck,  } from "lucide-react"
+import { ArrowRight, ShieldCheck,Send  } from "lucide-react"
 import Link from "next/link"
 import {SignupSheet} from "@/components/auth/SignupSheet";
 import {AnimatedGridPattern} from "@/components/ui/animated-grid-pattern";
@@ -114,6 +114,7 @@ export function HeroSection() {
                 <SignupSheet desscription={"Sign Up Now, It's Self Guided"} className="h-12 px-8 text-base bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all"/>
           <Button variant="outline" size="lg" className="h-12 px-8 text-base rounded-full" asChild>
             <Link href="https://t.me/+wWazCHK2wEMzMzdk" target={"external"}>
+                <div className={"rounded-full bg-blue-400 p-2"}><Send className={"text-white"}/></div>
               Join our Telegram for Free
             </Link>
           </Button>
