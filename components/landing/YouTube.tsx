@@ -12,7 +12,7 @@ export function YouTube() {
               Tutorial
             </span>
           </h2>
-        <div className="max-w-4xl mx-auto aspect-video rounded-2xl overflow-hidden shadow-2xl">
+        <div className="max-w-7xl mx-auto aspect-video rounded-2xl overflow-hidden shadow-2xl">
           <iframe
             width="100%"
             height="100%"
