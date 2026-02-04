@@ -16,7 +16,7 @@ export function YouTube() {
           <iframe
             width="100%"
             height="100%"
-            src="https://www.youtube.com/embed/2VMSKMZApeM"
+            src="https://youtu.be/OhV11JYsiWw?si=m7tw5Y4j8_Bt2Wc7"
             title="YouTube video player"
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
