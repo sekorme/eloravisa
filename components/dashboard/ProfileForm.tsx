@@ -193,8 +193,8 @@ export default function ProfileForm() {
                                 <Select value={formData.destination} onValueChange={(v) => handleSelectChange("destination", v)}>
                                     <SelectTrigger><SelectValue placeholder="Select destination" /></SelectTrigger>
                                     <SelectContent>
-                                        {["Canada", "UK", "USA", "Schengen", "Other"].map((c) => (
-                                            <SelectItem key={c} value={c}>{c}</SelectItem>
+                                        {countryList.map((c) => (
+                                            <SelectItem key={c.code + "dest"} value={c.name}>{c.name}</SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
