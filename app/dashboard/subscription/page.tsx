@@ -1,7 +1,7 @@
-"use client"
+    "use client"
 
 import React, { useState, useEffect } from 'react'
-import { Check,  Loader2, Sparkles, Zap, Shield, MessageCircle, Send } from 'lucide-react'
+import { Check,  Loader2, Sparkles, Zap, Shield, MessageCircle, Send, Coins } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { SUBSCRIPTION_PLANS, PlanId } from '@/lib/subscriptions'
@@ -10,6 +10,7 @@ import { doc, getDoc, onSnapshot } from 'firebase/firestore'
 import { startPaystackPayment } from '@/lib/paystack'
 import { getUserCurrencyInfo, convertGHS } from '@/lib/currency'
 import { toast } from 'sonner'
+import {convertCurrency} from "@/lib/convertCurrency";
 
 export default function SubscriptionPage() {
   const [userData, setUserData] = useState<any>(null)
@@ -35,6 +36,8 @@ export default function SubscriptionPage() {
       setCurrency(info.currency || 'USD')
     })
   }, [])
+    
+    
 
   const handleSubscribe = async (planKey: PlanId) => {
     const plan = SUBSCRIPTION_PLANS[planKey]
@@ -61,7 +64,7 @@ export default function SubscriptionPage() {
       
       const priceUSD = plan.price;
       // Mock conversion for Paystack GHS if needed, but let's try USD first
-      const amount = priceUSD; 
+      const amount = await convertCurrency(priceUSD, "GHS"); 
 
       await startPaystackPayment(
         auth.currentUser.email,
@@ -81,7 +84,7 @@ export default function SubscriptionPage() {
             });
             const data = await res.json();
             if (data.success) {
-              toast.success(`Welcome to the ${plan.name}!`);
+              toast.success(planKey === 'TOPUP_50' ? 'Tokens added successfully!' : `Welcome to the ${plan.name}!`);
             } else {
               toast.error(data.error || "Failed to update subscription");
             }
@@ -258,6 +261,55 @@ export default function SubscriptionPage() {
             </Button>
           </CardFooter>
         </Card>
+      </div>
+
+      {/* Top Up Section */}
+      <div className="mt-12">
+        <h2 className="text-2xl font-bold mb-6 text-center">Need More Tokens?</h2>
+        <div className="max-w-md mx-auto">
+            <Card className="border-2 border-amber-400 shadow-lg bg-amber-50/50 dark:bg-amber-900/10">
+                <CardHeader>
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <CardTitle className="text-xl font-bold text-amber-700 dark:text-amber-400">Token Top-Up</CardTitle>
+                            <CardDescription>Add tokens without changing your plan.</CardDescription>
+                        </div>
+                        <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-full text-amber-600">
+                            <Coins className="w-6 h-6" />
+                        </div>
+                    </div>
+                    <div className="mt-4 flex items-baseline">
+                        <span className="text-3xl font-black text-amber-700 dark:text-amber-400">${SUBSCRIPTION_PLANS.TOPUP_50.price}</span>
+                        <span className="ml-1 text-slate-500 text-sm">one-time</span>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <ul className="space-y-3">
+                        <li className="flex items-start gap-3 text-sm">
+                            <Check className="w-5 h-5 text-amber-600 shrink-0" />
+                            <span className="font-bold text-amber-800 dark:text-amber-200">{SUBSCRIPTION_PLANS.TOPUP_50.tokens} AI Tokens</span>
+                        </li>
+                        <li className="flex items-start gap-3 text-sm">
+                            <Check className="w-5 h-5 text-amber-600 shrink-0" />
+                            <span className="text-amber-800 dark:text-amber-200">Instant Credit</span>
+                        </li>
+                        <li className="flex items-start gap-3 text-sm">
+                            <Check className="w-5 h-5 text-amber-600 shrink-0" />
+                            <span className="text-amber-800 dark:text-amber-200">Never Expires</span>
+                        </li>
+                    </ul>
+                </CardContent>
+                <CardFooter>
+                    <Button 
+                        onClick={() => handleSubscribe('TOPUP_50')} 
+                        className="w-full bg-amber-500 hover:bg-amber-600 text-white border-none"
+                        disabled={payingPlan === 'TOPUP_50'}
+                    >
+                        {payingPlan === 'TOPUP_50' ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Top Up Now'}
+                    </Button>
+                </CardFooter>
+            </Card>
+        </div>
       </div>
 
       <div className="mt-16 bg-slate-50 dark:bg-slate-900/50 p-8 rounded-3xl border border-slate-200 dark:border-slate-800">

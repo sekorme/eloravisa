@@ -40,22 +40,32 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
     }
 
-    // Calculate new tokens and expiration
+    // Calculate new tokens
     const currentTokens = userData.tokens || 0;
     const newTokens = currentTokens + selectedPlan.tokens;
     
     const now = Date.now();
-    const oneMonth = 30 * 24 * 60 * 60 * 1000;
-    const expiresAt = now + oneMonth;
 
-    // Update user document
-    await userDoc.ref.update({
-      tokens: newTokens,
-      planId: selectedPlan.id,
-      subscriptionExpiresAt: expiresAt,
-      lastPaymentReference: reference,
-      updatedAt: now,
-    });
+    if (planId === 'TOPUP_50') {
+      // This is a one-time top-up, don't change plan or expiration
+      await userDoc.ref.update({
+        tokens: newTokens,
+        lastPaymentReference: reference,
+        updatedAt: now,
+      });
+    } else {
+      // This is a regular subscription
+      const oneMonth = 30 * 24 * 60 * 60 * 1000;
+      const expiresAt = now + oneMonth;
+
+      await userDoc.ref.update({
+        tokens: newTokens,
+        planId: selectedPlan.id,
+        subscriptionExpiresAt: expiresAt,
+        lastPaymentReference: reference,
+        updatedAt: now,
+      });
+    }
 
     // Save payment record
     await db.collection("payments").add({

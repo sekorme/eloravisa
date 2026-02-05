@@ -26,6 +26,15 @@ export const SUBSCRIPTION_PLANS = {
     hasTelegram: true,
     durationMonths: 1,
   },
+  TOPUP_50: {
+    id: 'topup_50',
+    name: 'Token Top-Up',
+    price: 8,
+    tokens: 50,
+    hasChatbot: false,
+    hasTelegram: false,
+    durationMonths: 0, // One-time purchase
+  },
 } as const;
 
 export const TOKEN_COSTS = {
