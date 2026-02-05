@@ -1,4 +1,4 @@
-    "use client"
+"use client"
 
 import React, { useState, useEffect } from 'react'
 import { Check,  Loader2, Sparkles, Zap, Shield, MessageCircle, Send, Coins } from 'lucide-react'

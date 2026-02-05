@@ -149,7 +149,7 @@ const Navbar = () => {
                             <User className="h-[1.2rem] w-[1.2rem] mr-2" />
                             Profile
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => router.push('/dashboard/settings')}>
                             <Settings className="h-[1.2rem] w-[1.2rem] mr-2" />
                             Settings
                         </DropdownMenuItem>

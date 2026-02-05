@@ -126,7 +126,7 @@ const AppSidebar = () => {
                             </SidebarMenuItem>
                             <SidebarMenuItem className={"text-[#00b7fa]"}>
                                 <SidebarMenuButton asChild>
-                                    <Link href="#">
+                                    <Link href="/dashboard/settings">
                                         <Settings />
                                         Settings
                                     </Link>
