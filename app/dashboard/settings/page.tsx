@@ -208,7 +208,7 @@ const SettingsPage = () => {
                             <CardDescription className="text-red-600/80 dark:text-red-400/80">Irreversible actions for your account.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            <div className="flex items-start justify-between gap-4">
+                            <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
                                 <div className="flex-1">
                                     <Label className="text-base text-red-600 dark:text-red-400">Delete Account</Label>
                                     <p className="text-sm text-red-600/70 dark:text-red-400/70 mt-1">Permanently delete your account and all data. This action cannot be undone.</p>
