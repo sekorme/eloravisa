@@ -5,6 +5,7 @@ import { getMessaging } from 'firebase-admin/messaging';
 
 // ── Initialise Firebase Admin once ───────────────────────────────────────────
 if (!admin.apps.length) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const serviceAccount = require('@/service_key.json');      // ← adjust path
     admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
 }
@@ -55,7 +56,7 @@ export async function POST(req: NextRequest) {
         for (const slice of chunk(tokens, 500)) {
             const res = await messaging.sendEachForMulticast({
                 tokens: slice,
-                data: { title, body, icon: '/512.png', link: 'https://souhaitlearning.com/dashboard' }
+                data: { title, body, icon: '/512.png', link: 'https://eloravisa.com/admin' }
             });
 
             successCount += res.successCount;
@@ -74,7 +75,7 @@ export async function POST(req: NextRequest) {
         tokens.forEach(t => {
             const uid = tokenToUid[t];
             const ref = db.doc(`users/${uid}/notifications/${db.collection('_').doc().id}`);
-            bw.set(ref, { title, body, icon: '/512.png', url: 'https://souhaitlearning.com/dashboard',
+            bw.set(ref, { title, body, icon: '/512.png', url: 'https://eloravisa.com/admin',
                 createdAt, read: false });
         });
 
