@@ -55,7 +55,8 @@ const Navbar = () => {
                 const userDocRef = doc(db, "users", user.uid);
                 const unsubDoc = onSnapshot(userDocRef, (doc) => {
                     if (doc.exists()) {
-                        setUserData(doc.data());
+                        // Include the user ID in the state
+                        setUserData({ ...doc.data(), id: user.uid });
                     }
                 });
                 return () => unsubDoc();
@@ -115,7 +116,7 @@ const Navbar = () => {
                     {currentTitle}
                 </Link>
                 {/* THEME MENU */}
-                {userData && <NotificationBell userId={userData?.id} />}
+                {userData && <NotificationBell userId={userData.id} />}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" size="icon">
