@@ -21,6 +21,7 @@ import { auth, db } from "@/firebase/client";
 import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { Coins } from "lucide-react";
 import {NumberTicker} from "@/components/ui/number-ticker";
+import {NotificationBell} from "@/components/NotificationBell";
 
 function titleizeSegment(seg: string) {
     if (!seg) return "";
@@ -114,6 +115,7 @@ const Navbar = () => {
                     {currentTitle}
                 </Link>
                 {/* THEME MENU */}
+                {userData && <NotificationBell userId={userData?.id} />}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" size="icon">

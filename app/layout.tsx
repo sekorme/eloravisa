@@ -5,6 +5,7 @@ import {ThemeProvider} from "@/components/theme-provider";
 import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "@/components/ui/sonner";
 import Script from "next/script";
+import TrackVisit from "@/components/TrackVisit";
 
 
 
@@ -151,6 +152,7 @@ export default function RootLayout({
         <body
             className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         >
+        <TrackVisit/>
         <ThemeProvider
             attribute="class"
             defaultTheme={ "system"}

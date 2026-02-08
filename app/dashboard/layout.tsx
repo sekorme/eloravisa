@@ -8,6 +8,7 @@ import AppSidebar from "@/components/AppSidebar";
 import {cookies} from "next/headers";
 import {getGeminiKey} from "@/action/ai";
 import HomePageContent from "@/components/HomePageContent";
+import {RegisterSW} from "@/components/RegisterSW";
 
 
 
@@ -22,6 +23,7 @@ const Layout = async({children}:{children: React.ReactNode}) =>{
                 <main className=" w-full">
                     <Navbar />
                     <div className="">
+                        <RegisterSW/>
                         {children}
 
                         <HomePageContent key={keys!}/>
