@@ -4,7 +4,7 @@ import {useEffect} from "react"
 import {logVisit} from "@/lib/logVisit";
 
 
-export default function TrackVisit(){
+export  function TrackVisit(){
     useEffect(()=>{
         const country = document.cookie
             .split('; ')
