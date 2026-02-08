@@ -33,6 +33,7 @@ import { db } from "@/firebase/client"
 import { signInWithGoogle } from "@/lib/googleSignin"
 import { toast } from "sonner"
 import { SUBSCRIPTION_PLANS } from "@/lib/subscriptions"
+import {registrationEmail} from "@/lib/registrationEmail";
 
 export function SignupSheet({className, desscription}: {className?: string, desscription?: string}) {
     const router = useRouter()
@@ -69,6 +70,7 @@ export function SignupSheet({className, desscription}: {className?: string, dess
         try {
             // 1. Create Firebase Auth User
             const user = await signup(formData.email, formData.password)
+            const {email, fullName} = formData
 
             if (user) {
                 // 2. Save initial data directly to Firestore
@@ -85,6 +87,7 @@ export function SignupSheet({className, desscription}: {className?: string, dess
                 });
 
                 toast.success("Account created successfully")
+                await registrationEmail({email, name:fullName})
                 // 3. Redirect to onboarding
                 router.push("/onboarding")
             }
