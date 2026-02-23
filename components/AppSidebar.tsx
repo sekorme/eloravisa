@@ -104,8 +104,8 @@ const AppSidebar = () => {
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {items.map((item) => (
-                                <SidebarMenuItem key={item.title} className={"text-primary"}>
-                                    <SidebarMenuButton asChild>
+                                <SidebarMenuItem key={item.title} className={""}>
+                                    <SidebarMenuButton asChild tooltip={item.title}>
                                         <Link href={item.url}>
                                             <item.icon />
                                             <span>{item.title}</span>
@@ -125,10 +125,10 @@ const AppSidebar = () => {
 
                             </SidebarMenuItem>
                             <SidebarMenuItem className={"text-[#00b7fa]"}>
-                                <SidebarMenuButton asChild>
+                                <SidebarMenuButton asChild tooltip="Settings">
                                     <Link href="/dashboard/settings">
                                         <Settings />
-                                        Settings
+                                        <span>Settings</span>
                                     </Link>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
@@ -139,10 +139,10 @@ const AppSidebar = () => {
             <SidebarFooter>
                 <SidebarMenu>
                     <SidebarMenuItem className={"text-[#00b7fa]"}>
-                        <SidebarMenuButton asChild>
+                        <SidebarMenuButton asChild tooltip="Profile">
                             <Link href="/dashboard/profile">
                                 <User2 />
-                                Profile
+                                <span>Profile</span>
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
