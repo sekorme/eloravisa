@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import AffiliateHomeNavbar from "@/components/affiliate/AffiliateHomeNavbar";
+import AffiliatePublicGuard from "@/components/affiliate/guards/AffiliatePublicGuard";
 
 export const metadata: Metadata = {
     title: {
@@ -30,7 +31,9 @@ export default function AffiliateLayout({
     return (
         <>
             <AffiliateHomeNavbar />
-            {children}
+            <AffiliatePublicGuard>
+                {children}
+            </AffiliatePublicGuard>
         </>
     );
 }

@@ -210,7 +210,7 @@ export default function AffiliateDashboardPage() {
                             <h3 className="text-sm font-semibold mb-6 text-muted-foreground uppercase tracking-widest">
                                 Monthly Referrals Over Time
                             </h3>
-                            <div className="flex-1 min-h-[250px] flex items-end">
+                            <div className="flex-1 min-h-[250px] flex items-end overflow-hidden">
                                 <MonthlyBarChart 
                                     data={monthlyData} 
                                     labels={['11m','10m','9m','8m','7m','6m','5m','4m','3m','2m','1m','Now']} 

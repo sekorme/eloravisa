@@ -172,15 +172,15 @@ export default function AffiliateAnalyticsPage() {
 
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="h-full p-6 bg-card rounded-xl border shadow-sm flex flex-col">
+          <div className="h-full p-6 bg-card rounded-xl border shadow-sm flex flex-col overflow-hidden">
             <h3 className="text-sm font-semibold mb-6 text-muted-foreground uppercase tracking-widest">Monthly Referrals</h3>
-            <div className="flex-1 min-h-[250px] flex items-end">
+            <div className="flex-1 min-h-[250px] flex items-end overflow-hidden">
               <MonthlyBarChart data={metrics.monthlyRefCounts} labels={labels} />
             </div>
           </div>
-          <div className="h-full p-6 bg-card rounded-xl border shadow-sm flex flex-col">
+          <div className="h-full p-6 bg-card rounded-xl border shadow-sm flex flex-col overflow-hidden">
             <h3 className="text-sm font-semibold mb-6 text-muted-foreground uppercase tracking-widest">Monthly Earnings ($)</h3>
-            <div className="flex-1 min-h-[250px] flex items-end">
+            <div className="flex-1 min-h-[250px] flex items-end overflow-hidden">
               <MonthlyBarChart data={metrics.monthlyEarn.map(v => Math.round(v))} labels={labels} />
             </div>
           </div>
