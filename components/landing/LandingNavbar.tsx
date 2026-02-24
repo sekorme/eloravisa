@@ -109,6 +109,9 @@ export function LandingNavbar() {
                   <MenubarItem asChild>
                     <a href="#pricing">Pricing</a>
                   </MenubarItem>
+                    <MenubarItem asChild>
+                        <a href="/affiliate">Affiliate</a>
+                    </MenubarItem>
                   <MenubarSeparator />
                   <MenubarItem asChild>
                        <LoginModal/>
