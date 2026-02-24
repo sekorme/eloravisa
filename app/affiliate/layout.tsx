@@ -15,12 +15,16 @@ export const metadata: Metadata = {
         url: "https://eloravisa.com/affiliate",
         siteName: "Elora Visa Affiliate",
         type: "website",
+        images: [
+            "https://eloravisa.com/affiliateimage.png"
+        ],
     },
     twitter: {
         card: "summary_large_image",
         title: "Elora Visa Affiliate Program",
         description: "Join our affiliate program and earn 10% commission on every referral. Help people succeed in their visa applications.",
     },
+
 };
 
 export default function AffiliateLayout({
