@@ -4,7 +4,7 @@ import { SUBSCRIPTION_PLANS, PlanId } from "@/lib/subscriptions";
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, reference, planId } = await req.json();
+    const { email, reference, planId, promoCode } = await req.json();
 
     if (!email || !reference || !planId) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -40,34 +40,41 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
     }
 
-    // Calculate new tokens
-    const currentTokens = userData.tokens || 0;
-    const newTokens = currentTokens + selectedPlan.tokens;
-    
-    const now = Date.now();
-
-    if (planId === 'TOPUP_50') {
-      // This is a one-time top-up, don't change plan or expiration
-      await userDoc.ref.update({
-        tokens: newTokens,
-        lastPaymentReference: reference,
-        updatedAt: now,
-      });
-    } else {
-      // This is a regular subscription
-      const oneMonth = 30 * 24 * 60 * 60 * 1000;
-      const expiresAt = now + oneMonth;
-
-      await userDoc.ref.update({
-        tokens: newTokens,
-        planId: selectedPlan.id,
-        subscriptionExpiresAt: expiresAt,
-        lastPaymentReference: reference,
-        updatedAt: now,
-      });
+    // Server-side promo code validation: if provided, check influencers collection
+    let influencerId: string | null = null
+    if (promoCode) {
+      try {
+        const inflRef = db.collection('influencers')
+        const inflSnap = await inflRef.where('promoCode', '==', promoCode).limit(1).get()
+        if (!inflSnap.empty) {
+          influencerId = inflSnap.docs[0].id
+        } else {
+          // promo code not found - we won't reject the payment but record that promo was invalid
+          console.warn(`Promo code ${promoCode} not found during server validation`)
+        }
+      } catch (err) {
+        console.error('Error checking promo code on server:', err)
+      }
     }
 
-    // Save payment record
+    // Calculate new tokens and expiration
+    const currentTokens = userData.tokens || 0;
+    const newTokens = currentTokens + selectedPlan.tokens;
+
+    const now = Date.now();
+    const oneMonth = 30 * 24 * 60 * 60 * 1000;
+    const expiresAt = now + oneMonth;
+
+    // Update user document
+    await userDoc.ref.update({
+      tokens: newTokens,
+      planId: selectedPlan.id,
+      subscriptionExpiresAt: expiresAt,
+      lastPaymentReference: reference,
+      updatedAt: now,
+    });
+
+    // Save payment record, include influencerId if present
     await db.collection("payments").add({
       userId,
       email,
@@ -76,12 +83,15 @@ export async function POST(req: NextRequest) {
       currency: paymentData.data.currency,
       planId: selectedPlan.id,
       status: "success",
+      influencerId: influencerId || null,
+      promoCode: promoCode || null,
       createdAt: now,
     });
 
     return NextResponse.json({ success: true, tokens: newTokens });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error processing payment:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const message = error instanceof Error ? error.message : String(error)
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

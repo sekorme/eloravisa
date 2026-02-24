@@ -11,6 +11,8 @@ import {
     Info,
     Mic,
     Users,
+    LayoutTemplate,
+    BarChart3
 } from "lucide-react";
 import {
     Sidebar,
@@ -25,7 +27,7 @@ import {
     SidebarMenuItem,
     SidebarSeparator,
     SidebarTrigger,
-} from "./ui/sidebar";
+} from "../ui/sidebar";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from 'next/navigation'
@@ -71,15 +73,18 @@ const items = [
 ];
 
 const affiliateItems = [
-    { title: 'Referrals', url: '/affiliate/dashboard', icon: Users },
-    { title: 'Withdrawals', url: '/affiliate/dashboard/withdrawals', icon: CircleDollarSign },
+    { title: 'Dashboard', url: '/affiliate/dashboard', icon: LayoutTemplate },
+    { title: 'Analytics', url: '/affiliate/dashboard/analytics', icon: BarChart3 },
+    { title: 'Withdrawals History', url: '/affiliate/dashboard/withdrawals', icon: CircleDollarSign },
     { title: 'Settings', url: '/affiliate/dashboard/settings', icon: Settings },
+
 ]
 
 const AppSidebar = () => {
     const pathname = usePathname()
     const isAffiliate = pathname?.startsWith('/affiliate')
     const menuItems = isAffiliate ? affiliateItems : items
+    const linked = isAffiliate ? "/affiliate/dashboard/profile" : "/dashboard/profile"
 
     return (
         <Sidebar collapsible="icon">
@@ -142,7 +147,7 @@ const AppSidebar = () => {
                  <SidebarMenu>
                      <SidebarMenuItem className={"text-[#00b7fa]"}>
                          <SidebarMenuButton asChild tooltip="Profile">
-                             <Link href="/dashboard/profile">
+                             <Link href={linked}>
                                  <User2 />
                                  <span>Profile</span>
                              </Link>

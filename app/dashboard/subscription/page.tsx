@@ -6,23 +6,41 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { SUBSCRIPTION_PLANS, PlanId } from '@/lib/subscriptions'
 import { auth, db } from '@/firebase/client'
-import { doc, getDoc, onSnapshot } from 'firebase/firestore'
+import { doc, onSnapshot, collection, query, where, getDocs } from 'firebase/firestore'
 import { startPaystackPayment } from '@/lib/paystack'
-import { getUserCurrencyInfo, convertGHS } from '@/lib/currency'
+import { getUserCurrencyInfo } from '@/lib/currency'
 import { toast } from 'sonner'
 import {convertCurrency} from "@/lib/convertCurrency";
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog'
 
 export default function SubscriptionPage() {
-  const [userData, setUserData] = useState<any>(null)
+  type UserData = { planId?: string | null; fullName?: string | null } | null
+
+  const [userData, setUserData] = useState<UserData>(null)
   const [loading, setLoading] = useState(true)
   const [payingPlan, setPayingPlan] = useState<string | null>(null)
-  const [currency, setCurrency] = useState('USD')
+  const [promoCode, setPromoCode] = useState('')
+  const [promoNotFoundOpen, setPromoNotFoundOpen] = useState(false)
+  const [pendingPlan, setPendingPlan] = useState<PlanId | null>(null)
+  const [pendingPromo, setPendingPromo] = useState<string | null>(null)
 
   useEffect(() => {
     const user = auth.currentUser
     if (user) {
       const unsub = onSnapshot(doc(db, "users", user.uid), (doc) => {
-        setUserData(doc.data())
+        const d = doc.data()
+        setUserData(d ? (d as UserData) : null)
         setLoading(false)
       })
       return () => unsub()
@@ -32,9 +50,8 @@ export default function SubscriptionPage() {
   }, [])
 
   useEffect(() => {
-    getUserCurrencyInfo().then(info => {
-      setCurrency(info.currency || 'USD')
-    })
+    // keep for possible future use; attempt to fetch currency but ignore result for now
+    getUserCurrencyInfo().catch(() => {})
   }, [])
     
     
@@ -55,16 +72,50 @@ export default function SubscriptionPage() {
     setPayingPlan(planKey)
 
     try {
-      // Convert price to currency
-      // For simplicity, let's assume the $20 and $40 are in USD and we want to pay in GHS or currency
-      // Usually Paystack handles GHS/NGN/USD/KES/ZAR. 
-      // Let's assume the price is in USD and convert to GHS for Paystack if needed, 
-      // or just use USD if the merchant account supports it.
-      // Paystack expects amount in minor units.
-      
-      const priceUSD = plan.price;
-      // Mock conversion for Paystack GHS if needed, but let's try USD first
-      const amount = await convertCurrency(priceUSD, "GHS"); 
+      // If a promo code was entered, verify it exists in the influencers collection.
+      // If it doesn't exist, ask the user if they want to continue without it or re-enter.
+      let promoToUse: string | null = promoCode.trim() ? promoCode.trim() : null
+      if (promoToUse) {
+        try {
+          const inflRef = collection(db, 'influencers')
+          const q = query(inflRef, where('promoCode', '==', promoToUse))
+          const snap = await getDocs(q)
+          if (snap.empty) {
+            // Open modal to let the user continue without the promo code or cancel to re-enter
+            setPendingPlan(planKey)
+            setPendingPromo(promoToUse)
+            setPromoNotFoundOpen(true)
+            // stop here; the modal will resume the flow if the user confirms
+            return
+          }
+        } catch (err) {
+          console.error('Error validating promo code:', err)
+          // Don't block payment on validation errors — allow user to continue but notify.
+          toast.warning('Could not verify promo code. You can continue to payment or try again.')
+        }
+      }
+       // Convert price to currency
+       // For simplicity, let's assume the $20 and $40 are in USD and we want to pay in GHS or currency
+       // Usually Paystack handles GHS/NGN/USD/KES/ZAR.
+       // Let's assume the price is in USD and convert to GHS for Paystack if needed,
+       // or just use USD if the merchant account supports it.
+       // Paystack expects amount in minor units.
+
+       // delegate full payment flow to helper so modal can resume it
+       await startPaymentFlow(planKey, promoToUse)
+     } catch (error) {
+       console.error(error)
+       toast.error("Failed to initialize payment")
+       setPayingPlan(null)
+     }
+  }
+
+  // Helper to start the Paystack flow (extracted to allow modal to resume)
+  async function startPaymentFlow(planKey: PlanId, promoToUse: string | null) {
+    const plan = SUBSCRIPTION_PLANS[planKey]
+    try {
+      const priceUSD = plan.price
+      const amount = await convertCurrency(priceUSD, 'GHS')
 
       await startPaystackPayment(
         auth.currentUser.email,
@@ -73,31 +124,36 @@ export default function SubscriptionPage() {
         plan.id,
         async (reference) => {
           try {
-            const res = await fetch("/api/paystack-success", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ 
-                email: auth.currentUser?.email, 
-                reference, 
-                planId: planKey 
+            const res = await fetch('/api/paystack-success', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                email: auth.currentUser?.email,
+                reference,
+                planId: planKey,
+                promoCode: promoToUse || null,
               }),
-            });
-            const data = await res.json();
+            })
+            const data = await res.json()
             if (data.success) {
-              toast.success(planKey === 'TOPUP_50' ? 'Tokens added successfully!' : `Welcome to the ${plan.name}!`);
+              toast.success(planKey === 'TOPUP_50' ? 'Tokens added successfully!' : `Welcome to the ${plan.name}!`)
             } else {
-              toast.error(data.error || "Failed to update subscription");
+              toast.error(data.error || 'Failed to update subscription')
             }
-          } catch (err) {
-            toast.error("An error occurred while updating your subscription");
+          } catch {
+            toast.error('An error occurred while updating your subscription')
           } finally {
-            setPayingPlan(null);
+            setPayingPlan(null)
+            // clear pending state
+            setPendingPlan(null)
+            setPendingPromo(null)
+            setPromoNotFoundOpen(false)
           }
         }
       )
-    } catch (error) {
-      console.error(error)
-      toast.error("Failed to initialize payment")
+    } catch (err) {
+      console.error('Payment init error:', err)
+      toast.error('Failed to initialize payment')
       setPayingPlan(null)
     }
   }
@@ -119,6 +175,17 @@ export default function SubscriptionPage() {
         <p className="text-slate-500 dark:text-slate-400 max-w-2xl mx-auto font-medium">
           Get the tokens you need to power your visa application journey. All tokens are valid for one month and roll over if you renew.
         </p>
+
+        <div className="max-w-xs mx-auto pt-4 space-y-2">
+          <Label htmlFor="promoCode" className="text-sm font-semibold">Have a Promo Code? (Get 50 extra tokens)</Label>
+          <Input 
+            id="promoCode" 
+            placeholder="Enter code" 
+            value={promoCode} 
+            onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+            className="text-center font-bold tracking-widest"
+          />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -353,11 +420,22 @@ export default function SubscriptionPage() {
           </div>
         </div>
       </div>
+
+      {/* Promo not-found confirmation dialog (rendered at end so it's inside the same client component) */}
+      <PromoNotFoundDialog
+        open={promoNotFoundOpen}
+        onOpenChange={setPromoNotFoundOpen}
+        onContinue={() => {
+          // user confirmed to continue without promo code
+          startPaymentFlow(pendingPlan!, pendingPromo)
+        }}
+        promo={pendingPromo}
+      />
     </div>
   )
 }
 
-function X(props: any) {
+function X(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       {...props}
@@ -374,5 +452,36 @@ function X(props: any) {
       <path d="M18 6 6 18" />
       <path d="m6 6 12 12" />
     </svg>
+  )
+}
+
+// Promo not-found confirmation dialog (rendered at end so it's inside the same client component)
+export function PromoNotFoundDialog({
+  open,
+  onOpenChange,
+  onContinue,
+  promo,
+}: {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onContinue: () => void
+  promo: string | null
+}) {
+  return (
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Promo code not found</AlertDialogTitle>
+          <AlertDialogDescription>
+            The promo code "{promo}" could not be found. You can continue to payment without a promo
+            code, or cancel to re-enter a different code.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => onOpenChange(false)}>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={onContinue}>Continue to payment</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }

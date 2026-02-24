@@ -35,16 +35,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (loading) return;
 
         const isProtectedRoute = pathname.startsWith("/dashboard") || pathname.startsWith("/onboarding");
+        const isAffiliateDashboard = pathname.startsWith("/affiliate/dashboard");
+        const isAffiliateAuthPage = pathname === "/affiliate/signin" || pathname === "/affiliate/signup";
         const isPublicAuthPage = pathname === "/" || pathname === "/login";
 
-        // If user is not logged in and tries to access a protected route, redirect to home
+        // Handle normal user routes
         if (!user && isProtectedRoute) {
             router.push("/");
         }
 
         // If user is logged in and tries to access landing/login page, redirect to dashboard
-        if (user && isPublicAuthPage) {
+        if (user && isPublicAuthPage && !isAffiliateDashboard && !isAffiliateAuthPage) {
             router.push("/dashboard");
+        }
+        
+        // Handle affiliate routes (minimal logic here, can be expanded)
+        if (!user && isAffiliateDashboard) {
+            router.push("/affiliate/signin");
         }
     }, [user, loading, pathname, router]);
 

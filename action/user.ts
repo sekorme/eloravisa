@@ -16,6 +16,14 @@ export async function getCurrentUserDetails() {
         if (userDoc.exists()) {
             return userDoc.data();
         } else {
+            // Also check if they are an influencer and don't let them in as a regular user
+            const influencerDocRef = doc(db, "influencers", user.uid);
+            const influencerDoc = await getDoc(influencerDocRef);
+            if (influencerDoc.exists()) {
+                 console.log("Influencer tried to sign in as user");
+                 return null;
+            }
+
             console.log("No such user document!");
             return null;
         }
