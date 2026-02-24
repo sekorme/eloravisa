@@ -3,7 +3,6 @@
 
 import Link from "next/image"
 import { Button } from "@/components/ui/button"
-import AffiliateHomeNavbar from "@/components/affiliate/AffiliateHomeNavbar"
 import { AffiliateBackground } from "@/components/affiliate/AffiliateBackground"
 import { ArrowRight, DollarSign, Users, Zap, ShieldCheck } from "lucide-react"
 import NextLink from "next/link"
@@ -11,7 +10,6 @@ import NextLink from "next/link"
 export default function AffiliateLandingPage() {
   return (
     <div className="min-h-screen bg-background relative overflow-hidden flex flex-col">
-      <AffiliateHomeNavbar />
       <div className="relative flex-1">
         <AffiliateBackground />
         

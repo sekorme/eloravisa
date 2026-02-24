@@ -1,10 +1,11 @@
-"use client";
+"use client"
 
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
 import { Moon, Sun } from "lucide-react";
+import { usePathname } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +15,12 @@ import {
 
 export default function AffiliateHomeNavbar() {
   const { setTheme } = useTheme();
+  const pathname = usePathname();
+
+  // Don't show this navbar on dashboard pages
+  if (pathname?.startsWith("/affiliate/dashboard")) {
+    return null;
+  }
 
   return (
     <nav className="p-4 flex items-center justify-between bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 border-b">

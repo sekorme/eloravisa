@@ -19,7 +19,6 @@ import { toast } from "sonner"
 import { Loader2, Globe, Phone, Calendar, Instagram, Facebook, Video, Share2 } from "lucide-react"
 import Link from "next/link"
 import countries from "world-countries"
-import AffiliateHomeNavbar from "@/components/affiliate/AffiliateHomeNavbar"
 import { AffiliateBackground } from "@/components/affiliate/AffiliateBackground"
 
 export default function AffiliateSignupPage() {
@@ -83,7 +82,6 @@ export default function AffiliateSignupPage() {
 
     return (
         <div className="min-h-screen bg-background relative overflow-hidden flex flex-col">
-            <AffiliateHomeNavbar />
             <div className="relative flex-1">
                 <AffiliateBackground />
                 <div className="flex items-center justify-center p-4 py-12 relative z-10">

@@ -11,7 +11,6 @@ import { influencerSignin } from "@/lib/influencerAuth"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 import Link from "next/link"
-import AffiliateHomeNavbar from "@/components/affiliate/AffiliateHomeNavbar"
 import { AffiliateBackground } from "@/components/affiliate/AffiliateBackground"
 
 export default function AffiliateSigninPage() {
@@ -44,7 +43,6 @@ export default function AffiliateSigninPage() {
 
     return (
         <div className="min-h-screen bg-background relative overflow-hidden flex flex-col">
-            <AffiliateHomeNavbar />
             <div className="relative flex-1">
                 <AffiliateBackground />
                 <div className="flex items-center justify-center p-4 min-h-[calc(100vh-64px)] relative z-10">
