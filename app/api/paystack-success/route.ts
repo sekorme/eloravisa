@@ -57,11 +57,31 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const now = Date.now();
     // Calculate new tokens and expiration
     const currentTokens = userData.tokens || 0;
-    const newTokens = currentTokens + selectedPlan.tokens;
+    let tokensToAdd = selectedPlan.tokens;
+    let commissionAmount = 0;
 
-    const now = Date.now();
+    if (influencerId) {
+      const bonusTokens = Math.floor(selectedPlan.tokens * 0.3);
+      tokensToAdd += bonusTokens;
+      commissionAmount = selectedPlan.price * 0.1;
+
+      // Update influencer's commission and referral count
+      const influencerRef = db.collection("influencers").doc(influencerId);
+      const influencerDoc = await influencerRef.get();
+      const influencerData = influencerDoc.data() || {};
+
+      await influencerRef.update({
+        totalCommission: (influencerData.totalCommission || 0) + commissionAmount,
+        referralCount: (influencerData.referralCount || 0) + 1,
+        updatedAt: now,
+      });
+    }
+
+    const newTokens = currentTokens + tokensToAdd;
+
     const oneMonth = 30 * 24 * 60 * 60 * 1000;
     const expiresAt = now + oneMonth;
 
@@ -85,6 +105,7 @@ export async function POST(req: NextRequest) {
       status: "success",
       influencerId: influencerId || null,
       promoCode: promoCode || null,
+      commissionAmount: commissionAmount,
       createdAt: now,
     });
 

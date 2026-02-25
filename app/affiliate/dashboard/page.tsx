@@ -11,6 +11,7 @@ import { collection, query, where, orderBy, getDocs } from "firebase/firestore"
 import { Loader2 } from "lucide-react"
 
 import PromoCodeCard from '@/components/affiliate/PromoCodeCard'
+import StatsCards from '@/components/affiliate/StatsCards'
 import ProgramDetails from '@/components/affiliate/ProgramDetails'
 import WithdrawalForm from '@/components/affiliate/WithdrawalForm'
 import PaymentsTable from '@/components/affiliate/PaymentsTable'
@@ -177,6 +178,9 @@ export default function AffiliateDashboardPage() {
         return counts
     })()
 
+    // Calculate total withdrawn amount
+    const totalWithdrawn = withdrawals.reduce((acc, w) => acc + (w.requestedAmount || 0), 0)
+
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background">
@@ -200,6 +204,7 @@ export default function AffiliateDashboardPage() {
                         referralCount={influencerData.referralCount || 0}
                         monthlyData={monthlyData}
                         promoCode={influencerData.promoCode}
+                        totalWithdrawn={totalWithdrawn}
                     />
                 </div>
 

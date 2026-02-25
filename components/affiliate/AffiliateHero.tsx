@@ -12,9 +12,10 @@ interface Props {
   referralCount?: number
   monthlyData?: number[]
   promoCode?:string
+  totalWithdrawn?: number
 }
 
-export default function AffiliateHero({promoCode, name, balance = 0, referralCount = 0, monthlyData = [] }: Props) {
+export default function AffiliateHero({promoCode, name, balance = 0, referralCount = 0, monthlyData = [], totalWithdrawn = 0 }: Props) {
   const recent = monthlyData && monthlyData.length ? monthlyData.slice(-12) : []
   const [conversion, setConversion] = useState('0.0')
 
@@ -25,7 +26,9 @@ export default function AffiliateHero({promoCode, name, balance = 0, referralCou
   }, [])
 
   const totalReferrals = referralCount || recent.reduce((a, b) => a + b, 0)
-  const avgCommission = balance && balance > 0 ? (balance / (totalReferrals || 1)).toFixed(2) : '0.00'
+  // Total Earned = Current Balance + Total Withdrawn
+  const totalEarned = (balance || 0) + (totalWithdrawn || 0)
+  
     const handleCopy = (text: string) => {
         navigator.clipboard.writeText(text)
         toast.success("Promo code copied to clipboard!")
@@ -60,7 +63,7 @@ export default function AffiliateHero({promoCode, name, balance = 0, referralCou
                     <div className="p-1.5 rounded-lg bg-blue-500/30">
                         <DollarSign className="h-4 w-4 text-blue-100" />
                     </div>
-                    <span className="text-sm font-medium">Earned</span>
+                    <span className="text-sm font-medium">Balance</span>
                   </div>
                   <div className="text-3xl font-bold mt-2">${(balance || 0).toFixed(2)}</div>
                </div>
@@ -102,11 +105,11 @@ export default function AffiliateHero({promoCode, name, balance = 0, referralCou
         <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-6 border-t border-white/10 pt-6">
            <div className="group">
               <div className="text-xs text-blue-300 uppercase tracking-wider font-semibold mb-1 group-hover:text-white transition-colors">Total Earned</div>
-              <div className="text-xl font-semibold">${(balance || 0).toFixed(2)}</div>
+              <div className="text-xl font-semibold">${totalEarned.toFixed(2)}</div>
            </div>
            <div className="group">
-              <div className="text-xs text-blue-300 uppercase tracking-wider font-semibold mb-1 group-hover:text-white transition-colors">Avg. Commission</div>
-              <div className="text-xl font-semibold">${avgCommission}</div>
+              <div className="text-xs text-blue-300 uppercase tracking-wider font-semibold mb-1 group-hover:text-white transition-colors">Total Withdrawn</div>
+              <div className="text-xl font-semibold">${(totalWithdrawn || 0).toFixed(2)}</div>
            </div>
            <div className="group">
               <div className="text-xs text-blue-300 uppercase tracking-wider font-semibold mb-1 group-hover:text-white transition-colors">Account Status</div>
