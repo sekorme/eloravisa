@@ -3,21 +3,20 @@
 
 import { useEffect, useState } from "react"
 import { useAuth } from "@/context/AuthContext"
-import { getInfluencerData } from "@/lib/influencerAuth"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { db } from "@/firebase/client"
-import { collection, query, where, orderBy, getDocs } from "firebase/firestore"
+import { collection, query, where, orderBy, onSnapshot, doc } from "firebase/firestore"
 import { Loader2 } from "lucide-react"
 
-import PromoCodeCard from '@/components/affiliate/PromoCodeCard'
-import StatsCards from '@/components/affiliate/StatsCards'
-import ProgramDetails from '@/components/affiliate/ProgramDetails'
-import WithdrawalForm from '@/components/affiliate/WithdrawalForm'
-import PaymentsTable from '@/components/affiliate/PaymentsTable'
-import WithdrawalsTable from '@/components/affiliate/WithdrawalsTable'
 import AffiliateHero from '@/components/affiliate/AffiliateHero'
 import MonthlyBarChart from '@/components/affiliate/MonthlyBarChart'
+import PaymentsTable from '@/components/affiliate/PaymentsTable'
+import ProgramDetails from '@/components/affiliate/ProgramDetails'
+import PromoCodeCard from '@/components/affiliate/PromoCodeCard'
+
+import WithdrawalForm from '@/components/affiliate/WithdrawalForm'
+import WithdrawalsTable from '@/components/affiliate/WithdrawalsTable'
 
 // Small local types to avoid explicit `any`
 interface InfluencerData {
@@ -57,79 +56,89 @@ export default function AffiliateDashboardPage() {
     const router = useRouter()
     const [influencerData, setInfluencerDataState] = useState<InfluencerData | null>(null)
     const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([])
-    const [loadingWithdrawals, setLoadingWithdrawals] = useState(false)
     const [loading, setLoading] = useState(true)
     const [payments, setPayments] = useState<Payment[]>([])
-    const [loadingPayments, setLoadingPayments] = useState(false)
 
+    // Real-time listener for influencer data
     useEffect(() => {
-        async function fetchData() {
-            if (user) {
-                try {
-                    const data = await getInfluencerData(user.uid)
-                    if (data) {
-                        setInfluencerDataState(data as InfluencerData)
-                    } else {
-                        // Not an influencer
-                        router.push("/affiliate/signin")
-                    }
-                } catch (error) {
-                    console.error("Error fetching influencer data:", error)
-                    toast.error("Failed to load dashboard data")
-                } finally {
-                    setLoading(false)
-                }
-            }
+        if (!user) {
+            setLoading(false)
+            return
         }
-        fetchData()
+
+        const influencerDocRef = doc(db, "influencers", user.uid)
+        const unsubscribe = onSnapshot(influencerDocRef, (docSnap) => {
+            if (docSnap.exists()) {
+                setInfluencerDataState({ uid: docSnap.id, ...docSnap.data() } as InfluencerData)
+            } else {
+                // Not an influencer, redirect
+                toast.error("Access denied. This account is not registered as an influencer.")
+                router.push("/affiliate/signin")
+            }
+            setLoading(false)
+        }, (error) => {
+            console.error("Error fetching influencer data:", error)
+            toast.error("Failed to load dashboard data")
+            setLoading(false)
+        })
+
+        return () => unsubscribe()
     }, [user, router])
 
-    // Fetch payments that belong to this influencer
+    // Real-time listener for payments
     useEffect(() => {
-        async function fetchPayments() {
-            if (!influencerData?.uid) return
-            setLoadingPayments(true)
-            try {
-                const paymentsRef = collection(db, "payments")
-                const q = query(paymentsRef, where("influencerId", "==", influencerData.uid), orderBy("createdAt", "desc"))
-                const snap = await getDocs(q)
-                const items: Payment[] = []
-                snap.forEach(doc => {
-                    items.push({ id: doc.id, ...(doc.data() as unknown as Payment) })
-                })
-                setPayments(items)
-            } catch (err) {
-                console.error("Error fetching affiliate payments:", err)
-                toast.error("Failed to load referrals")
-            } finally {
-                setLoadingPayments(false)
-            }
-        }
-        fetchPayments()
+        if (!influencerData?.uid) return
+
+        const paymentsRef = collection(db, "payments")
+        // Removed orderBy to avoid index issues. Sorting client-side.
+        const q = query(paymentsRef, where("influencerId", "==", influencerData.uid))
+        
+        const unsubscribe = onSnapshot(q, (snap) => {
+            const items: Payment[] = []
+            snap.forEach(doc => {
+                items.push({ id: doc.id, ...(doc.data() as unknown as Payment) })
+            })
+            // Sort client-side
+            items.sort((a, b) => {
+                const tA = typeof a.createdAt === 'number' ? a.createdAt : 0
+                const tB = typeof b.createdAt === 'number' ? b.createdAt : 0
+                return tB - tA
+            })
+            setPayments(items)
+        }, (err) => {
+            console.error("Error fetching affiliate payments:", err)
+            toast.error("Failed to load referrals")
+        })
+
+        return () => unsubscribe()
     }, [influencerData])
 
-    // Fetch withdrawal history for influencer
+    // Real-time listener for withdrawals
     useEffect(() => {
-        async function fetchWithdrawals() {
-            if (!influencerData?.uid) return
-            setLoadingWithdrawals(true)
-            try {
-                const wRef = collection(db, 'withdrawals')
-                const q = query(wRef, where('influencerId', '==', influencerData.uid), orderBy('requestedAt', 'desc'))
-                const snap = await getDocs(q)
-                const items: Withdrawal[] = []
-                snap.forEach(d => {
-                    items.push({ id: d.id, ...(d.data() as unknown as Withdrawal) })
-                })
-                setWithdrawals(items)
-            } catch (err) {
-                console.error('Error fetching withdrawals:', err)
-                toast.error('Failed to load withdrawal history')
-            } finally {
-                setLoadingWithdrawals(false)
-            }
-        }
-        fetchWithdrawals()
+        if (!influencerData?.uid) return
+
+        const wRef = collection(db, 'withdrawals')
+        // Removed orderBy to avoid index issues. Sorting client-side.
+        const q = query(wRef, where('influencerId', '==', influencerData.uid))
+        
+        const unsubscribe = onSnapshot(q, (snap) => {
+            const items: Withdrawal[] = []
+            snap.forEach(d => {
+                items.push({ id: d.id, ...(d.data() as unknown as Withdrawal) })
+            })
+            // Sort client-side
+            items.sort((a, b) => {
+                const tA = typeof a.requestedAt === 'number' ? a.requestedAt : 0
+                const tB = typeof b.requestedAt === 'number' ? b.requestedAt : 0
+                return tB - tA
+            })
+            setWithdrawals(items)
+        }, (err) => {
+            console.error('Error fetching withdrawals:', err)
+            toast.error('Failed to load withdrawal history')
+        })
+
+        return () => unsubscribe()
     }, [influencerData])
 
     const handleCopy = (text: string) => {
@@ -138,21 +147,8 @@ export default function AffiliateDashboardPage() {
     }
 
     const handleWithdrawalSuccess = (newBalance: number) => {
-        setInfluencerDataState(prev => prev ? { ...prev, totalCommission: newBalance } : prev);
-        // Refresh withdrawals list after a successful request
-        (async () => {
-            try {
-                if (!influencerData?.uid) return
-                const wRef = collection(db, 'withdrawals')
-                const q = query(wRef, where('influencerId', '==', influencerData.uid), orderBy('requestedAt', 'desc'))
-                const snap = await getDocs(q)
-                const items: Withdrawal[] = []
-                snap.forEach(d => items.push({ id: d.id, ...(d.data() as unknown as Withdrawal) }))
-                setWithdrawals(items)
-            } catch (err) {
-                console.error('Error refreshing withdrawals:', err)
-            }
-        })()
+        // The listener will automatically update the balance, but we can optimistically update here if needed
+        setInfluencerDataState(prev => prev ? { ...prev, totalCommission: newBalance } : prev)
     }
 
     const isTimestamp = (v: unknown): v is { seconds: number } => {
@@ -160,22 +156,28 @@ export default function AffiliateDashboardPage() {
     }
 
     // Build monthly data (last 12 months) for visuals
-    const monthlyData = (() => {
-        const counts = new Array(12).fill(0)
+    const { monthlyReferrals, monthlyEarnings } = (() => {
+        const referrals = new Array(12).fill(0)
+        const earnings = new Array(12).fill(0)
         const now = new Date()
+        
         payments.forEach(p => {
             let ts = 0
             if (!p.createdAt) return
             if (typeof p.createdAt === 'number') ts = p.createdAt
             else if (typeof p.createdAt === 'string') ts = Date.parse(p.createdAt)
             else if (isTimestamp(p.createdAt)) ts = p.createdAt.seconds * 1000
+            
             const d = new Date(ts)
             const monthsDiff = (now.getFullYear() - d.getFullYear()) * 12 + (now.getMonth() - d.getMonth())
+            
             if (monthsDiff >= 0 && monthsDiff < 12) {
-                counts[11 - monthsDiff] += 1
+                const index = 11 - monthsDiff
+                referrals[index] += 1
+                earnings[index] += (p.commissionAmount || 0)
             }
         })
-        return counts
+        return { monthlyReferrals: referrals, monthlyEarnings: earnings }
     })()
 
     // Calculate total withdrawn amount
@@ -194,33 +196,44 @@ export default function AffiliateDashboardPage() {
     return (
         <div className="min-h-screen bg-background p-4 md:p-8">
             <div className="max-w-7xl mx-auto space-y-8">
-
-
                 {/* Hero Section - Full Width */}
                 <div className="w-full">
                     <AffiliateHero 
                         name={influencerData.fullName} 
                         balance={influencerData.totalCommission || 0} 
                         referralCount={influencerData.referralCount || 0}
-                        monthlyData={monthlyData}
+                        monthlyData={monthlyReferrals}
                         promoCode={influencerData.promoCode}
                         totalWithdrawn={totalWithdrawn}
                     />
                 </div>
 
                 {/* Performance & Metrics Row */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div className="lg:col-span-3">
-                        <div className="h-full p-6 bg-card rounded-xl border shadow-sm flex flex-col">
-                            <h3 className="text-sm font-semibold mb-6 text-muted-foreground uppercase tracking-widest">
-                                Monthly Referrals Over Time
-                            </h3>
-                            <div className="flex-1 min-h-[250px] flex items-end overflow-hidden">
-                                <MonthlyBarChart 
-                                    data={monthlyData} 
-                                    labels={['11m','10m','9m','8m','7m','6m','5m','4m','3m','2m','1m','Now']} 
-                                />
-                            </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Referrals Chart */}
+                    <div className="h-full p-6 bg-card rounded-xl border shadow-sm flex flex-col">
+                        <h3 className="text-sm font-semibold mb-6 text-muted-foreground uppercase tracking-widest">
+                            Monthly Referrals
+                        </h3>
+                        <div className="flex-1 min-h-[250px] flex items-end overflow-hidden">
+                            <MonthlyBarChart 
+                                data={monthlyReferrals} 
+                                labels={['11m','10m','9m','8m','7m','6m','5m','4m','3m','2m','1m','Now']} 
+                            />
+                        </div>
+                    </div>
+
+                    {/* Earnings Chart */}
+                    <div className="h-full p-6 bg-card rounded-xl border shadow-sm flex flex-col">
+                        <h3 className="text-sm font-semibold mb-6 text-muted-foreground uppercase tracking-widest">
+                            Monthly Earnings ($)
+                        </h3>
+                        <div className="flex-1 min-h-[250px] flex items-end overflow-hidden">
+                            <MonthlyBarChart 
+                                data={monthlyEarnings} 
+                                labels={['11m','10m','9m','8m','7m','6m','5m','4m','3m','2m','1m','Now']}
+                                prefix="$"
+                            />
                         </div>
                     </div>
                 </div>
@@ -237,7 +250,7 @@ export default function AffiliateDashboardPage() {
 
                         {/* Payments Table */}
                         <CardContainer title="Referred Users & Payments">
-                            <PaymentsTable payments={payments} loading={loadingPayments} />
+                            <PaymentsTable payments={payments} loading={false} />
                         </CardContainer>
                     </div>
 
@@ -248,7 +261,7 @@ export default function AffiliateDashboardPage() {
 
                         {/* Withdrawal History */}
                         <CardContainer title="Withdrawal History">
-                            <WithdrawalsTable withdrawals={withdrawals} loading={loadingWithdrawals} />
+                            <WithdrawalsTable withdrawals={withdrawals} loading={false} />
                         </CardContainer>
                     </div>
                 </div>

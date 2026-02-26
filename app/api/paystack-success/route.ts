@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
     }
 
     const now = Date.now();
-    // Calculate new tokens and expiration
+    // Calculate new tokens
     const currentTokens = userData.tokens || 0;
     let tokensToAdd = selectedPlan.tokens;
     let commissionAmount = 0;
@@ -82,17 +82,27 @@ export async function POST(req: NextRequest) {
 
     const newTokens = currentTokens + tokensToAdd;
 
-    const oneMonth = 30 * 24 * 60 * 60 * 1000;
-    const expiresAt = now + oneMonth;
+    // Update user document based on plan type
+    if (planId === 'TOPUP_50') {
+        // One-time top-up: Only add tokens, do NOT change plan or expiration
+        await userDoc.ref.update({
+            tokens: newTokens,
+            lastPaymentReference: reference,
+            updatedAt: now,
+        });
+    } else {
+        // Subscription plan: Update plan and expiration
+        const oneMonth = 30 * 24 * 60 * 60 * 1000;
+        const expiresAt = now + oneMonth;
 
-    // Update user document
-    await userDoc.ref.update({
-      tokens: newTokens,
-      planId: selectedPlan.id,
-      subscriptionExpiresAt: expiresAt,
-      lastPaymentReference: reference,
-      updatedAt: now,
-    });
+        await userDoc.ref.update({
+            tokens: newTokens,
+            planId: selectedPlan.id,
+            subscriptionExpiresAt: expiresAt,
+            lastPaymentReference: reference,
+            updatedAt: now,
+        });
+    }
 
     // Save payment record, include influencerId if present
     await db.collection("payments").add({
