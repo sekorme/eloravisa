@@ -33,12 +33,12 @@ export async function analyzeDocument(documentUrl: string, documentType: string,
     // 1. Fetch the file
     const response = await fetch(documentUrl);
     if (!response.ok) throw new Error("Failed to fetch document");
-    
+      console.log(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET);
     const arrayBuffer = await response.arrayBuffer();
     const base64Data = Buffer.from(arrayBuffer).toString("base64");
 
     // 2. Initialize Model
-    const model = genAI.getGenerativeModel({ model: "gemini-3-pro-preview" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     // 3. Construct Enhanced Prompt
     const userProfileString = JSON.stringify({
@@ -110,7 +110,7 @@ export async function analyzeDocument(documentUrl: string, documentType: string,
 export async function getVisaInformation(userData: any) {
   try {
     // Use the specific model version that is known to work for text generation
-    const model = genAI.getGenerativeModel({ model: "gemini-3-pro-preview" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `
       Generate a personalized visa application checklist and best practices guide for a user with the following profile:

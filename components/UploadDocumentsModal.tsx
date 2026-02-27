@@ -97,9 +97,24 @@ export function UploadDocumentsModal() {
                 setUploadProgress(progress)
             },
             (error) => {
-                console.error("Upload error:", error)
+                // Improved error logging: show code and message and full payload where possible
+                try {
+                    const errPayload = {
+                        code: (error as any)?.code,
+                        message: (error as any)?.message,
+                        name: (error as any)?.name,
+                        ...Object.getOwnPropertyNames(error as object).reduce((acc: any, key) => {
+                            try { acc[key] = (error as any)[key] } catch { }
+                            return acc
+                        }, {})
+                    }
+                    console.error('Upload error payload:', errPayload)
+                } catch (logErr) {
+                    console.error('Failed serializing upload error', logErr)
+                }
+
                 setError("Failed to upload file. Please try again.")
-                toast.error("Failed to upload file")
+                toast.error("Failed to upload file. Check console for details.")
                 setUploading(false)
             },
             async () => {

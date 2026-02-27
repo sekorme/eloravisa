@@ -32,7 +32,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose, key }) =>
             const geminiKey = config.geminiKey
             const ai = new GoogleGenAI({ apiKey: key!|| geminiKey });
             const newChat = ai.chats.create({
-                model: 'gemini-3-flash-preview',
+                model: 'gemini-2.5-flash',
                 config: {
                     systemInstruction: "You are Elora, a professional, warm, and helpful AI assistant for Elora Visa. You help users with visa applications, requirements, and status checks. Keep responses concise and easy to read. Use formatting like bullet points where appropriate. Avoid special formatting symbols such as asterisks or decorative characters.",
                 }

@@ -32,8 +32,15 @@ export function AvatarUploader({ currentAvatarUrl, fullName, onAvatarUpdate }: A
                 "state_changed",
                 () => {}, // Progress (optional)
                 (error) => {
-                    console.error("Avatar upload error:", error)
-                    toast.error("Failed to upload avatar")
+                    // richer logging
+                    try {
+                        const payload = { code: (error as any)?.code, message: (error as any)?.message, ...Object.getOwnPropertyNames(error as object).reduce((acc: any, k) => { try { acc[k] = (error as any)[k] } catch {} return acc }, {}) }
+                        console.error('Avatar upload error payload:', payload)
+                    } catch (e) {
+                        console.error('Failed to serialize avatar upload error', e)
+                    }
+
+                    toast.error("Failed to upload avatar. Check console for details.")
                     setUploading(false)
                 },
                 async () => {

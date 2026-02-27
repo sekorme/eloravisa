@@ -6,7 +6,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 export async function generateInterviewQuestions(userData: any, count: number) {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-pro-preview" });
 
     const prompt = `
       Generate ${count} visa interview questions for a user with the following profile:
@@ -38,7 +38,7 @@ export async function generateInterviewQuestions(userData: any, count: number) {
 
 export async function analyzeAnswer(question: string, answer: string) {
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-3-pro-preview" });
+        const model = genAI.getGenerativeModel({ model: "gemini-3.1-pro-preview" });
     
         const prompt = `
           **Question:** "${question}"
@@ -68,7 +68,7 @@ export async function analyzeAnswer(question: string, answer: string) {
 
 export async function generateInterviewFeedback(transcript: any[]) {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-3-pro-preview" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.1-pro-preview" });
 
     // Format transcript for the prompt
     const conversation = transcript.map(t => `${t.role.toUpperCase()}: ${t.text}`).join("\n");

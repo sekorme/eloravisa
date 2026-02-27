@@ -4,7 +4,7 @@
 import { MailerSend, EmailParams, Sender, Recipient } from "mailersend";
 
 const mailerSend = new MailerSend({
-  apiKey: process.env.MAILERSEND_API_KEY!, // store securely in .env
+  apiKey: process.env.MAILERSEND_API_KEY!, // store securely in .env.local
 });
 
 export async function registrationEmail({
