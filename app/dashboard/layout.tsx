@@ -9,6 +9,7 @@ import {cookies} from "next/headers";
 import {getGeminiKey} from "@/action/ai";
 import HomePageContent from "@/components/HomePageContent";
 import {RegisterSW} from "@/components/RegisterSW";
+import {AuthProvider} from "@/context/AuthContext";
 
 
 
@@ -18,6 +19,7 @@ const Layout = async({children}:{children: React.ReactNode}) =>{
     const keys = await getGeminiKey()
     return (
         <div>
+            <AuthProvider>
             <SidebarProvider defaultOpen={defaultOpen}>
                 <AppSidebar />
                 <main className=" w-full">
@@ -30,6 +32,7 @@ const Layout = async({children}:{children: React.ReactNode}) =>{
                     </div>
                 </main>
             </SidebarProvider>
+            </AuthProvider>
         </div>
     )
 }
