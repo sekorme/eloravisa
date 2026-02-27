@@ -112,7 +112,7 @@ const Navbar = () => {
                         <span className="text-sm font-bold">{<NumberTicker value={userData.tokens || 0}/>}</span>
                     </Link>
                 )}
-                <Link href={pathname} className="font-semibold">
+                <Link href={pathname} className="hidden md:block font-semibold">
                     {currentTitle}
                 </Link>
                 {/* THEME MENU */}
