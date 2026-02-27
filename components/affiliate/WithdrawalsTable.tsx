@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { Loader2 } from 'lucide-react'
+import { format } from 'date-fns'
 
 interface Withdrawal {
   id?: string
@@ -22,14 +23,23 @@ interface Props {
   loading?: boolean
 }
 
-const formatDate = (val: unknown): string => {
-  if (!val) return '—'
-  if (typeof val === 'number') return new Date(val).toLocaleString()
-  if (typeof val === 'string') return new Date(val).toLocaleString()
-  if (val instanceof Date) return val.toLocaleString()
+const toDate = (val: unknown): Date | null => {
+  if (!val) return null
+  if (typeof val === 'number') return new Date(val)
+  if (typeof val === 'string') {
+    const d = new Date(val)
+    return isNaN(d.getTime()) ? null : d
+  }
+  if (val instanceof Date) return val
   const maybe = val as { seconds?: number }
-  if (maybe && typeof maybe.seconds === 'number') return new Date(maybe.seconds * 1000).toLocaleString()
-  return '—'
+  if (maybe && typeof maybe.seconds === 'number') return new Date(maybe.seconds * 1000)
+  return null
+}
+
+const formatDateParts = (val: unknown): { date: string; time: string } => {
+  const d = toDate(val)
+  if (!d) return { date: '—', time: '' }
+  return { date: format(d, 'PPP'), time: format(d, 'p') }
 }
 
 export default function WithdrawalsTable({ withdrawals, loading }: Props) {
@@ -59,12 +69,16 @@ export default function WithdrawalsTable({ withdrawals, loading }: Props) {
                   </td>
                 </tr>
               )}
-              {withdrawals.map(w => (
+              {withdrawals.map(w => {
+                // Support both `requestedAt` and `createdAt` timestamps (some APIs write `createdAt`)
+                const timestamp = (w as any).requestedAt ?? (w as any).createdAt
+                const parts = formatDateParts(timestamp)
+                return (
                 <tr key={w.id} className="hover:bg-muted/20 transition-colors group">
                   <td className="py-4 px-6">
                     <div className="flex flex-col">
-                        <span className="font-medium text-foreground">{formatDate(w.requestedAt).split(',')[0]}</span>
-                        <span className="text-[10px] text-muted-foreground uppercase">{formatDate(w.requestedAt).split(',')[1]}</span>
+                        <span className="font-medium text-foreground">{parts.date}</span>
+                        <span className="text-[10px] text-muted-foreground uppercase">{parts.time}</span>
                     </div>
                   </td>
                   <td className="py-4 px-6">
@@ -95,7 +109,8 @@ export default function WithdrawalsTable({ withdrawals, loading }: Props) {
                     </span>
                   </td>
                 </tr>
-              ))}
+                )
+              })}
             </tbody>
           </table>
         </div>
@@ -103,4 +118,3 @@ export default function WithdrawalsTable({ withdrawals, loading }: Props) {
     </div>
   )
 }
-

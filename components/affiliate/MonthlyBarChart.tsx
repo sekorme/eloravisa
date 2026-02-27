@@ -1,6 +1,16 @@
 "use client"
 
-import React from 'react'
+import React, { useMemo } from 'react'
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Cell,
+} from 'recharts'
 
 interface Props {
   data: number[]
@@ -9,32 +19,45 @@ interface Props {
 }
 
 export default function MonthlyBarChart({ data, labels, prefix = '' }: Props) {
-  const max = Math.max(...data, 1)
-  return (
-    <div className="w-full overflow-x-auto pb-2 scrollbar-hide">
-      <div className="flex gap-4 items-end h-48 min-w-[600px] md:min-w-full">
-        {data.map((v, i) => {
-          const h = Math.max(2, Math.round((v / max) * 100))
-          const displayValue = prefix ? `${prefix}${v.toFixed(2)}` : v
-          return (
-            <div key={i} className="flex-1 min-w-[30px] flex flex-col items-center">
-              <div className="flex-1 w-full flex items-end justify-center group relative">
-                {/* Tooltip or Value on hover */}
-                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-popover text-popover-foreground text-[10px] px-2 py-1 rounded border shadow-sm opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                  {displayValue}
-                </div>
-                <div 
-                  className="w-8 md:w-10 bg-primary/80 hover:bg-primary rounded-t-lg transition-all duration-300 ease-in-out shadow-sm" 
-                  style={{ height: `${h}%` }} 
-                />
-              </div>
-              <div className="text-[10px] md:text-xs text-center mt-3 text-muted-foreground font-medium truncate w-full">
-                {labels?.[i] ?? ''}
-              </div>
-            </div>
-          )
-        })}
+  // defensive: ensure we have an array of 12 (or at least something)
+  const chartData = useMemo(() => {
+    if (!Array.isArray(data) || data.length === 0) return []
+    return data.map((v, i) => ({
+      name: labels?.[i] ?? `M${i + 1}`,
+      value: Number(v) || 0,
+    }))
+  }, [data, labels])
+
+  const max = Math.max(...(data.length ? data : [1]), 1)
+
+  if (!chartData.length) {
+    return (
+      <div className="w-full h-48 flex items-center justify-center text-sm text-muted-foreground">
+        No data available
       </div>
+    )
+  }
+
+  return (
+    <div className="w-full h-48">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={chartData} margin={{ top: 8, right: 8, left: -12, bottom: 8 }}>
+          <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.06} />
+          <XAxis dataKey="name" tick={{ fontSize: 12 }} axisLine={false} tickLine={false} />
+          <YAxis tickFormatter={(v: any) => (prefix ? `${prefix}${v}` : String(v))} axisLine={false} tickLine={false} />
+          <Tooltip
+            // use permissive any types to satisfy the library's expected signature
+            formatter={(value: any) => (prefix ? `${prefix}${Number(value).toFixed(2)}` : Number(value).toFixed(2))}
+            labelFormatter={(label: any) => String(label)}
+            wrapperStyle={{ borderRadius: 8, boxShadow: '0 6px 20px rgba(2,6,23,0.2)' }}
+          />
+          <Bar dataKey="value" fill="#06b6d4" radius={[6, 6, 0, 0]} maxBarSize={48}>
+            {chartData.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={entry.value === max ? '#0ea5a4' : '#06b6d4'} />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   )
 }
