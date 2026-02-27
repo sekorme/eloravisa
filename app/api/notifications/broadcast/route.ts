@@ -1,17 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import admin from 'firebase-admin';
-import { getFirestore, FieldValue } from 'firebase-admin/firestore';
-import { getMessaging } from 'firebase-admin/messaging';
-
-// ── Initialise Firebase Admin once ───────────────────────────────────────────
-if (!admin.apps.length) {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const serviceAccount = require('@/service_key.json');      // ← adjust path
-    admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
-}
-
-const db        = getFirestore();
-const messaging = getMessaging();
+import { db, messaging } from '@/firebase/admin';
+import { FieldValue } from 'firebase-admin/firestore';
 
 // helper: split an array in chunks of N
 const chunk = <T>(arr: T[], size: number) =>

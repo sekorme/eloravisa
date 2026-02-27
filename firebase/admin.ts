@@ -1,6 +1,7 @@
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
+import { getMessaging } from "firebase-admin/messaging";
 
 const initFirebaseAdmin = () => {
     const apps = getApps();
@@ -18,7 +19,8 @@ const initFirebaseAdmin = () => {
     return {
         auth: getAuth(),
         db: getFirestore(),
+        messaging: getMessaging(),
     };
 };
 
-export const { auth, db } = initFirebaseAdmin();
+export const { auth, db, messaging } = initFirebaseAdmin();
