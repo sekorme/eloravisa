@@ -7,8 +7,7 @@ import {SignupSheet} from "@/components/auth/SignupSheet";
 const IMAGES = ["/IMG_9093.jpg", "/30.JPG", "/elora5.jpeg", "/akyere.jpg"];
 
 export function PowerfulHeroTwo() {
-    const canvasRef = useRef(null);
-    const { resolvedTheme } = useTheme();
+    const canvasRef = useRef<HTMLCanvasElement>(null);
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
@@ -20,59 +19,39 @@ export function PowerfulHeroTwo() {
         const canvas = canvasRef.current;
         if (!canvas) return;
 
-        const isDark = resolvedTheme === "dark";
-
-        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: "high-performance" });
+        const renderer = new THREE.WebGLRenderer({ 
+            canvas, 
+            antialias: true, 
+            alpha: false, 
+            powerPreference: "high-performance" 
+        });
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 
         const scene = new THREE.Scene();
-        // Theme-responsive background
-        scene.background = new THREE.Color(isDark ? 0x050510 : 0xf8fafc);
-
+        
         const camera = new THREE.PerspectiveCamera(60, canvas.clientWidth / canvas.clientHeight, 0.1, 2000);
         camera.position.z = 100;
 
-        // --- BACKGROUND ANIMATION (Starfield / Nebula) ---
-        const starCount = isDark ? 3000 : 1500; // Fewer stars in light mode for a cleaner look
+        // --- BACKGROUND ANIMATION (Starfield) ---
+        const starCount = 1000; // Simplified star count
         const starGeometry = new THREE.BufferGeometry();
         const starPositions = new Float32Array(starCount * 3);
         const starColors = new Float32Array(starCount * 3);
-
-        const darkPalette = [
-            new THREE.Color(0x4444ff), // blue
-            new THREE.Color(0x00ffff), // cyan
-            new THREE.Color(0xff00ff), // magenta
-            new THREE.Color(0xffffff), // white
-        ];
-
-        const lightPalette = [
-            new THREE.Color(0x6366f1), // indigo
-            new THREE.Color(0x3b82f6), // blue
-            new THREE.Color(0x06b6d4), // cyan
-            new THREE.Color(0x8b5cf6), // violet
-        ];
-
-        const colorPalette = isDark ? darkPalette : lightPalette;
 
         for (let i = 0; i < starCount; i++) {
             starPositions[i * 3] = (Math.random() - 0.5) * 1000;
             starPositions[i * 3 + 1] = (Math.random() - 0.5) * 1000;
             starPositions[i * 3 + 2] = (Math.random() - 0.5) * 1000;
-
-            const color = colorPalette[Math.floor(Math.random() * colorPalette.length)];
-            starColors[i * 3] = color.r;
-            starColors[i * 3 + 1] = color.g;
-            starColors[i * 3 + 2] = color.b;
         }
 
         starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
         starGeometry.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
 
         const starMaterial = new THREE.PointsMaterial({
-            size: isDark ? 1.5 : 2,
+            size: 2,
             vertexColors: true,
             transparent: true,
-            opacity: isDark ? 0.8 : 0.4,
+            opacity: 0.6,
             sizeAttenuation: true
         });
 
@@ -80,79 +59,52 @@ export function PowerfulHeroTwo() {
         scene.add(stars);
 
         // --- FLYING PLANES ---
-        const planes = [];
+        const planes: any[] = [];
         const planeMaterial = new THREE.MeshPhongMaterial({
-            color: isDark ? 0xffffff : 0x4f46e5,
             flatShading: true,
             side: THREE.DoubleSide
         });
 
-        // Simple Paper Plane Shape
         const planeBodyGeo = new THREE.BufferGeometry();
         const vertices = new Float32Array([
-            0, 0, 10,   // nose
-            -5, 0, -5,  // left wing back
-            0, 2, -3,   // top back
-            5, 0, -5,   // right wing back
-            0, 0, -2    // tail
+            0, 0, 10, -5, 0, -5, 0, 2, -3, 5, 0, -5, 0, 0, -2
         ]);
-        const indices = [
-            0, 1, 2,
-            0, 2, 3,
-            0, 3, 4,
-            0, 4, 1,
-            1, 4, 2,
-            2, 4, 3
-        ];
+        const indices = [0, 1, 2, 0, 2, 3, 0, 3, 4, 0, 4, 1, 1, 4, 2, 2, 4, 3];
         planeBodyGeo.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
         planeBodyGeo.setIndex(indices);
         planeBodyGeo.computeVertexNormals();
 
-        // Plane 1: Orbital Circle
+        // One orbital plane, one linear
         const p1 = new THREE.Group();
         p1.add(new THREE.Mesh(planeBodyGeo, planeMaterial));
         p1.scale.set(1.5, 1.5, 1.5);
         scene.add(p1);
-        planes.push({ group: p1, type: 'circle', radius: 150, speed: 0.4, offset: 0 });
+        planes.push({ group: p1, type: 'circle', radius: 150, speed: 0.3, offset: 0 });
 
-        // Plane 2: Left to Right
         const p2 = new THREE.Group();
         p2.add(new THREE.Mesh(planeBodyGeo, planeMaterial));
         p2.scale.set(1.2, 1.2, 1.2);
         scene.add(p2);
         planes.push({ group: p2, type: 'linear', xStart: -400, xEnd: 400, y: 40, z: -100, speed: 40, offset: 2 });
 
-        // Plane 3: Right to Left
-        const p3 = new THREE.Group();
-        p3.add(new THREE.Mesh(planeBodyGeo, planeMaterial));
-        p3.scale.set(1.3, 1.3, 1.3);
-        scene.add(p3);
-        planes.push({ group: p3, type: 'linear', xStart: 400, xEnd: -400, y: -40, z: -150, speed: 35, offset: 5 });
-
-        // --- AMBIENT LIGHTING ---
-        const ambientLight = new THREE.AmbientLight(0xffffff, isDark ? 0.5 : 0.8);
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
         scene.add(ambientLight);
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, isDark ? 0.8 : 1.0);
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
         directionalLight.position.set(50, 100, 50);
         scene.add(directionalLight);
 
-        let animId;
+        let animId: number;
         const clock = new THREE.Clock();
         let scrollY = 0;
         let isVisible = true;
 
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                isVisible = entry.isIntersecting;
-            },
-            { threshold: 0 }
-        );
+        const observer = new IntersectionObserver(([entry]) => {
+            isVisible = entry.isIntersecting;
+        }, { threshold: 0 });
         observer.observe(canvas);
 
-        const handleScroll = () => {
-            scrollY = window.scrollY;
-        };
+        const handleScroll = () => { scrollY = window.scrollY; };
         window.addEventListener("scroll", handleScroll);
 
         const resize = () => {
@@ -166,11 +118,35 @@ export function PowerfulHeroTwo() {
         window.addEventListener("resize", resize);
 
         let mouseX = 0, mouseY = 0;
-        const onMouseMove = (e) => {
+        const onMouseMove = (e: MouseEvent) => {
             mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
             mouseY = -(e.clientY / window.innerHeight - 0.5) * 2;
         };
         window.addEventListener("mousemove", onMouseMove);
+
+        const updateThemeColors = () => {
+            const isDark = document.documentElement.classList.contains('dark');
+            scene.background = new THREE.Color(isDark ? 0x050510 : 0xf8fafc);
+            planeMaterial.color.set(isDark ? 0xffffff : 0x4f46e5);
+            
+            const colors = starGeometry.attributes.color.array as Float32Array;
+            const palette = isDark ? [0x4444ff, 0x00ffff, 0xff00ff, 0xffffff] : [0x6366f1, 0x3b82f6, 0x06b6d4, 0x8b5cf6];
+            
+            for (let i = 0; i < starCount; i++) {
+                const hex = palette[Math.floor(Math.random() * palette.length)];
+                const c = new THREE.Color(hex);
+                colors[i * 3] = c.r;
+                colors[i * 3 + 1] = c.g;
+                colors[i * 3 + 2] = c.b;
+            }
+            starGeometry.attributes.color.needsUpdate = true;
+            starMaterial.opacity = isDark ? 0.6 : 0.3;
+        };
+
+        // MutationObserver to detect theme change
+        const themeObserver = new MutationObserver(updateThemeColors);
+        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+        updateThemeColors();
 
         const animate = () => {
             animId = requestAnimationFrame(animate);
@@ -179,42 +155,30 @@ export function PowerfulHeroTwo() {
             const delta = clock.getDelta();
             const elapsed = clock.getElapsedTime();
 
-            stars.rotation.y += delta * 0.05;
-            stars.rotation.x += delta * 0.02;
-
-            // Planes animation
+            stars.rotation.y += delta * 0.03;
+            
             planes.forEach(p => {
                 if (p.type === 'circle') {
                     const speed = elapsed * p.speed + p.offset;
                     p.group.position.x = Math.sin(speed) * p.radius;
                     p.group.position.z = Math.cos(speed) * p.radius;
-                    p.group.position.y = Math.sin(elapsed * 0.8) * 20 + 20;
-
-                    const nextX = Math.sin(speed + 0.01) * p.radius;
-                    const nextZ = Math.cos(speed + 0.01) * p.radius;
-                    const nextY = Math.sin((elapsed + 0.01) * 0.8) * 20 + 20;
-                    p.group.lookAt(nextX, nextY, nextZ);
+                    p.group.position.y = Math.sin(elapsed * 0.5) * 15 + 15;
+                    p.group.lookAt(Math.sin(speed + 0.01) * p.radius, Math.sin((elapsed + 0.01) * 0.5) * 15 + 15, Math.cos(speed + 0.01) * p.radius);
                 } else if (p.type === 'linear') {
                     const duration = Math.abs(p.xEnd - p.xStart) / p.speed;
                     const t = ((elapsed + p.offset) % duration) / duration;
                     p.group.position.x = p.xStart + (p.xEnd - p.xStart) * t;
-                    p.group.position.y = p.y + Math.sin(elapsed * 0.5) * 10;
+                    p.group.position.y = p.y + Math.sin(elapsed * 0.4) * 8;
                     p.group.position.z = p.z;
-
-                    // Look ahead
                     p.group.lookAt(p.xEnd, p.group.position.y, p.group.position.z);
                 }
             });
 
-            // Subtle camera movement based on mouse + scroll parallax
-            const targetCamX = mouseX * 10;
-            const targetCamY = mouseY * 10 - (scrollY * 0.05); // Parallax effect
-            camera.position.x += (targetCamX - camera.position.x) * 0.05;
-            camera.position.y += (targetCamY - camera.position.y) * 0.05;
+            camera.position.x += (mouseX * 5 - camera.position.x) * 0.05;
+            camera.position.y += (mouseY * 5 - (scrollY * 0.02) - camera.position.y) * 0.05;
             camera.lookAt(0, 0, 0);
 
-            // Move stars slightly with scroll for deeper parallax
-            stars.position.y = scrollY * 0.1;
+            stars.position.y = scrollY * 0.05;
 
             renderer.render(scene, camera);
         };
@@ -226,13 +190,14 @@ export function PowerfulHeroTwo() {
             window.removeEventListener("mousemove", onMouseMove);
             window.removeEventListener("scroll", handleScroll);
             observer.disconnect();
+            themeObserver.disconnect();
             renderer.dispose();
             starGeometry.dispose();
             starMaterial.dispose();
             planeBodyGeo.dispose();
             planeMaterial.dispose();
         };
-    }, [mounted, resolvedTheme]);
+    }, [mounted]);
 
     if (!mounted) return <div className="ph2-root" style={{ minHeight: "100vh" }} />;
 
@@ -281,6 +246,7 @@ export function PowerfulHeroTwo() {
           height: 100%;
           z-index: 0;
           pointer-events: none;
+          background: transparent;
         }
 
         .ph2-container {

@@ -65,7 +65,6 @@ const audiences = [
 export function TargetAudienceSection() {
     const containerRef = useRef<HTMLDivElement>(null)
     const canvasRef = useRef<HTMLCanvasElement>(null)
-    const { resolvedTheme } = useTheme()
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
@@ -89,25 +88,24 @@ export function TargetAudienceSection() {
         const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000)
         camera.position.z = 5
 
-        const isDark = resolvedTheme === "dark"
         const shapes: THREE.Mesh[] = []
-        const shapeCount = 15
+        const shapeCount = 10
 
         // Create abstract geometric shapes
         const geometries = [
             new THREE.IcosahedronGeometry(0.5, 0),
-            new THREE.TorusGeometry(0.3, 0.1, 16, 32),
+            new THREE.TorusGeometry(0.3, 0.1, 8, 16),
             new THREE.OctahedronGeometry(0.4, 0),
         ]
 
+        const sharedMaterial = new THREE.MeshPhongMaterial({
+            wireframe: true,
+            transparent: true,
+        })
+
         for (let i = 0; i < shapeCount; i++) {
             const geometry = geometries[Math.floor(Math.random() * geometries.length)]
-            const material = new THREE.MeshPhongMaterial({
-                color: isDark ? 0x0ea5e9 : 0x0284c7,
-                wireframe: true,
-                transparent: true,
-                opacity: isDark ? 0.3 : 0.15,
-            })
+            const material = sharedMaterial.clone()
             const shape = new THREE.Mesh(geometry, material)
 
             shape.position.set(
@@ -128,6 +126,19 @@ export function TargetAudienceSection() {
             scene.add(shape)
             shapes.push(shape)
         }
+
+        const updateThemeColors = () => {
+            const isDark = document.documentElement.classList.contains('dark')
+            shapes.forEach(shape => {
+                const mat = shape.material as THREE.MeshPhongMaterial
+                mat.color.set(isDark ? 0x0ea5e9 : 0x0284c7)
+                mat.opacity = isDark ? 0.3 : 0.1
+            })
+        }
+
+        const themeObserver = new MutationObserver(updateThemeColors)
+        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+        updateThemeColors()
 
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
         scene.add(ambientLight)
@@ -192,14 +203,16 @@ export function TargetAudienceSection() {
             window.removeEventListener("resize", handleResize)
             cancelAnimationFrame(animationFrameId)
             observer.disconnect()
+            themeObserver.disconnect()
             geometries.forEach(g => g.dispose())
             shapes.forEach(s => {
                 (s.material as THREE.Material).dispose()
                 s.geometry.dispose()
             })
+            sharedMaterial.dispose()
             renderer.dispose()
         }
-    }, [mounted, resolvedTheme])
+    }, [mounted])
 
     // GSAP Entrance Animations
     useEffect(() => {
