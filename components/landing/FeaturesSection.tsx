@@ -86,9 +86,10 @@ export function FeaturesSection() {
     const renderer = new THREE.WebGLRenderer({
       canvas,
       antialias: true,
-      alpha: true
+      alpha: true,
+      powerPreference: "high-performance"
     })
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
 
     const scene = new THREE.Scene()
     const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000)
@@ -155,7 +156,7 @@ export function FeaturesSection() {
       if (!container) return
       camera.aspect = container.clientWidth / container.clientHeight
       camera.updateProjectionMatrix()
-      renderer.setSize(container.clientWidth, container.clientHeight)
+      renderer.setSize(container.clientWidth, container.clientHeight, false)
     }
 
     window.addEventListener("resize", handleResize)
@@ -163,6 +164,16 @@ export function FeaturesSection() {
 
     let mouseX = 0
     let mouseY = 0
+    let isVisible = true
+
+    const observer = new IntersectionObserver(
+        ([entry]) => {
+            isVisible = entry.isIntersecting
+        },
+        { threshold: 0 }
+    )
+    observer.observe(canvas)
+
     const onMouseMove = (e: MouseEvent) => {
       mouseX = (e.clientX / window.innerWidth) - 0.5
       mouseY = (e.clientY / window.innerHeight) - 0.5
@@ -172,7 +183,8 @@ export function FeaturesSection() {
     let animationFrameId: number
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate)
-      
+      if (!isVisible) return
+
       group.rotation.y += 0.001
       group.rotation.x += 0.0005
       
@@ -210,6 +222,7 @@ export function FeaturesSection() {
       window.removeEventListener("resize", handleResize)
       window.removeEventListener("mousemove", onMouseMove)
       cancelAnimationFrame(animationFrameId)
+      observer.disconnect()
       renderer.dispose()
       geometries.forEach(g => g.dispose())
       particles.forEach(p => (p.material as THREE.Material).dispose())

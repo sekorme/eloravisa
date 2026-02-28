@@ -80,9 +80,10 @@ export function TargetAudienceSection() {
         const renderer = new THREE.WebGLRenderer({
             canvas,
             antialias: true,
-            alpha: true
+            alpha: true,
+            powerPreference: "high-performance"
         })
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
 
         const scene = new THREE.Scene()
         const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000)
@@ -138,6 +139,15 @@ export function TargetAudienceSection() {
         let animationFrameId: number
         let mouseX = 0
         let mouseY = 0
+        let isVisible = true
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                isVisible = entry.isIntersecting
+            },
+            { threshold: 0 }
+        )
+        observer.observe(canvas)
 
         const handleMouseMove = (e: MouseEvent) => {
             mouseX = (e.clientX / window.innerWidth - 0.5) * 2
@@ -147,6 +157,9 @@ export function TargetAudienceSection() {
         window.addEventListener("mousemove", handleMouseMove)
 
         const animate = (time: number) => {
+            animationFrameId = requestAnimationFrame(animate)
+            if (!isVisible) return
+
             shapes.forEach((shape) => {
                 shape.rotation.x += shape.userData.rotationSpeed
                 shape.rotation.y += shape.userData.rotationSpeed
@@ -159,7 +172,6 @@ export function TargetAudienceSection() {
             camera.lookAt(scene.position)
 
             renderer.render(scene, camera)
-            animationFrameId = requestAnimationFrame(animate)
         }
 
         const handleResize = () => {
@@ -179,6 +191,7 @@ export function TargetAudienceSection() {
             window.removeEventListener("mousemove", handleMouseMove)
             window.removeEventListener("resize", handleResize)
             cancelAnimationFrame(animationFrameId)
+            observer.disconnect()
             geometries.forEach(g => g.dispose())
             shapes.forEach(s => {
                 (s.material as THREE.Material).dispose()

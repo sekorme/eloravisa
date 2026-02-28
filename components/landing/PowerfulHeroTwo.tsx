@@ -22,8 +22,8 @@ export function PowerfulHeroTwo() {
 
         const isDark = resolvedTheme === "dark";
 
-        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: "high-performance" });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 
         const scene = new THREE.Scene();
         // Theme-responsive background
@@ -166,6 +166,15 @@ export function PowerfulHeroTwo() {
         let animId;
         const clock = new THREE.Clock();
         let scrollY = 0;
+        let isVisible = true;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                isVisible = entry.isIntersecting;
+            },
+            { threshold: 0 }
+        );
+        observer.observe(canvas);
 
         const handleScroll = () => {
             scrollY = window.scrollY;
@@ -190,6 +199,8 @@ export function PowerfulHeroTwo() {
 
         const animate = () => {
             animId = requestAnimationFrame(animate);
+            if (!isVisible) return;
+            
             const delta = clock.getDelta();
             const elapsed = clock.getElapsedTime();
 
@@ -243,6 +254,7 @@ export function PowerfulHeroTwo() {
             window.removeEventListener("resize", resize);
             window.removeEventListener("mousemove", onMouseMove);
             window.removeEventListener("scroll", handleScroll);
+            observer.disconnect();
             renderer.dispose();
             starGeometry.dispose();
             starMaterial.dispose();
