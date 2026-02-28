@@ -11,7 +11,8 @@ import { TrustSection } from "./TrustSection"
 import { FinalCTASection } from "./FinalCTASection"
 import PricingSection from "@/components/PriceSection"
 import {AnimatedTestimonialsPlus} from "@/components/landing/AnimatedTestimonials";
-import { PowerfulHero } from "./PowerfulHero"
+
+import { GlobalThreeBackground } from "./GlobalThreeBackground"
 
 import { Footer } from "./Footer"
 
@@ -20,7 +21,8 @@ import { Footer } from "./Footer"
 
 export function LandingPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      <GlobalThreeBackground />
       <HeroSection/>
 
       <TargetAudienceSection />

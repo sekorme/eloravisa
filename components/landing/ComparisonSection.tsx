@@ -123,7 +123,7 @@ export function ComparisonSection() {
 
         <div className="max-w-5xl mx-auto">
           {/* Header Row */}
-          <div className="grid grid-cols-12 gap-4 mb-6 px-6 py-4 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border font-bold text-lg hidden md:grid">
+          <div className="grid grid-cols-12 gap-4 mb-6 px-6 py-4 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border font-bold text-lg ">
             <div className="col-span-4">Feature</div>
             <div className="col-span-4 text-center text-red-500">Traditional Agents</div>
             <div className="col-span-4 text-center text-blue-600 dark:text-blue-400">Elora Visa</div>
