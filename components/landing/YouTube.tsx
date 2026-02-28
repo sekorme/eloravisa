@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useEffect, useRef, useState } from "react"
-import * as THREE from "three"
 import { useTheme } from "next-themes"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
@@ -10,7 +9,6 @@ gsap.registerPlugin(ScrollTrigger)
 
 export function YouTube() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
   const { resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
@@ -18,98 +16,6 @@ export function YouTube() {
     setMounted(true)
   }, [])
 
-  useEffect(() => {
-    if (!mounted || !canvasRef.current || !containerRef.current) return
-
-    const canvas = canvasRef.current
-    const container = containerRef.current
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      antialias: true,
-      alpha: true
-    })
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-
-    const scene = new THREE.Scene()
-    const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000)
-    camera.position.z = 5
-
-    const isDark = resolvedTheme === "dark"
-    
-    // Create animated background elements (floating rings)
-    const ringsGroup = new THREE.Group()
-    scene.add(ringsGroup)
-
-    const ringCount = 8
-    const rings: THREE.Mesh[] = []
-
-    for (let i = 0; i < ringCount; i++) {
-      const geometry = new THREE.TorusGeometry(
-        1.5 + i * 0.4, 
-        0.015, 
-        16, 
-        100
-      )
-      const material = new THREE.MeshBasicMaterial({
-        color: isDark ? 0x00b7fa : 0xff1cf7,
-        transparent: true,
-        opacity: 0.1 - (i * 0.01)
-      })
-      const ring = new THREE.Mesh(geometry, material)
-      
-      ring.rotation.x = Math.random() * Math.PI
-      ring.rotation.y = Math.random() * Math.PI
-      
-      ringsGroup.add(ring)
-      rings.push(ring)
-    }
-
-    // Animation Loop
-    let animationFrameId: number
-    const animate = () => {
-      animationFrameId = requestAnimationFrame(animate)
-      
-      rings.forEach((ring, i) => {
-        ring.rotation.x += 0.001 * (i + 1) * 0.2
-        ring.rotation.y += 0.002 * (i + 1) * 0.2
-      })
-
-      renderer.render(scene, camera)
-    }
-    animate()
-
-    // Handle Resize
-    const handleResize = () => {
-      if (!container) return
-      camera.aspect = container.clientWidth / container.clientHeight
-      camera.updateProjectionMatrix()
-      renderer.setSize(container.clientWidth, container.clientHeight)
-    }
-    handleResize()
-    window.addEventListener("resize", handleResize)
-
-    // Parallax effect on scroll
-    const scrollTrigger = ScrollTrigger.create({
-        trigger: container,
-        start: "top bottom",
-        end: "bottom top",
-        onUpdate: (self) => {
-            ringsGroup.position.y = self.progress * 2 - 1
-            ringsGroup.rotation.z = self.progress * Math.PI * 0.2
-        }
-    })
-
-    return () => {
-      window.removeEventListener("resize", handleResize)
-      cancelAnimationFrame(animationFrameId)
-      scrollTrigger.kill()
-      rings.forEach(ring => {
-        ring.geometry.dispose()
-        ;(ring.material as THREE.Material).dispose()
-      })
-      renderer.dispose()
-    }
-  }, [mounted, resolvedTheme])
 
   useEffect(() => {
     if (!mounted || !containerRef.current) return
@@ -143,11 +49,6 @@ export function YouTube() {
 
   return (
     <section ref={containerRef} className="relative py-24 overflow-hidden">
-      {/* Three.js Canvas */}
-      <canvas
-        ref={canvasRef}
-        className="absolute top-0 left-0 w-full h-full pointer-events-none z-0 opacity-60"
-      />
 
       <div className="container relative z-10 px-4 mx-auto text-center">
         <div className="youtube-header mb-12">

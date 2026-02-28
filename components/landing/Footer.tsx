@@ -3,7 +3,6 @@
 import React, { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import * as THREE from "three"
 import { useTheme } from "next-themes"
 import { Facebook, Instagram, Linkedin, Send } from "lucide-react"
 import { gsap } from "gsap"
@@ -13,7 +12,6 @@ gsap.registerPlugin(ScrollTrigger)
 
 export function Footer() {
   const footerRef = useRef<HTMLElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
   const { resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
@@ -21,73 +19,6 @@ export function Footer() {
     setMounted(true)
   }, [])
 
-  // Three.js Background Animation
-  useEffect(() => {
-    if (!mounted || !canvasRef.current || !footerRef.current) return
-
-    const canvas = canvasRef.current
-    const container = footerRef.current
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      antialias: true,
-      alpha: true
-    })
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-
-    const scene = new THREE.Scene()
-    const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000)
-    camera.position.z = 5
-
-    const isDark = resolvedTheme === "dark"
-    
-    // Create subtle floating "dust" or "stars"
-    const particleCount = 50
-    const geometry = new THREE.BufferGeometry()
-    const positions = new Float32Array(particleCount * 3)
-
-    for (let i = 0; i < particleCount; i++) {
-        positions[i * 3] = (Math.random() - 0.5) * 10
-        positions[i * 3 + 1] = (Math.random() - 0.5) * 10
-        positions[i * 3 + 2] = (Math.random() - 0.5) * 5
-    }
-
-    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3))
-    const material = new THREE.PointsMaterial({
-        color: isDark ? 0x94a3b8 : 0x64748b,
-        size: 0.05,
-        transparent: true,
-        opacity: 0.3
-    })
-
-    const points = new THREE.Points(geometry, material)
-    scene.add(points)
-
-    // Animation Loop
-    let animationFrameId: number
-    const animate = () => {
-      animationFrameId = requestAnimationFrame(animate)
-      points.rotation.y += 0.0005
-      renderer.render(scene, camera)
-    }
-    animate()
-
-    const handleResize = () => {
-      if (!container) return
-      camera.aspect = container.clientWidth / container.clientHeight
-      camera.updateProjectionMatrix()
-      renderer.setSize(container.clientWidth, container.clientHeight)
-    }
-    handleResize()
-    window.addEventListener("resize", handleResize)
-
-    return () => {
-      window.removeEventListener("resize", handleResize)
-      cancelAnimationFrame(animationFrameId)
-      geometry.dispose()
-      material.dispose()
-      renderer.dispose()
-    }
-  }, [mounted, resolvedTheme])
 
   useEffect(() => {
     if (!mounted || !footerRef.current) return
@@ -111,11 +42,6 @@ export function Footer() {
 
   return (
     <footer ref={footerRef} className="relative bg-slate-50 dark:bg-[#020205] border-t border-slate-200 dark:border-slate-800 overflow-hidden">
-      {/* Three.js Canvas */}
-      <canvas
-        ref={canvasRef}
-        className="absolute top-0 left-0 w-full h-full pointer-events-none z-0 opacity-40"
-      />
 
       <div className="container relative z-10 px-4 mx-auto py-16 md:py-24">
         <div className="grid grid-cols-1 md:grid-cols-5 gap-12 lg:gap-16">

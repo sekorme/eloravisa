@@ -1,6 +1,5 @@
 "use client"
 import { useEffect, useRef } from "react";
-import * as THREE from "three";
 
 const IMAGES = ["/IMG_9093.jpg", "/30.JPG", "/elora5.jpeg", "/akyere.jpg"];
 
@@ -8,145 +7,6 @@ export function PowerfulHero() {
     const canvasRef = useRef(null);
 
     useEffect(() => {
-        const canvas = canvasRef.current;
-        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x020b18);
-
-        const camera = new THREE.PerspectiveCamera(60, canvas.clientWidth / canvas.clientHeight, 0.1, 200);
-        camera.position.z = 40;
-
-        const COUNT = 1800;
-        const positions = new Float32Array(COUNT * 3);
-        const colors = new Float32Array(COUNT * 3);
-        const sizes = new Float32Array(COUNT);
-        const palette = [
-            new THREE.Color(0x00c6ff),
-            new THREE.Color(0x0072ff),
-            new THREE.Color(0x00ffc3),
-            new THREE.Color(0xffd700),
-            new THREE.Color(0xff6b35),
-        ];
-        for (let i = 0; i < COUNT; i++) {
-            positions[i * 3] = (Math.random() - 0.5) * 120;
-            positions[i * 3 + 1] = (Math.random() - 0.5) * 80;
-            positions[i * 3 + 2] = (Math.random() - 0.5) * 60;
-            const c = palette[Math.floor(Math.random() * palette.length)];
-            colors[i * 3] = c.r;
-            colors[i * 3 + 1] = c.g;
-            colors[i * 3 + 2] = c.b;
-            sizes[i] = Math.random() * 2.5 + 0.5;
-        }
-        const geo = new THREE.BufferGeometry();
-        geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-        geo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-        geo.setAttribute("size", new THREE.BufferAttribute(sizes, 1));
-
-        const mat = new THREE.ShaderMaterial({
-            vertexColors: true,
-            transparent: true,
-            depthWrite: false,
-            vertexShader: `
-        attribute float size;
-        varying vec3 vColor;
-        void main(){
-          vColor = color;
-          vec4 mv = modelViewMatrix * vec4(position,1.0);
-          gl_PointSize = size * (300.0 / -mv.z);
-          gl_Position = projectionMatrix * mv;
-        }`,
-            fragmentShader: `
-        varying vec3 vColor;
-        void main(){
-          float d = length(gl_PointCoord - 0.5);
-          if(d > 0.5) discard;
-          float a = 1.0 - smoothstep(0.35, 0.5, d);
-          gl_FragColor = vec4(vColor, a * 0.85);
-        }`,
-        });
-        const points = new THREE.Points(geo, mat);
-        scene.add(points);
-
-        const rings = [];
-        const ringColors = [0x00c6ff, 0x0072ff, 0x00ffc3];
-        for (let i = 0; i < 5; i++) {
-            const g = new THREE.TorusGeometry(4 + i * 2.5, 0.06, 8, 80);
-            const m = new THREE.MeshBasicMaterial({
-                color: ringColors[i % ringColors.length],
-                transparent: true,
-                opacity: 0.18 - i * 0.02,
-            });
-            const mesh = new THREE.Mesh(g, m);
-            mesh.position.set(
-                (Math.random() - 0.5) * 50,
-                (Math.random() - 0.5) * 30,
-                (Math.random() - 0.5) * 20 - 10
-            );
-            mesh.rotation.x = Math.random() * Math.PI;
-            mesh.rotation.y = Math.random() * Math.PI;
-            rings.push({ mesh, rx: Math.random() * 0.003, ry: Math.random() * 0.003 });
-            scene.add(mesh);
-        }
-
-        const lineMat = new THREE.LineBasicMaterial({ color: 0x003366, transparent: true, opacity: 0.25 });
-        for (let x = -50; x <= 50; x += 10) {
-            const g = new THREE.BufferGeometry().setFromPoints([
-                new THREE.Vector3(x, -40, -30),
-                new THREE.Vector3(x, 40, -30),
-            ]);
-            scene.add(new THREE.Line(g, lineMat));
-        }
-        for (let y = -40; y <= 40; y += 10) {
-            const g = new THREE.BufferGeometry().setFromPoints([
-                new THREE.Vector3(-50, y, -30),
-                new THREE.Vector3(50, y, -30),
-            ]);
-            scene.add(new THREE.Line(g, lineMat));
-        }
-
-        let animId;
-        const clock = new THREE.Clock();
-
-        const resize = () => {
-            const w = canvas.clientWidth, h = canvas.clientHeight;
-            renderer.setSize(w, h, false);
-            camera.aspect = w / h;
-            camera.updateProjectionMatrix();
-        };
-        resize();
-        window.addEventListener("resize", resize);
-
-        let mx = 0, my = 0;
-        const onMouse = (e) => {
-            mx = (e.clientX / window.innerWidth - 0.5) * 2;
-            my = -(e.clientY / window.innerHeight - 0.5) * 2;
-        };
-        window.addEventListener("mousemove", onMouse);
-
-        const animate = () => {
-            animId = requestAnimationFrame(animate);
-            const t = clock.getElapsedTime();
-            points.rotation.y = t * 0.012;
-            points.rotation.x = t * 0.005;
-            rings.forEach(({ mesh, rx, ry }) => {
-                mesh.rotation.x += rx;
-                mesh.rotation.y += ry;
-            });
-            camera.position.x += (mx * 3 - camera.position.x) * 0.04;
-            camera.position.y += (my * 2 - camera.position.y) * 0.04;
-            camera.lookAt(scene.position);
-            renderer.render(scene, camera);
-        };
-        animate();
-
-        return () => {
-            cancelAnimationFrame(animId);
-            window.removeEventListener("resize", resize);
-            window.removeEventListener("mousemove", onMouse);
-            renderer.dispose();
-        };
     }, []);
 
     return (
@@ -431,7 +291,6 @@ export function PowerfulHero() {
       `}</style>
 
             <section className="ph-root">
-                <canvas ref={canvasRef} className="ph-canvas" />
                 <div className="ph-overlay" />
                 <div className="ph-deco ph-deco-ring" />
 

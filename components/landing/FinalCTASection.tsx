@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useEffect, useRef, useState } from "react"
-import * as THREE from "three"
 import { useTheme } from "next-themes"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
@@ -12,7 +11,6 @@ gsap.registerPlugin(ScrollTrigger)
 
 export function FinalCTASection() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
   const { resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
@@ -20,88 +18,6 @@ export function FinalCTASection() {
     setMounted(true)
   }, [])
 
-  // Three.js Background Animation
-  useEffect(() => {
-    if (!mounted || !canvasRef.current || !containerRef.current) return
-
-    const canvas = canvasRef.current
-    const container = containerRef.current
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      antialias: true,
-      alpha: true
-    })
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-
-    const scene = new THREE.Scene()
-    const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000)
-    camera.position.z = 5
-
-    const isDark = resolvedTheme === "dark"
-    
-    // Create an "energy field" or pulsing particles
-    const particlesCount = 150
-    const positions = new Float32Array(particlesCount * 3)
-    const sizes = new Float32Array(particlesCount)
-
-    for (let i = 0; i < particlesCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 15
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 15
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 10
-      sizes[i] = Math.random() * 2
-    }
-
-    const geometry = new THREE.BufferGeometry()
-    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3))
-    geometry.setAttribute("size", new THREE.BufferAttribute(sizes, 1))
-
-    const material = new THREE.PointsMaterial({
-      color: isDark ? 0x60a5fa : 0x3b82f6,
-      size: 0.1,
-      transparent: true,
-      opacity: 0.4,
-      blending: THREE.AdditiveBlending
-    })
-
-    const points = new THREE.Points(geometry, material)
-    scene.add(points)
-
-    // Animation Loop
-    let animationFrameId: number
-    const animate = () => {
-      animationFrameId = requestAnimationFrame(animate)
-      
-      points.rotation.y += 0.001
-      points.rotation.x += 0.0005
-      
-      const time = Date.now() * 0.001
-      const posArray = geometry.attributes.position.array as Float32Array
-      for (let i = 0; i < particlesCount; i++) {
-          posArray[i * 3 + 1] += Math.sin(time + i) * 0.002
-      }
-      geometry.attributes.position.needsUpdate = true
-
-      renderer.render(scene, camera)
-    }
-    animate()
-
-    const handleResize = () => {
-      if (!container) return
-      camera.aspect = container.clientWidth / container.clientHeight
-      camera.updateProjectionMatrix()
-      renderer.setSize(container.clientWidth, container.clientHeight)
-    }
-    handleResize()
-    window.addEventListener("resize", handleResize)
-
-    return () => {
-      window.removeEventListener("resize", handleResize)
-      cancelAnimationFrame(animationFrameId)
-      geometry.dispose()
-      material.dispose()
-      renderer.dispose()
-    }
-  }, [mounted, resolvedTheme])
 
   useEffect(() => {
     if (!mounted || !containerRef.current) return
@@ -138,10 +54,6 @@ export function FinalCTASection() {
 
   return (
     <section ref={containerRef} className="relative py-24 md:py-32 overflow-hidden bg-slate-50/30 dark:bg-black/30">
-      <canvas
-        ref={canvasRef}
-        className="absolute top-0 left-0 w-full h-full pointer-events-none z-0"
-      />
 
       <div className="container relative z-10 px-4 mx-auto">
         <div className="cta-box max-w-5xl mx-auto rounded-[3rem] p-12 md:p-24 bg-gradient-to-br from-blue-600 to-indigo-700 dark:from-blue-700 dark:to-indigo-900 text-white shadow-[0_20px_50px_rgba(37,99,235,0.3)] relative overflow-hidden group">

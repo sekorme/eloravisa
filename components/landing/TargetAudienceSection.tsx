@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useEffect, useRef, useState } from "react"
-import * as THREE from "three"
 import { useTheme } from "next-themes"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
@@ -64,155 +63,11 @@ const audiences = [
 
 export function TargetAudienceSection() {
     const containerRef = useRef<HTMLDivElement>(null)
-    const canvasRef = useRef<HTMLCanvasElement>(null)
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
         setMounted(true)
     }, [])
-
-    // Three.js Background Animation
-    useEffect(() => {
-        if (!mounted || !canvasRef.current) return
-
-        const canvas = canvasRef.current
-        const renderer = new THREE.WebGLRenderer({
-            canvas,
-            antialias: true,
-            alpha: true,
-            powerPreference: "high-performance"
-        })
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
-
-        const scene = new THREE.Scene()
-        const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000)
-        camera.position.z = 5
-
-        const shapes: THREE.Mesh[] = []
-        const shapeCount = 10
-
-        // Create abstract geometric shapes
-        const geometries = [
-            new THREE.IcosahedronGeometry(0.5, 0),
-            new THREE.TorusGeometry(0.3, 0.1, 8, 16),
-            new THREE.OctahedronGeometry(0.4, 0),
-        ]
-
-        const sharedMaterial = new THREE.MeshPhongMaterial({
-            wireframe: true,
-            transparent: true,
-        })
-
-        for (let i = 0; i < shapeCount; i++) {
-            const geometry = geometries[Math.floor(Math.random() * geometries.length)]
-            const material = sharedMaterial.clone()
-            const shape = new THREE.Mesh(geometry, material)
-
-            shape.position.set(
-                (Math.random() - 0.5) * 10,
-                (Math.random() - 0.5) * 10,
-                (Math.random() - 0.5) * 5
-            )
-            shape.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0)
-            
-            // Random movement data
-            const speed = 0.005 + Math.random() * 0.01
-            shape.userData = { 
-                rotationSpeed: speed,
-                floatSpeed: speed * 0.5,
-                floatOffset: Math.random() * Math.PI * 2 
-            }
-
-            scene.add(shape)
-            shapes.push(shape)
-        }
-
-        const updateThemeColors = () => {
-            const isDark = document.documentElement.classList.contains('dark')
-            shapes.forEach(shape => {
-                const mat = shape.material as THREE.MeshPhongMaterial
-                mat.color.set(isDark ? 0x0ea5e9 : 0x0284c7)
-                mat.opacity = isDark ? 0.3 : 0.1
-            })
-        }
-
-        const themeObserver = new MutationObserver(updateThemeColors)
-        themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
-        updateThemeColors()
-
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
-        scene.add(ambientLight)
-
-        const pointLight = new THREE.PointLight(0xffffff, 1)
-        pointLight.position.set(5, 5, 5)
-        scene.add(pointLight)
-
-        let animationFrameId: number
-        let mouseX = 0
-        let mouseY = 0
-        let isVisible = true
-
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                isVisible = entry.isIntersecting
-            },
-            { threshold: 0 }
-        )
-        observer.observe(canvas)
-
-        const handleMouseMove = (e: MouseEvent) => {
-            mouseX = (e.clientX / window.innerWidth - 0.5) * 2
-            mouseY = -(e.clientY / window.innerHeight - 0.5) * 2
-        }
-
-        window.addEventListener("mousemove", handleMouseMove)
-
-        const animate = (time: number) => {
-            animationFrameId = requestAnimationFrame(animate)
-            if (!isVisible) return
-
-            shapes.forEach((shape) => {
-                shape.rotation.x += shape.userData.rotationSpeed
-                shape.rotation.y += shape.userData.rotationSpeed
-                shape.position.y += Math.sin(time * 0.001 + shape.userData.floatOffset) * 0.002
-            })
-
-            // Parallax effect
-            camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.05
-            camera.position.y += (mouseY * 0.5 - camera.position.y) * 0.05
-            camera.lookAt(scene.position)
-
-            renderer.render(scene, camera)
-        }
-
-        const handleResize = () => {
-            if (!canvas || !containerRef.current) return
-            const width = containerRef.current.clientWidth
-            const height = containerRef.current.clientHeight
-            renderer.setSize(width, height, false)
-            camera.aspect = width / height
-            camera.updateProjectionMatrix()
-        }
-
-        handleResize()
-        window.addEventListener("resize", handleResize)
-        animate(0)
-
-        return () => {
-            window.removeEventListener("mousemove", handleMouseMove)
-            window.removeEventListener("resize", handleResize)
-            cancelAnimationFrame(animationFrameId)
-            observer.disconnect()
-            themeObserver.disconnect()
-            geometries.forEach(g => g.dispose())
-            shapes.forEach(s => {
-                (s.material as THREE.Material).dispose()
-                s.geometry.dispose()
-            })
-            sharedMaterial.dispose()
-            renderer.dispose()
-        }
-    }, [mounted])
 
     // GSAP Entrance Animations
     useEffect(() => {
@@ -272,12 +127,6 @@ export function TargetAudienceSection() {
             ref={containerRef}
             className="relative py-24 md:py-32 bg-[#f8fafc] dark:bg-[#050510] overflow-hidden"
         >
-            <canvas
-                ref={canvasRef}
-                className="absolute inset-0 pointer-events-none z-0"
-                style={{ opacity: 0.8 }}
-            />
-
             <div className="container px-4 mx-auto relative z-10">
                 <div className="text-center mb-32 section-header">
                     <h2 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter mb-6">

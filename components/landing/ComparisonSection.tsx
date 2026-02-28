@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useEffect, useRef, useState } from "react"
-import * as THREE from "three"
 import { useTheme } from "next-themes"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
@@ -51,7 +50,6 @@ const comparisonData = [
 
 export function ComparisonSection() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
   const { resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
@@ -59,90 +57,6 @@ export function ComparisonSection() {
     setMounted(true)
   }, [])
 
-  // Three.js Background
-  useEffect(() => {
-    if (!mounted || !canvasRef.current || !containerRef.current) return
-
-    const canvas = canvasRef.current
-    const container = containerRef.current
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      antialias: true,
-      alpha: true
-    })
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-
-    const scene = new THREE.Scene()
-    const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000)
-    camera.position.z = 5
-
-    const isDark = resolvedTheme === "dark"
-    
-    // Create floating "vs" particles or geometric shapes
-    const group = new THREE.Group()
-    scene.add(group)
-
-    const particleCount = 20
-    const particles: THREE.Mesh[] = []
-
-    for (let i = 0; i < particleCount; i++) {
-      const geometry = Math.random() > 0.5 
-        ? new THREE.BoxGeometry(0.2, 0.2, 0.2)
-        : new THREE.TetrahedronGeometry(0.2, 0)
-        
-      const material = new THREE.MeshBasicMaterial({
-        color: i % 2 === 0 ? (isDark ? 0xef4444 : 0xf87171) : (isDark ? 0x3b82f6 : 0x60a5fa),
-        transparent: true,
-        opacity: 0.15,
-        wireframe: true
-      })
-      
-      const mesh = new THREE.Mesh(geometry, material)
-      mesh.position.set(
-        (Math.random() - 0.5) * 10,
-        (Math.random() - 0.5) * 10,
-        (Math.random() - 0.5) * 5
-      )
-      mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI)
-      
-      group.add(mesh)
-      particles.push(mesh)
-    }
-
-    // Animation Loop
-    let animationFrameId: number
-    const animate = () => {
-      animationFrameId = requestAnimationFrame(animate)
-      
-      particles.forEach((p, i) => {
-        p.rotation.x += 0.005
-        p.rotation.y += 0.005
-        p.position.y += Math.sin(Date.now() * 0.001 + i) * 0.002
-      })
-
-      renderer.render(scene, camera)
-    }
-    animate()
-
-    const handleResize = () => {
-      if (!container) return
-      camera.aspect = container.clientWidth / container.clientHeight
-      camera.updateProjectionMatrix()
-      renderer.setSize(container.clientWidth, container.clientHeight)
-    }
-    handleResize()
-    window.addEventListener("resize", handleResize)
-
-    return () => {
-      window.removeEventListener("resize", handleResize)
-      cancelAnimationFrame(animationFrameId)
-      particles.forEach(p => {
-        p.geometry.dispose()
-        ;(p.material as THREE.Material).dispose()
-      })
-      renderer.dispose()
-    }
-  }, [mounted, resolvedTheme])
 
   useEffect(() => {
     if (!mounted || !containerRef.current) return
@@ -193,10 +107,6 @@ export function ComparisonSection() {
 
   return (
     <section ref={containerRef} className="relative py-24 md:py-32 overflow-hidden bg-slate-50/50 dark:bg-[#030308]/50">
-      <canvas
-        ref={canvasRef}
-        className="absolute top-0 left-0 w-full h-full pointer-events-none z-0 opacity-40"
-      />
 
       <div className="container relative z-10 px-4 mx-auto">
         <div className="comparison-title text-center mb-16 md:mb-24">

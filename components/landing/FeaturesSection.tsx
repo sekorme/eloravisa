@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useEffect, useRef, useState } from "react"
-import * as THREE from "three"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { Brain, Mic, FileText, MessageCircle, Sparkles, ShieldCheck, Zap, Globe } from "lucide-react"
@@ -69,7 +68,6 @@ const features = [
 
 export function FeaturesSection() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
   const { resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
 
@@ -77,160 +75,6 @@ export function FeaturesSection() {
     setMounted(true)
   }, [])
 
-  // Three.js Background Animation
-  useEffect(() => {
-    if (!mounted || !canvasRef.current || !containerRef.current) return
-
-    const canvas = canvasRef.current
-    const container = containerRef.current
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      antialias: true,
-      alpha: true,
-      powerPreference: "high-performance"
-    })
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5))
-
-    const scene = new THREE.Scene()
-    const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000)
-    camera.position.z = 5
-
-    const isDark = resolvedTheme === "dark"
-    
-    // Create floating "data particles"
-    const particleCount = 40
-    const particles: THREE.Mesh[] = []
-    
-    // Mix of shapes
-    const geometries = [
-      new THREE.BoxGeometry(0.1, 0.1, 0.1),
-      new THREE.IcosahedronGeometry(0.08, 0),
-      new THREE.TetrahedronGeometry(0.1, 0)
-    ]
-    
-    const group = new THREE.Group()
-    scene.add(group)
-
-    for (let i = 0; i < particleCount; i++) {
-      const geometry = geometries[Math.floor(Math.random() * geometries.length)]
-      const material = new THREE.MeshPhongMaterial({
-        color: isDark ? 0x8b5cf6 : 0x6366f1,
-        emissive: isDark ? 0x8b5cf6 : 0x6366f1,
-        emissiveIntensity: 0.4,
-        transparent: true,
-        opacity: isDark ? 0.3 : 0.15,
-        wireframe: Math.random() > 0.5
-      })
-      
-      const particle = new THREE.Mesh(geometry, material)
-      particle.position.set(
-        (Math.random() - 0.5) * 12,
-        (Math.random() - 0.5) * 12,
-        (Math.random() - 0.5) * 6
-      )
-      
-      particle.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI)
-      
-      particle.userData = {
-        rotationSpeed: (Math.random() - 0.5) * 0.01,
-        velocity: new THREE.Vector3(
-          (Math.random() - 0.5) * 0.005,
-          (Math.random() - 0.5) * 0.005,
-          (Math.random() - 0.5) * 0.005
-        )
-      }
-      
-      group.add(particle)
-      particles.push(particle)
-    }
-
-    // Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
-    scene.add(ambientLight)
-
-    const pointLight = new THREE.PointLight(isDark ? 0x8b5cf6 : 0x6366f1, 2)
-    pointLight.position.set(5, 5, 5)
-    scene.add(pointLight)
-
-    const handleResize = () => {
-      if (!container) return
-      camera.aspect = container.clientWidth / container.clientHeight
-      camera.updateProjectionMatrix()
-      renderer.setSize(container.clientWidth, container.clientHeight, false)
-    }
-
-    window.addEventListener("resize", handleResize)
-    handleResize()
-
-    let mouseX = 0
-    let mouseY = 0
-    let isVisible = true
-
-    const observer = new IntersectionObserver(
-        ([entry]) => {
-            isVisible = entry.isIntersecting
-        },
-        { threshold: 0 }
-    )
-    observer.observe(canvas)
-
-    const onMouseMove = (e: MouseEvent) => {
-      mouseX = (e.clientX / window.innerWidth) - 0.5
-      mouseY = (e.clientY / window.innerHeight) - 0.5
-    }
-    window.addEventListener("mousemove", onMouseMove)
-
-    let animationFrameId: number
-    const animate = () => {
-      animationFrameId = requestAnimationFrame(animate)
-      if (!isVisible) return
-
-      group.rotation.y += 0.001
-      group.rotation.x += 0.0005
-      
-      // Parallax mouse effect
-      group.position.x += (mouseX * 0.5 - group.position.x) * 0.05
-      group.position.y += (-mouseY * 0.5 - group.position.y) * 0.05
-
-      particles.forEach(p => {
-        p.rotation.x += p.userData.rotationSpeed
-        p.rotation.y += p.userData.rotationSpeed
-        p.position.add(p.userData.velocity)
-        
-        // Bounds check
-        if (Math.abs(p.position.x) > 8) p.userData.velocity.x *= -1
-        if (Math.abs(p.position.y) > 8) p.userData.velocity.y *= -1
-        if (Math.abs(p.position.z) > 4) p.userData.velocity.z *= -1
-      })
-
-      renderer.render(scene, camera)
-    }
-    animate()
-
-    // Scroll parallax with GSAP
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: container,
-        start: "top bottom",
-        end: "bottom top",
-        scrub: 1
-      }
-    })
-    tl.to(group.position, { z: 2, ease: "none" })
-
-    return () => {
-      window.removeEventListener("resize", handleResize)
-      window.removeEventListener("mousemove", onMouseMove)
-      cancelAnimationFrame(animationFrameId)
-      observer.disconnect()
-      renderer.dispose()
-      geometries.forEach(g => g.dispose())
-      particles.forEach(p => (p.material as THREE.Material).dispose())
-      ScrollTrigger.getAll().forEach(st => {
-        if (st.vars.trigger === container) st.kill()
-      })
-    }
-  }, [mounted, resolvedTheme])
 
   // GSAP Entrance Animations
   useEffect(() => {
@@ -271,11 +115,6 @@ export function FeaturesSection() {
       ref={containerRef} 
       className="relative py-24 md:py-32 overflow-hidden bg-[#f8fafc] dark:bg-[#050510]"
     >
-      {/* Three.js Background Canvas */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 w-full h-full pointer-events-none opacity-60 dark:opacity-40"
-      />
 
       {/* Decorative Gradients */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-[120px] pointer-events-none" />

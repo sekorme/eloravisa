@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState } from "react"
 import { gsap } from "gsap"
-import * as THREE from "three"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, ShieldCheck, Send } from "lucide-react"
 import Link from "next/link"
@@ -14,71 +13,11 @@ const IMAGES = ["/IMG_9093.jpg", "/30.JPG", "/elora5.jpeg", "/akyere.jpg"];
 
 export function HeroSection() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
     
-    // Three.js Background Animation
-    if (!canvasRef.current) return;
-    const canvas = canvasRef.current;
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-    
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
-    camera.position.z = 30;
-
-    // Particles/Stars
-    const count = 1000;
-    const positions = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 100;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 100;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 100;
-    }
-    const geometry = new THREE.BufferGeometry();
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const material = new THREE.PointsMaterial({
-      size: 0.15,
-      color: 0x3b82f6,
-      transparent: true,
-      opacity: 0.6,
-      sizeAttenuation: true
-    });
-    const points = new THREE.Points(geometry, material);
-    scene.add(points);
-
-    // Update colors based on theme
-    const updateTheme = () => {
-      const isDark = document.documentElement.classList.contains('dark');
-      material.color.setHex(isDark ? 0x60a5fa : 0x2563eb);
-      material.opacity = isDark ? 0.4 : 0.6;
-    };
-    updateTheme();
-
-    const observer = new MutationObserver(updateTheme);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-
-    let animId: number;
-    const animate = () => {
-      animId = requestAnimationFrame(animate);
-      points.rotation.y += 0.001;
-      points.rotation.x += 0.0005;
-      renderer.render(scene, camera);
-    };
-    animate();
-
-    const handleResize = () => {
-      const w = canvas.clientWidth, h = canvas.clientHeight;
-      renderer.setSize(w, h, false);
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-
     // GSAP Animations
     const ctx = gsap.context(() => {
       // Animate blobs
@@ -134,16 +73,11 @@ export function HeroSection() {
 
     return () => {
       ctx.revert();
-      cancelAnimationFrame(animId);
-      window.removeEventListener('resize', handleResize);
-      renderer.dispose();
-      observer.disconnect();
     }
   }, [])
 
   return (
     <section ref={containerRef} className="relative pt-24 pb-16 md:pt-32 md:pb-24 bg-background overflow-hidden min-h-[90vh] flex items-center">
-      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-0" />
       
       {/* Animated Blob Background */}
       <div className="absolute inset-0 -z-0 opacity-30">

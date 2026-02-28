@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import * as THREE from "three";
 import { useTheme } from "next-themes";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -82,7 +81,6 @@ const plans: Plan[] = [
 
 export default function PriceSection() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -90,87 +88,6 @@ export default function PriceSection() {
     setMounted(true);
   }, []);
 
-  // Three.js Background
-  useEffect(() => {
-    if (!mounted || !canvasRef.current || !containerRef.current) return;
-
-    const canvas = canvasRef.current;
-    const container = containerRef.current;
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      antialias: true,
-      alpha: true
-    });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-    camera.position.z = 5;
-
-    const isDark = resolvedTheme === "dark";
-    
-    // Create floating currencies or geometric coins
-    const group = new THREE.Group();
-    scene.add(group);
-
-    const coinCount = 15;
-    const coins: THREE.Mesh[] = [];
-
-    const geometry = new THREE.CylinderGeometry(0.2, 0.2, 0.05, 32);
-    const material = new THREE.MeshStandardMaterial({
-      color: isDark ? 0x3b82f6 : 0x2563eb,
-      metalness: 0.8,
-      roughness: 0.2,
-      transparent: true,
-      opacity: 0.2
-    });
-
-    const light = new THREE.PointLight(0xffffff, 1);
-    light.position.set(5, 5, 5);
-    scene.add(light);
-    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-
-    for (let i = 0; i < coinCount; i++) {
-      const coin = new THREE.Mesh(geometry, material);
-      coin.position.set(
-        (Math.random() - 0.5) * 12,
-        (Math.random() - 0.5) * 10,
-        (Math.random() - 0.5) * 5
-      );
-      coin.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
-      group.add(coin);
-      coins.push(coin);
-    }
-
-    // Animation Loop
-    let animationFrameId: number;
-    const animate = () => {
-      animationFrameId = requestAnimationFrame(animate);
-      coins.forEach((coin, i) => {
-        coin.rotation.y += 0.01;
-        coin.position.y += Math.sin(Date.now() * 0.001 + i) * 0.002;
-      });
-      renderer.render(scene, camera);
-    };
-    animate();
-
-    const handleResize = () => {
-      if (!container) return;
-      camera.aspect = container.clientWidth / container.clientHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(container.clientWidth, container.clientHeight);
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      cancelAnimationFrame(animationFrameId);
-      geometry.dispose();
-      material.dispose();
-      renderer.dispose();
-    };
-  }, [mounted, resolvedTheme]);
 
   useEffect(() => {
     if (!mounted || !containerRef.current) return;
@@ -209,10 +126,6 @@ export default function PriceSection() {
 
   return (
     <section ref={containerRef} className="relative py-24 md:py-32 overflow-hidden bg-slate-50/50 dark:bg-[#030308]/50">
-      <canvas
-        ref={canvasRef}
-        className="absolute top-0 left-0 w-full h-full pointer-events-none z-0 opacity-40"
-      />
 
       <div className="container relative z-10 px-4 mx-auto">
         <div className="price-header text-center mb-16 md:mb-24">
