@@ -1,6 +1,8 @@
 "use client"
 
 import React, { useEffect, useRef, useState } from "react"
+import * as THREE from "three"
+import { useTheme } from "next-themes"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import {
@@ -8,14 +10,8 @@ import {
     AlertTriangle,
     GraduationCap,
     Shield,
-    ChevronLeft,
-    ChevronRight,
 } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-
-import { AnimatedGridPattern } from "../ui/animated-grid-pattern"
-import {cn} from "@/lib/utils";
+import { cn } from "@/lib/utils"
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -23,145 +19,322 @@ const audiences = [
     {
         icon: User,
         title: "First-time Applicants",
-        desc: "Navigate the complex process with confidence from day one.",
+        subtitle: "A smooth start to your new chapter.",
+        desc: "The visa application process can be daunting, but it doesn't have to be. We simplify the complexities, providing a clear roadmap from your initial idea to your final approval. Our step-by-step guidance ensures you never miss a detail.",
+        color: "from-blue-500/20 to-cyan-500/20",
+        borderColor: "border-blue-500/20 dark:border-blue-400/20",
+        iconColor: "text-blue-500 dark:text-blue-400",
+        iconBg: "bg-blue-500/10 dark:bg-blue-400/10",
+        shape: "icosahedron"
     },
     {
         icon: AlertTriangle,
         title: "Past Refusals",
-        desc: "Understand what went wrong and fix your application strategy.",
+        subtitle: "Turning setbacks into success.",
+        desc: "A previous rejection isn't the end of the road. We specialize in analyzing refusal letters to identify exactly what went wrong. By addressing the root causes and strengthening your application strategy, we help you reapply with newfound confidence.",
+        color: "from-amber-500/20 to-orange-500/20",
+        borderColor: "border-amber-500/20 dark:border-amber-400/20",
+        iconColor: "text-amber-500 dark:text-amber-400",
+        iconBg: "bg-amber-500/10 dark:bg-amber-400/10",
+        shape: "torus"
     },
     {
         icon: GraduationCap,
         title: "Students & Workers",
-        desc: "Tailored guidance for study permits and work visas.",
+        subtitle: "Bridging the gap to global opportunities.",
+        desc: "Whether you're pursuing a degree or a career abroad, we provide specialized support for study permits and work visas. Our guidance is tailored to your unique goals, helping you navigate institutional requirements and international labor markets.",
+        color: "from-indigo-500/20 to-purple-500/20",
+        borderColor: "border-indigo-500/20 dark:border-indigo-400/20",
+        iconColor: "text-indigo-500 dark:text-indigo-400",
+        iconBg: "bg-indigo-500/10 dark:bg-indigo-400/10",
+        shape: "octahedron"
     },
     {
         icon: Shield,
         title: "Tired of Agents",
-        desc: "Avoid misinformation and take full control of your destiny.",
+        subtitle: "Take full control of your destiny.",
+        desc: "Say goodbye to middlemen and hidden fees. We empower you with the knowledge and tools to handle your own application. Avoid misinformation and stay in the driver's seat of your immigration journey with total transparency.",
+        color: "from-emerald-500/20 to-teal-500/20",
+        borderColor: "border-emerald-500/20 dark:border-emerald-400/20",
+        iconColor: "text-emerald-500 dark:text-emerald-400",
+        iconBg: "bg-emerald-500/10 dark:bg-emerald-400/10",
+        shape: "sphere"
     },
 ]
 
 export function TargetAudienceSection() {
     const containerRef = useRef<HTMLDivElement>(null)
-    const [stack, setStack] = useState(audiences)
+    const canvasRef = useRef<HTMLCanvasElement>(null)
+    const { resolvedTheme } = useTheme()
+    const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    // Three.js Background Animation
+    useEffect(() => {
+        if (!mounted || !canvasRef.current) return
+
+        const canvas = canvasRef.current
+        const renderer = new THREE.WebGLRenderer({
+            canvas,
+            antialias: true,
+            alpha: true
+        })
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+
+        const scene = new THREE.Scene()
+        const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000)
+        camera.position.z = 5
+
+        const isDark = resolvedTheme === "dark"
+        const shapes: THREE.Mesh[] = []
+        const shapeCount = 15
+
+        // Create abstract geometric shapes
+        const geometries = [
+            new THREE.IcosahedronGeometry(0.5, 0),
+            new THREE.TorusGeometry(0.3, 0.1, 16, 32),
+            new THREE.OctahedronGeometry(0.4, 0),
+        ]
+
+        for (let i = 0; i < shapeCount; i++) {
+            const geometry = geometries[Math.floor(Math.random() * geometries.length)]
+            const material = new THREE.MeshPhongMaterial({
+                color: isDark ? 0x0ea5e9 : 0x0284c7,
+                wireframe: true,
+                transparent: true,
+                opacity: isDark ? 0.3 : 0.15,
+            })
+            const shape = new THREE.Mesh(geometry, material)
+
+            shape.position.set(
+                (Math.random() - 0.5) * 10,
+                (Math.random() - 0.5) * 10,
+                (Math.random() - 0.5) * 5
+            )
+            shape.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, 0)
+            
+            // Random movement data
+            const speed = 0.005 + Math.random() * 0.01
+            shape.userData = { 
+                rotationSpeed: speed,
+                floatSpeed: speed * 0.5,
+                floatOffset: Math.random() * Math.PI * 2 
+            }
+
+            scene.add(shape)
+            shapes.push(shape)
+        }
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
+        scene.add(ambientLight)
+
+        const pointLight = new THREE.PointLight(0xffffff, 1)
+        pointLight.position.set(5, 5, 5)
+        scene.add(pointLight)
+
+        let animationFrameId: number
+        let mouseX = 0
+        let mouseY = 0
+
+        const handleMouseMove = (e: MouseEvent) => {
+            mouseX = (e.clientX / window.innerWidth - 0.5) * 2
+            mouseY = -(e.clientY / window.innerHeight - 0.5) * 2
+        }
+
+        window.addEventListener("mousemove", handleMouseMove)
+
+        const animate = (time: number) => {
+            shapes.forEach((shape) => {
+                shape.rotation.x += shape.userData.rotationSpeed
+                shape.rotation.y += shape.userData.rotationSpeed
+                shape.position.y += Math.sin(time * 0.001 + shape.userData.floatOffset) * 0.002
+            })
+
+            // Parallax effect
+            camera.position.x += (mouseX * 0.5 - camera.position.x) * 0.05
+            camera.position.y += (mouseY * 0.5 - camera.position.y) * 0.05
+            camera.lookAt(scene.position)
+
+            renderer.render(scene, camera)
+            animationFrameId = requestAnimationFrame(animate)
+        }
+
+        const handleResize = () => {
+            if (!canvas || !containerRef.current) return
+            const width = containerRef.current.clientWidth
+            const height = containerRef.current.clientHeight
+            renderer.setSize(width, height, false)
+            camera.aspect = width / height
+            camera.updateProjectionMatrix()
+        }
+
+        handleResize()
+        window.addEventListener("resize", handleResize)
+        animate(0)
+
+        return () => {
+            window.removeEventListener("mousemove", handleMouseMove)
+            window.removeEventListener("resize", handleResize)
+            cancelAnimationFrame(animationFrameId)
+            geometries.forEach(g => g.dispose())
+            shapes.forEach(s => {
+                (s.material as THREE.Material).dispose()
+                s.geometry.dispose()
+            })
+            renderer.dispose()
+        }
+    }, [mounted, resolvedTheme])
+
+    // GSAP Entrance Animations
+    useEffect(() => {
+        if (!mounted) return
         const ctx = gsap.context(() => {
-            // Card entrance animation
-            gsap.from(".audience-card", {
-                y: 100,
+            gsap.utils.toArray<HTMLElement>(".audience-section").forEach((section, i) => {
+                const isEven = i % 2 === 0
+                const content = section.querySelector(".section-content")
+                const visual = section.querySelector(".section-visual")
+
+                gsap.from(content, {
+                    x: isEven ? -100 : 100,
+                    opacity: 0,
+                    duration: 1.2,
+                    ease: "power4.out",
+                    scrollTrigger: {
+                        trigger: section,
+                        start: "top 70%",
+                    },
+                })
+
+                gsap.from(visual, {
+                    x: isEven ? 100 : -100,
+                    opacity: 0,
+                    scale: 0.8,
+                    duration: 1.5,
+                    ease: "elastic.out(1, 0.5)",
+                    scrollTrigger: {
+                        trigger: section,
+                        start: "top 70%",
+                    },
+                })
+            })
+
+            gsap.from(".section-header", {
+                y: -50,
                 opacity: 0,
-                duration: 0.8,
-                stagger: 0.15,
+                duration: 1.2,
                 ease: "power3.out",
                 scrollTrigger: {
                     trigger: containerRef.current,
-                    start: "top 70%",
+                    start: "top 85%",
                 },
-            })
-
-            // 🔹 Animated gradient (transform-based — reliable)
-            gsap.to("#audience-gradient", {
-                xPercent: 20,
-                yPercent: -15,
-                duration: 30,
-                ease: "none",
-                repeat: -1,
-                yoyo: true,
             })
         }, containerRef)
 
         return () => ctx.revert()
-    }, [])
-
-    const swipe = (direction: "next" | "prev") => {
-        const cards = gsap.utils.toArray<HTMLElement>(".audience-card")
-        const topCard = cards[0]
-
-        gsap.to(topCard, {
-            x: direction === "next" ? -120 : 120,
-            rotation: direction === "next" ? -8 : 8,
-            opacity: 0,
-            duration: 0.4,
-            ease: "power2.in",
-            onComplete: () => {
-                gsap.set(topCard, { x: 0, rotation: 0, opacity: 1 })
-
-                setStack((prev) => {
-                    if (direction === "next") {
-                        const [first, ...rest] = prev
-                        return [...rest, first]
-                    } else {
-                        const last = prev[prev.length - 1]
-                        return [last, ...prev.slice(0, -1)]
-                    }
-                })
-            },
-        })
-    }
+    }, [mounted])
 
     return (
         <section
             ref={containerRef}
-            className="relative py-24 md:py-32 bg-background/50 overflow-hidden"
+            className="relative py-24 md:py-32 bg-[#f8fafc] dark:bg-[#050510] overflow-hidden"
         >
-            <AnimatedGridPattern
-                numSquares={30}
-                maxOpacity={0.1}
-                duration={3}
-                repeatDelay={1}
-                className={cn(
-                    "[mask-image:radial-gradient(500px_circle_at_center,white,transparent)]",
-                    "inset-x-0 inset-y-[-30%] h-[200%] skew-y-12"
-                )}
+            <canvas
+                ref={canvasRef}
+                className="absolute inset-0 pointer-events-none z-0"
+                style={{ opacity: 0.8 }}
             />
 
-
-
-            <div className="container px-4 mx-auto relative z-0">
-                <div className="text-center mb-16">
-                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-[#00b7fa] to-[#01cfea] bg-clip-text text-transparent">
+            <div className="container px-4 mx-auto relative z-10">
+                <div className="text-center mb-32 section-header">
+                    <h2 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter mb-6">
                         Who This Is{" "}
-                        <span className="text-primary">For.</span>
+                        <span className="bg-gradient-to-r from-[#00b7fa] to-[#01cfea] bg-clip-text text-transparent italic">
+                            For.
+                        </span>
                     </h2>
-                    <p className="text-muted-foreground text-lg">
-                        You stay in control. We guide, you apply.
+                    <div className="w-24 h-1.5 bg-gradient-to-r from-[#00b7fa] to-[#01cfea] mx-auto mb-8 rounded-full" />
+                    <p className="text-muted-foreground text-xl max-w-2xl mx-auto leading-relaxed font-medium">
+                        Empowering you to take charge of your journey. No agents, no hidden fees, just expert guidance for every stage.
                     </p>
                 </div>
 
-                <div className="flex flex-col items-center gap-6">
-                    {/* Card Stack */}
-                    <div className="relative w-full max-w-sm h-64">
-                        {stack.map((item, index) => (
-                            <Card
-                                key={item.title}
-                                className="audience-card absolute w-full h-full p-6 bg-background/60 dark:bg-background/40 backdrop-blur-lg border-2 border-white/20 rounded-2xl shadow-lg"
-                                style={{
-                                    transform: `rotateZ(${index * 2 - 3}deg) translateY(${index * -6}px)`,
-                                    zIndex: stack.length - index,
-                                }}
+                <div className="space-y-32 md:space-y-48">
+                    {audiences.map((item, index) => {
+                        const isEven = index % 2 === 0
+                        return (
+                            <div 
+                                key={index} 
+                                className={cn(
+                                    "audience-section flex flex-col md:flex-row items-center gap-12 md:gap-24",
+                                    !isEven && "md:flex-row-reverse"
+                                )}
                             >
-                                <CardContent className="p-0 flex flex-col items-center text-center">
-                                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-4 text-blue-600 dark:text-blue-400">
-                                        <item.icon className="w-6 h-6" />
+                                {/* Text Content */}
+                                <div className="section-content flex-1 text-center md:text-left">
+                                    <div className={cn(
+                                        "inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-8",
+                                        "shadow-2xl shadow-black/10 transition-transform duration-500 hover:rotate-12",
+                                        item.iconBg,
+                                        item.iconColor
+                                    )}>
+                                        <item.icon size={40} />
                                     </div>
-                                    <h3 className="font-bold text-xl mb-2">{item.title}</h3>
-                                    <p className="text-sm text-muted-foreground">{item.desc}</p>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
+                                    
+                                    <h3 className="text-3xl md:text-5xl font-black mb-4 text-slate-900 dark:text-white tracking-tight">
+                                        {item.title}
+                                    </h3>
+                                    
+                                    <h4 className={cn(
+                                        "text-xl md:text-2xl font-bold mb-6 bg-gradient-to-r bg-clip-text text-transparent",
+                                        "from-slate-600 to-slate-400 dark:from-slate-300 dark:to-slate-500"
+                                    )}>
+                                        {item.subtitle}
+                                    </h4>
 
-                    {/* Controls */}
-                    <div className="flex gap-4">
-                        <Button variant="outline" size="icon" onClick={() => swipe("prev") }>
-                            <ChevronLeft className="w-5 h-5" />
-                        </Button>
-                        <Button variant="outline" size="icon" onClick={() => swipe("next") }>
-                            <ChevronRight className="w-5 h-5" />
-                        </Button>
-                    </div>
+                                    <p className="text-slate-600 dark:text-slate-400 leading-loose text-lg md:text-xl font-medium max-w-xl mx-auto md:mx-0">
+                                        {item.desc}
+                                    </p>
+
+                                    <div className="mt-10 flex flex-wrap gap-4 justify-center md:justify-start">
+                                        <div className={cn(
+                                            "h-1 w-12 rounded-full bg-gradient-to-r",
+                                            item.color
+                                        )} />
+                                    </div>
+                                </div>
+
+                                {/* Visual Element */}
+                                <div className="section-visual flex-1 relative flex justify-center items-center">
+                                    <div className={cn(
+                                        "absolute inset-0 blur-[100px] opacity-20 dark:opacity-30 rounded-full",
+                                        item.color
+                                    )} />
+                                    
+                                    <div className={cn(
+                                        "relative z-10 w-full max-w-[400px] aspect-square rounded-[3rem] border-2",
+                                        "bg-white/10 dark:bg-white/5 backdrop-blur-3xl flex items-center justify-center",
+                                        item.borderColor,
+                                        "shadow-[0_0_50px_-12px_rgba(0,0,0,0.1)] dark:shadow-[0_0_50px_-12px_rgba(255,255,255,0.05)]"
+                                    )}>
+                                        <div className="text-center p-8">
+                                            <div className={cn(
+                                                "w-32 h-32 mx-auto mb-6 flex items-center justify-center rounded-full bg-gradient-to-br opacity-50 blur-xl absolute",
+                                                item.color
+                                            )} />
+                                            <item.icon size={120} className={cn("relative z-10 opacity-80", item.iconColor)} />
+                                        </div>
+                                        
+                                        {/* Abstract Floating Shapes */}
+                                        <div className="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-full blur-2xl opacity-40 animate-pulse" />
+                                        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full blur-3xl opacity-30 animate-bounce [animation-duration:5s]" />
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    })}
                 </div>
             </div>
         </section>

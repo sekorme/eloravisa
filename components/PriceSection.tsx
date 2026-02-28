@@ -1,11 +1,14 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import * as THREE from "three";
+import { useTheme } from "next-themes";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Check, X, Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-import { title, subtitle } from "./primitives";
-
-import { useSectionReveal } from "@/hooks/useSectionReveal";
+gsap.registerPlugin(ScrollTrigger);
 
 type Feature = {
   name: string;
@@ -21,6 +24,7 @@ type Plan = {
   cta: string;
   highlight?: boolean;
   badge?: string;
+  color: string;
 };
 
 const plans: Plan[] = [
@@ -38,6 +42,7 @@ const plans: Plan[] = [
       { name: "Document Storage", included: true },
     ],
     cta: "Get started",
+    color: "blue"
   },
   {
     name: "Pro Plan",
@@ -55,6 +60,7 @@ const plans: Plan[] = [
     cta: "Upgrade to Pro",
     highlight: true,
     badge: "Most Popular",
+    color: "indigo"
   },
   {
     name: "Full Features",
@@ -70,227 +76,223 @@ const plans: Plan[] = [
       { name: "Document Storage", included: true },
     ],
     cta: "Boost your application",
+    color: "purple"
   },
 ];
 
 export default function PriceSection() {
-  const gridRef = useRef<HTMLDivElement | null>(null);
-  const revealRef = useSectionReveal();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const root = gridRef.current;
-
-    if (!root) return;
-
-    const prefersReduced =
-      typeof window !== "undefined" &&
-      window.matchMedia &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    const cards = Array.from(
-      root.querySelectorAll<HTMLElement>("[data-price-card]"),
-    );
-    const badges = Array.from(
-      root.querySelectorAll<HTMLElement>("[data-badge]"),
-    );
-
-    if (prefersReduced) {
-      gsap.set(cards, { opacity: 1, y: 0, scale: 1, clearProps: "transform" });
-
-      return;
-    }
-
-    const ctx = gsap.context(() => {
-      // Entrance animation
-      gsap.set(cards, { opacity: 0, y: 18, scale: 0.98 });
-      gsap.to(cards, {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.6,
-        ease: "power3.out",
-        stagger: 0.08,
-        clearProps: "transform",
-      });
-
-      // Subtle floating idle animation for all cards
-      gsap.to(cards, {
-        y: (i) => (i % 2 === 0 ? -3 : -5),
-        duration: 3,
-        ease: "sine.inOut",
-        repeat: -1,
-        yoyo: true,
-        stagger: { each: 0.12, yoyo: true },
-      });
-
-      // Highlighted card gets a gentle glow pulse and a slightly larger float
-      const highlighted = cards.filter((el) => el.dataset.highlight === "true");
-
-      if (highlighted.length) {
-        // slightly larger float for highlight
-        gsap.to(highlighted, {
-          y: -7,
-          duration: 3.2,
-          ease: "sine.inOut",
-          repeat: -1,
-          yoyo: true,
-        });
-        // animate the dedicated glow layer instead of expensive box-shadow
-        const highlightGlows = highlighted
-          .map((el) => el.querySelector<HTMLElement>("[data-glow]"))
-          .filter((n): n is HTMLElement => Boolean(n));
-
-        if (highlightGlows.length) {
-          gsap.set(highlightGlows, { opacity: 0.4, scale: 1 });
-          gsap.to(highlightGlows, {
-            opacity: 0.8,
-            scale: 1.03,
-            duration: 1.6,
-            ease: "sine.inOut",
-            repeat: -1,
-            yoyo: true,
-            transformOrigin: "50% 50%",
-          });
-        }
-      }
-
-      // Badge breathing animation
-      if (badges.length) {
-        gsap.to(badges, {
-          scale: 1.04,
-          duration: 1.8,
-          ease: "sine.inOut",
-          repeat: -1,
-          yoyo: true,
-          transformOrigin: "50% 50%",
-        });
-      }
-    }, root);
-
-    return () => {
-      ctx.revert();
-    };
+    setMounted(true);
   }, []);
 
+  // Three.js Background
+  useEffect(() => {
+    if (!mounted || !canvasRef.current || !containerRef.current) return;
+
+    const canvas = canvasRef.current;
+    const container = containerRef.current;
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      alpha: true
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+    camera.position.z = 5;
+
+    const isDark = resolvedTheme === "dark";
+    
+    // Create floating currencies or geometric coins
+    const group = new THREE.Group();
+    scene.add(group);
+
+    const coinCount = 15;
+    const coins: THREE.Mesh[] = [];
+
+    const geometry = new THREE.CylinderGeometry(0.2, 0.2, 0.05, 32);
+    const material = new THREE.MeshStandardMaterial({
+      color: isDark ? 0x3b82f6 : 0x2563eb,
+      metalness: 0.8,
+      roughness: 0.2,
+      transparent: true,
+      opacity: 0.2
+    });
+
+    const light = new THREE.PointLight(0xffffff, 1);
+    light.position.set(5, 5, 5);
+    scene.add(light);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+
+    for (let i = 0; i < coinCount; i++) {
+      const coin = new THREE.Mesh(geometry, material);
+      coin.position.set(
+        (Math.random() - 0.5) * 12,
+        (Math.random() - 0.5) * 10,
+        (Math.random() - 0.5) * 5
+      );
+      coin.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+      group.add(coin);
+      coins.push(coin);
+    }
+
+    // Animation Loop
+    let animationFrameId: number;
+    const animate = () => {
+      animationFrameId = requestAnimationFrame(animate);
+      coins.forEach((coin, i) => {
+        coin.rotation.y += 0.01;
+        coin.position.y += Math.sin(Date.now() * 0.001 + i) * 0.002;
+      });
+      renderer.render(scene, camera);
+    };
+    animate();
+
+    const handleResize = () => {
+      if (!container) return;
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      cancelAnimationFrame(animationFrameId);
+      geometry.dispose();
+      material.dispose();
+      renderer.dispose();
+    };
+  }, [mounted, resolvedTheme]);
+
+  useEffect(() => {
+    if (!mounted || !containerRef.current) return;
+
+    const ctx = gsap.context(() => {
+      gsap.from(".price-header", {
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top bottom",
+          toggleActions: "play none none none"
+        },
+        y: 30,
+        opacity: 0,
+        duration: 0.8,
+        ease: "power3.out",
+        clearProps: "all"
+      });
+
+      gsap.from(".price-card", {
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top bottom",
+          toggleActions: "play none none none"
+        },
+        y: 60,
+        opacity: 0,
+        duration: 1,
+        stagger: 0.15,
+        ease: "power2.out",
+        clearProps: "all"
+      });
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, [mounted]);
+
   return (
-    <section ref={revealRef as any} className="py-8 md:py-15">
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="text-center mb-10 md:mb-14">
-          <h2 data-reveal className={title({ size: "lg", color: "blue" })}>
-            Pricing
+    <section ref={containerRef} className="relative py-24 md:py-32 overflow-hidden bg-slate-50/50 dark:bg-[#030308]/50">
+      <canvas
+        ref={canvasRef}
+        className="absolute top-0 left-0 w-full h-full pointer-events-none z-0 opacity-40"
+      />
+
+      <div className="container relative z-10 px-4 mx-auto">
+        <div className="price-header text-center mb-16 md:mb-24">
+          <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6">
+            <span className="bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent">
+              Simple, Transparent{" "}
+            </span>
+            <span className="text-foreground">Pricing</span>
           </h2>
-          <p data-reveal className={subtitle({ fullWidth: true })}>
-            Choose a plan that fits your journey. Start free, upgrade when
-            you&apos;re ready.
+          <p className="max-w-2xl mx-auto text-muted-foreground text-xl">
+            Choose the plan that's right for your ambition. No hidden fees, ever.
           </p>
         </div>
 
-        <div ref={gridRef} className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {plans.map((plan) => (
-            <article
-              key={plan.name}
-              data-price-card
-              className={[
-                "relative rounded-2xl border bg-content1/50 p-6 shadow-sm backdrop-blur",
-                "border-default-200",
-                plan.highlight
-                  ? "ring-1 ring-blue-500/30 border-blue-300/50 bg-background/70"
-                  : "",
-              ].join(" ")}
-              data-highlight={plan.highlight ? "true" : "false"}
+        <div className="price-grid grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+          {plans.map((plan, idx) => (
+            <div 
+              key={idx}
+              className={cn(
+                "price-card relative p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 border transition-all duration-500 flex flex-col group",
+                plan.highlight 
+                  ? "border-blue-500/50 shadow-[0_20px_50px_rgba(59,130,246,0.15)] scale-105 z-10 dark:bg-slate-900/80" 
+                  : "border-slate-200 dark:border-slate-800 hover:border-blue-500/30 shadow-xl hover:shadow-2xl"
+              )}
             >
-              {plan.highlight && (
-                <div
-                  aria-hidden
-                  data-glow
-                  className="pointer-events-none absolute inset-0 -z-10 rounded-2xl bg-blue-500/25 blur-2xl opacity-40"
-                />
-              )}
               {plan.badge && (
-                <span
-                  data-badge
-                  className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full border border-default-200 bg-background px-3 py-1 text-xs font-medium text-default-700 shadow-sm"
-                >
-                  {plan.badge}
-                </span>
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-blue-600 text-white text-xs font-bold rounded-full shadow-lg flex items-center gap-1">
+                  <Sparkles className="w-3 h-3" /> {plan.badge}
+                </div>
               )}
 
-              <div className="mb-4">
-                <h3 className="text-xl font-semibold text-foreground">
-                  {plan.name}
-                </h3>
-                <p className="mt-1 text-sm text-default-600">
-                  {plan.description}
-                </p>
+              <div className="mb-8">
+                <h3 className="text-2xl font-bold mb-2 group-hover:text-blue-500 transition-colors">{plan.name}</h3>
+                <p className="text-muted-foreground text-sm">{plan.description}</p>
               </div>
 
-              <div className="mb-6">
-                <div className="flex items-end gap-1">
-                  <span className="text-4xl font-bold text-foreground">
-                    {plan.price}
-                  </span>
-                  {plan.cadence ? (
-                    <span className="pb-1 text-default-500">
-                      {plan.cadence}
-                    </span>
-                  ) : null}
-                </div>
+              <div className="mb-8 flex items-baseline gap-1">
+                <span className="text-5xl font-extrabold">{plan.price}</span>
+                <span className="text-muted-foreground">{plan.cadence}</span>
               </div>
 
-              <ul className="mb-6 space-y-2 text-sm text-default-700">
-                {plan.features.map((f) => (
-                  <li key={f.name} className={`flex items-start gap-2 ${!f.included ? "text-default-400" : ""}`}>
-                    {f.included ? (
-                      <svg
-                        aria-hidden="true"
-                        className="mt-0.5 h-4 w-4 text-green-500"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M20 6L9 17l-5-5" />
-                      </svg>
+              <div className="space-y-4 mb-10 flex-grow">
+                {plan.features.map((feature, fIdx) => (
+                  <div key={fIdx} className={cn("flex items-start gap-3 text-sm", !feature.included && "opacity-40")}>
+                    {feature.included ? (
+                      <div className="mt-0.5 p-0.5 rounded-full bg-blue-500/10 text-blue-500">
+                        <Check className="w-4 h-4" />
+                      </div>
                     ) : (
-                      <svg
-                        aria-hidden="true"
-                        className="mt-0.5 h-4 w-4 text-default-400"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M18 6L6 18M6 6l12 12" />
-                      </svg>
+                      <div className="mt-0.5 p-0.5 rounded-full bg-slate-500/10 text-slate-500">
+                        <X className="w-4 h-4" />
+                      </div>
                     )}
-                    <span className={!f.included ? "line-through decoration-default-400/50" : ""}>{f.name}</span>
-                  </li>
+                    <span className={cn(feature.included ? "text-foreground/90 font-medium" : "text-muted-foreground line-through")}>
+                      {feature.name}
+                    </span>
+                  </div>
                 ))}
-              </ul>
-
-              <div>
-                <button
-                  aria-label={plan.cta + " for " + plan.name}
-                  className={[
-                    "w-full inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-sm font-semibold transition",
-                    plan.highlight
-                      ? "bg-blue-600 text-white hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60"
-                      : "border border-default-200 bg-background text-foreground hover:bg-content2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-default-300",
-                  ].join(" ")}
-                >
-                  {plan.cta}
-                </button>
               </div>
-            </article>
+
+              <button 
+                className={cn(
+                  "w-full py-4 px-6 rounded-2xl font-bold transition-all duration-300",
+                  plan.highlight
+                    ? "bg-blue-600 text-white shadow-lg hover:bg-blue-700 hover:shadow-blue-500/25"
+                    : "bg-slate-100 dark:bg-slate-800 text-foreground hover:bg-blue-500 hover:text-white"
+                )}
+              >
+                {plan.cta}
+              </button>
+
+              {plan.highlight && (
+                <div className="absolute inset-0 rounded-[2.5rem] bg-gradient-to-b from-blue-500/5 to-transparent pointer-events-none"></div>
+              )}
+            </div>
           ))}
         </div>
-
-        <p className="mt-6 text-center text-xs text-default-500">
-          Prices in USD. You can cancel or change your plan anytime.
+        
+        <p className="mt-12 text-center text-sm text-muted-foreground">
+          Prices in USD. All plans include 24/7 basic support.
         </p>
       </div>
     </section>
