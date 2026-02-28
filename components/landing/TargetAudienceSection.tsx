@@ -205,44 +205,49 @@ export function TargetAudienceSection() {
     useEffect(() => {
         if (!mounted) return
         const ctx = gsap.context(() => {
+            // Speed up the initial reveal and disable transitions during theme switch
+            gsap.defaults({ overwrite: "auto" })
+
             gsap.utils.toArray<HTMLElement>(".audience-section").forEach((section, i) => {
                 const isEven = i % 2 === 0
                 const content = section.querySelector(".section-content")
                 const visual = section.querySelector(".section-visual")
 
                 gsap.from(content, {
-                    x: isEven ? -100 : 100,
+                    x: isEven ? -50 : 50,
                     opacity: 0,
-                    duration: 1.2,
-                    ease: "power4.out",
+                    duration: 0.8,
+                    ease: "power2.out",
                     scrollTrigger: {
                         trigger: section,
-                        start: "top 70%",
+                        start: "top 90%",
+                        toggleActions: "play none none none"
                     },
                 })
 
                 gsap.from(visual, {
-                    x: isEven ? 100 : -100,
+                    x: isEven ? 50 : -50,
                     opacity: 0,
-                    scale: 0.8,
-                    duration: 1.5,
-                    ease: "elastic.out(1, 0.5)",
+                    scale: 0.9,
+                    duration: 1,
+                    ease: "power2.out",
                     scrollTrigger: {
                         trigger: section,
-                        start: "top 70%",
+                        start: "top 90%",
+                        toggleActions: "play none none none"
                     },
                 })
             })
 
             gsap.from(".section-header", {
-                y: -50,
+                y: -30,
                 opacity: 0,
-                duration: 1.2,
-                ease: "power3.out",
+                duration: 1,
+                ease: "power2.out",
                 scrollTrigger: {
                     trigger: containerRef.current,
-                    start: "top 85%",
-                },
+                    start: "top 95%",
+                }
             })
         }, containerRef)
 

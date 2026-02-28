@@ -87,32 +87,6 @@ export function PowerfulHeroTwo() {
             side: THREE.DoubleSide
         });
 
-        // --- ROTATING GLOBE (World Map) ---
-        // We'll use a wireframe sphere for a stylized "World Map" look
-        const globeGroup = new THREE.Group();
-        const globeGeo = new THREE.SphereGeometry(60, 32, 32);
-        const globeWireframeMat = new THREE.MeshPhongMaterial({
-            color: isDark ? 0x6366f1 : 0x4f46e5,
-            wireframe: true,
-            transparent: true,
-            opacity: isDark ? 0.3 : 0.15,
-        });
-        const globe = new THREE.Mesh(globeGeo, globeWireframeMat);
-        globeGroup.add(globe);
-
-        // Add a soft glow inner sphere
-        const innerGlobeGeo = new THREE.SphereGeometry(59, 32, 32);
-        const innerGlobeMat = new THREE.MeshPhongMaterial({
-            color: isDark ? 0x1e293b : 0xe2e8f0,
-            transparent: true,
-            opacity: isDark ? 0.2 : 0.1,
-        });
-        const innerGlobe = new THREE.Mesh(innerGlobeGeo, innerGlobeMat);
-        globeGroup.add(innerGlobe);
-
-        globeGroup.position.set(0, 0, -50); // Position it behind the text and images
-        scene.add(globeGroup);
-
         // Simple Paper Plane Shape
         const planeBodyGeo = new THREE.BufferGeometry();
         const vertices = new Float32Array([
@@ -182,6 +156,7 @@ export function PowerfulHeroTwo() {
         window.addEventListener("scroll", handleScroll);
 
         const resize = () => {
+            if (!canvas) return;
             const w = canvas.clientWidth, h = canvas.clientHeight;
             renderer.setSize(w, h, false);
             camera.aspect = w / h;
@@ -206,10 +181,6 @@ export function PowerfulHeroTwo() {
 
             stars.rotation.y += delta * 0.05;
             stars.rotation.x += delta * 0.02;
-
-            // Rotating Globe
-            globe.rotation.y += delta * 0.15;
-            innerGlobe.rotation.y += delta * 0.1;
 
             // Planes animation
             planes.forEach(p => {
@@ -260,10 +231,6 @@ export function PowerfulHeroTwo() {
             starMaterial.dispose();
             planeBodyGeo.dispose();
             planeMaterial.dispose();
-            globeGeo.dispose();
-            globeWireframeMat.dispose();
-            innerGlobeGeo.dispose();
-            innerGlobeMat.dispose();
         };
     }, [mounted, resolvedTheme]);
 
@@ -282,7 +249,7 @@ export function PowerfulHeroTwo() {
           background: var(--bg-hero, #050510);
           color: var(--text-hero, #ffffff);
           font-family: 'Inter', sans-serif;
-          transition: background 0.3s ease, color 0.3s ease;
+          transition: none;
         }
 
         :root {
@@ -390,7 +357,7 @@ export function PowerfulHeroTwo() {
           border-radius: 12px;
           font-weight: 600;
           text-decoration: none;
-          transition: all 0.3s ease;
+          transition: transform 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -446,7 +413,7 @@ export function PowerfulHeroTwo() {
           aspect-ratio: 1/1.1;
           clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
           background: var(--hex-bg);
-          transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+          transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.5s cubic-bezier(0.4, 0, 0.2, 1);
           overflow: hidden;
         }
 

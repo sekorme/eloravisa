@@ -156,6 +156,7 @@ export default function RootLayout({
             attribute="class"
             defaultTheme={ "system"}
             enableSystem
+            disableTransitionOnChange
         >
             <TrackVisit/>
             <AuthProvider>
