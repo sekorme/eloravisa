@@ -12,7 +12,7 @@ import { FinalCTASection } from "./FinalCTASection"
 import PricingSection from "@/components/PriceSection"
 import {AnimatedTestimonialsPlus} from "@/components/landing/AnimatedTestimonials";
 import { PowerfulHero } from "./PowerfulHero"
-import { PowerfulHeroTwo } from "./PowerfulHeroTwo"
+
 import { Footer } from "./Footer"
 
 

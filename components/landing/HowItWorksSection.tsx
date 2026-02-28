@@ -5,7 +5,7 @@ import * as THREE from "three"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { UserPlus, ListChecks, Bot, Send, ChevronRight } from "lucide-react"
-import { useTheme } from "next-themes"
+
 import { cn } from "@/lib/utils"
 
 gsap.registerPlugin(ScrollTrigger)
@@ -44,7 +44,7 @@ const steps = [
 export function HowItWorksSection() {
     const containerRef = useRef<HTMLDivElement>(null)
     const canvasRef = useRef<HTMLCanvasElement>(null)
-    const { resolvedTheme } = useTheme()
+
     const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
@@ -69,7 +69,7 @@ export function HowItWorksSection() {
         const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000)
         camera.position.z = 5
 
-        const isDark = resolvedTheme === "dark"
+
         
         // Create floating nodes and connections
         const nodeCount = 20
@@ -81,8 +81,8 @@ export function HowItWorksSection() {
 
         for (let i = 0; i < nodeCount; i++) {
             const material = new THREE.MeshPhongMaterial({
-                color: isDark ? 0x0ea5e9 : 0x6366f1,
-                emissive: isDark ? 0x0ea5e9 : 0x6366f1,
+
+
                 emissiveIntensity: 0.5,
                 transparent: true,
                 opacity: 0.8
@@ -106,7 +106,7 @@ export function HowItWorksSection() {
 
         // Add some lines between nodes
         const lineMaterial = new THREE.LineBasicMaterial({
-            color: isDark ? 0x0ea5e9 : 0x6366f1,
+
             transparent: true,
             opacity: 0.2
         })
@@ -206,7 +206,7 @@ export function HowItWorksSection() {
             lineGeometry.dispose()
             renderer.dispose()
         }
-    }, [mounted, resolvedTheme])
+    }, [mounted])
 
     // GSAP Parallax and Entrance
     useEffect(() => {
