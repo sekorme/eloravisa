@@ -21,7 +21,7 @@ import { Footer } from "./Footer"
 export function LandingPage() {
   return (
     <div className="min-h-screen bg-background">
-      <PowerfulHeroTwo />
+      <HeroSection/>
 
       <TargetAudienceSection />
       <HowItWorksSection />
