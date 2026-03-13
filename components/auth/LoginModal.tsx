@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Mail, Lock, Loader2, AlertCircle } from "lucide-react"
-import { signInWithEmailAndPassword } from "firebase/auth"
+import { signInWithEmailAndPassword, signOut } from "firebase/auth"
 import {auth, db} from "@/firebase/client"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { signInWithGoogle } from "@/lib/googleSignin"
@@ -37,7 +37,19 @@ export function LoginModal() {
         setError("")
 
         try {
-            await signInWithEmailAndPassword(auth, email, password)
+            const userCredential = await signInWithEmailAndPassword(auth, email, password)
+            const user = userCredential.user
+
+            // Check if they are an influencer
+            const influencerDoc = await getDoc(doc(db, "influencers", user.uid))
+            if (influencerDoc.exists()) {
+                await signOut(auth)
+                const message = "This account is registered as an affiliate. Please sign in through the affiliate portal."
+                setError(message)
+                toast.error(message)
+                return
+            }
+
             setIsOpen(false)
             toast.success("Signed in successfully")
             router.push("/dashboard")
@@ -56,6 +68,16 @@ export function LoginModal() {
         try {
             const user = await signInWithGoogle()
             if (user) {
+                // Check if they are an influencer
+                const influencerDoc = await getDoc(doc(db, "influencers", user.uid))
+                if (influencerDoc.exists()) {
+                    await signOut(auth)
+                    const message = "This account is registered as an affiliate. Please sign in through the affiliate portal."
+                    setError(message)
+                    toast.error(message)
+                    return
+                }
+
                 // Check if user doc exists
                 const userDoc = await getDoc(doc(db, "users", user.uid))
 

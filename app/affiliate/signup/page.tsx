@@ -15,6 +15,9 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { influencerSignup } from "@/lib/influencerAuth"
+import { auth, db } from "@/firebase/client"
+import { getDoc, doc } from "firebase/firestore"
+import { signOut } from "firebase/auth"
 import { toast } from "sonner"
 import { Loader2, Globe, Phone, Calendar, Instagram, Facebook, Video, Share2 } from "lucide-react"
 import Link from "next/link"
@@ -57,7 +60,7 @@ export default function AffiliateSignupPage() {
         setIsLoading(true)
 
         try {
-            await influencerSignup(
+            const influencerData = await influencerSignup(
                 formData.email, 
                 formData.password, 
                 formData.fullName,
@@ -71,6 +74,15 @@ export default function AffiliateSignupPage() {
                     other: formData.other
                 }
             )
+
+            // Check if they are a regular user (shouldn't be possible but good practice)
+            const userDoc = await getDoc(doc(db, "users", influencerData.uid))
+            if (userDoc.exists()) {
+                await signOut(auth)
+                toast.error("This account is already registered as a regular user. Please use a different email or sign in through the user portal.")
+                return
+            }
+
             toast.success("Affiliate account created! Welcome aboard.")
             router.push("/affiliate/dashboard")
         } catch (error: any) {

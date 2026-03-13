@@ -47,68 +47,83 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             return;
         }
 
-        // If user is logged in and on public auth page, decide destination based on onboarding flag
-        if (user && isPublicAuthPage && !isAffiliateDashboard && !isAffiliateAuthPage) {
+        // If user is logged in, check their role
+        if (user) {
             (async () => {
                 try {
-                    const userDoc = await getDoc(doc(db, "users", user.uid));
-                    if (userDoc.exists()) {
-                        const data = userDoc.data() as any;
-                        if (data.completedOnboarding) {
-                            router.push("/dashboard");
+                    // Check if they are an influencer
+                    const influencerDoc = await getDoc(doc(db, "influencers", user.uid));
+                    const isInfluencer = influencerDoc.exists();
+
+                    // If they are an influencer and trying to access normal user routes
+                    if (isInfluencer && (isProtectedRoute || isPublicAuthPage)) {
+                        router.push("/affiliate/dashboard");
+                        return;
+                    }
+
+                    // If they are NOT an influencer but trying to access affiliate routes
+                    if (!isInfluencer && (isAffiliateDashboard || isAffiliateAuthPage)) {
+                        // Decide destination based on onboarding flag
+                        const userDoc = await getDoc(doc(db, "users", user.uid));
+                        if (userDoc.exists()) {
+                            const data = userDoc.data() as any;
+                            if (data.completedOnboarding) {
+                                router.push("/dashboard");
+                            } else {
+                                router.push("/onboarding");
+                            }
+                        } else {
+                            // No user doc yet - assume onboarding required
+                            router.push("/onboarding");
+                        }
+                        return;
+                    }
+
+                    // For normal users on normal routes
+                    if (!isInfluencer && isPublicAuthPage) {
+                        const userDoc = await getDoc(doc(db, "users", user.uid));
+                        if (userDoc.exists()) {
+                            const data = userDoc.data() as any;
+                            if (data.completedOnboarding) {
+                                router.push("/dashboard");
+                            } else {
+                                router.push("/onboarding");
+                            }
                         } else {
                             router.push("/onboarding");
                         }
-                    } else {
-                        // No user doc yet - assume onboarding required
-                        router.push("/onboarding");
+                        return;
                     }
-                } catch (err) {
-                    console.error('Failed to read user doc for redirect:', err);
-                    // Fallback
-                    router.push("/dashboard");
-                }
-            })()
-            return;
-        }
 
-        // If user is navigating to /dashboard but hasn't completed onboarding, redirect to onboarding
-        if (user && pathname.startsWith("/dashboard")) {
-            (async () => {
-                try {
-                    const userDoc = await getDoc(doc(db, "users", user.uid));
-                    if (userDoc.exists()) {
-                        const data = userDoc.data() as any;
-                        if (!data.completedOnboarding) {
-                            router.push("/onboarding");
+                    // If normal user is navigating to /dashboard but hasn't completed onboarding
+                    if (!isInfluencer && pathname.startsWith("/dashboard")) {
+                        const userDoc = await getDoc(doc(db, "users", user.uid));
+                        if (userDoc.exists()) {
+                            const data = userDoc.data() as any;
+                            if (!data.completedOnboarding) {
+                                router.push("/onboarding");
+                            }
+                        }
+                    }
+
+                    // If normal user is on onboarding but already completed it
+                    if (!isInfluencer && pathname.startsWith("/onboarding")) {
+                        const userDoc = await getDoc(doc(db, "users", user.uid));
+                        if (userDoc.exists()) {
+                            const data = userDoc.data() as any;
+                            if (data.completedOnboarding) {
+                                router.push("/dashboard");
+                            }
                         }
                     }
                 } catch (err) {
-                    console.error('Failed to verify onboarding status:', err);
+                    console.error('Auth redirection error:', err);
                 }
-            })()
+            })();
             return;
         }
 
-        // If user is on onboarding but already completed it, send to dashboard
-        if (user && pathname.startsWith("/onboarding")) {
-            (async () => {
-                try {
-                    const userDoc = await getDoc(doc(db, "users", user.uid));
-                    if (userDoc.exists()) {
-                        const data = userDoc.data() as any;
-                        if (data.completedOnboarding) {
-                            router.push("/dashboard");
-                        }
-                    }
-                } catch (err) {
-                    console.error('Failed to verify onboarding status for onboarding route:', err);
-                }
-            })()
-            return;
-        }
-
-        // Handle affiliate routes (minimal logic here, can be expanded)
+        // Handle affiliate routes (unauthenticated)
         if (!user && isAffiliateDashboard) {
             router.push("/affiliate/signin");
         }

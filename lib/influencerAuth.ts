@@ -84,6 +84,13 @@ export async function influencerSignin(email: string, password: string) {
     throw new Error("This account is not registered as an influencer.");
   }
 
+  // Check if they are a normal user
+  const userDoc = await getDoc(doc(db, "users", user.uid));
+  if (userDoc.exists()) {
+    await firebaseSignOut(auth);
+    throw new Error("This account is registered as a regular user. Please sign in through the user portal.");
+  }
+
   return influencerDoc.data();
 }
 

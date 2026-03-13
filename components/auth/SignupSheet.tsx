@@ -29,8 +29,9 @@ import { Calendar as CalendarIcon, Globe, Mail, Lock, User, Phone, Loader2 } fro
 import countries from "world-countries"
 import { signup } from "@/lib/signUp"
 import { doc, setDoc, getDoc } from "firebase/firestore"
-import { db } from "@/firebase/client"
+import { db, auth } from "@/firebase/client"
 import { signInWithGoogle } from "@/lib/googleSignin"
+import { signOut } from "firebase/auth"
 import { toast } from "sonner"
 import { SUBSCRIPTION_PLANS } from "@/lib/subscriptions"
 import {registrationEmail} from "@/lib/registrationEmail";
@@ -73,6 +74,16 @@ export function SignupSheet({className, desscription}: {className?: string, dess
             const {email, fullName} = formData
 
             if (user) {
+                // Check if they are an influencer (they might have an account in Firebase but not in users doc)
+                // Although signup() creates a new user, if they already exist it might fail or return existing.
+                // If they exist in influencers, we should block them.
+                const influencerDoc = await getDoc(doc(db, "influencers", user.uid))
+                if (influencerDoc.exists()) {
+                    await signOut(auth)
+                    toast.error("This account is registered as an affiliate. Please use a different email or sign in through the affiliate portal.")
+                    return
+                }
+
                 // 2. Save initial data directly to Firestore
                 await setDoc(doc(db, "users", user.uid), {
                     fullName: formData.fullName,
@@ -104,6 +115,14 @@ export function SignupSheet({className, desscription}: {className?: string, dess
         try {
             const user = await signInWithGoogle()
             if (user) {
+                // Check if they are an influencer
+                const influencerDoc = await getDoc(doc(db, "influencers", user.uid))
+                if (influencerDoc.exists()) {
+                    await signOut(auth)
+                    toast.error("This account is registered as an affiliate. Please sign in through the affiliate portal.")
+                    return
+                }
+
                 // Check if user doc exists
                 const userDoc = await getDoc(doc(db, "users", user.uid))
 
