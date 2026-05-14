@@ -1,6 +1,7 @@
 "use client"
 
 import React, { useEffect, useRef, useState } from "react"
+import Image from "next/image"
 import { useTheme } from "next-themes"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
@@ -17,6 +18,7 @@ gsap.registerPlugin(ScrollTrigger)
 const audiences = [
     {
         icon: User,
+        image: "/firsttime.png",
         title: "First-time Applicants",
         subtitle: "A smooth start to your new chapter.",
         desc: "The visa application process can be daunting, but it doesn't have to be. We simplify the complexities, providing a clear roadmap from your initial idea to your final approval. Our step-by-step guidance ensures you never miss a detail.",
@@ -28,6 +30,7 @@ const audiences = [
     },
     {
         icon: AlertTriangle,
+        image: "/pastrefusal.png",
         title: "Past Refusals",
         subtitle: "Turning setbacks into success.",
         desc: "A previous rejection isn't the end of the road. We specialize in analyzing refusal letters to identify exactly what went wrong. By addressing the root causes and strengthening your application strategy, we help you reapply with newfound confidence.",
@@ -39,6 +42,7 @@ const audiences = [
     },
     {
         icon: GraduationCap,
+        image: "/studentworker.png",
         title: "Students & Workers",
         subtitle: "Bridging the gap to global opportunities.",
         desc: "Whether you're pursuing a degree or a career abroad, we provide specialized support for study permits and work visas. Our guidance is tailored to your unique goals, helping you navigate institutional requirements and international labor markets.",
@@ -50,6 +54,7 @@ const audiences = [
     },
     {
         icon: Shield,
+        image: "/tiredofagent.png",
         title: "Tired of Agents",
         subtitle: "Take full control of your destiny.",
         desc: "Say goodbye to middlemen and hidden fees. We empower you with the knowledge and tools to handle your own application. Avoid misinformation and stay in the driver's seat of your immigration journey with total transparency.",
@@ -127,12 +132,22 @@ export function TargetAudienceSection() {
             ref={containerRef}
             className="relative py-24 md:py-32 bg-[#f8fafc] dark:bg-[#050510] overflow-hidden"
         >
+            {/* Background Image */}
+            <div className="absolute inset-0 z-0">
+                <Image
+                    src="/whothisisfor.png"
+                    alt="Background"
+                    fill
+                    className="object-cover opacity-10"
+                    priority
+                />
+            </div>
             <div className="container px-4 mx-auto relative z-10">
                 <div className="text-center mb-32 section-header">
                     <h2 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter mb-6">
                         Who This Is{" "}
                         <span className="bg-gradient-to-r from-[#00b7fa] to-[#01cfea] bg-clip-text text-transparent italic">
-                            For.
+                            For
                         </span>
                     </h2>
                     <div className="w-24 h-1.5 bg-gradient-to-r from-[#00b7fa] to-[#01cfea] mx-auto mb-8 rounded-full" />
@@ -153,7 +168,7 @@ export function TargetAudienceSection() {
                                 )}
                             >
                                 {/* Text Content */}
-                                <div className="section-content flex-1 text-center md:text-left">
+                                <div className="section-content flex-1 w-full text-center md:text-left">
                                     <div className={cn(
                                         "inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-8",
                                         "shadow-2xl shadow-black/10 transition-transform duration-500 hover:rotate-12",
@@ -187,25 +202,24 @@ export function TargetAudienceSection() {
                                 </div>
 
                                 {/* Visual Element */}
-                                <div className="section-visual flex-1 relative flex justify-center items-center">
+                                <div className="section-visual flex-1 w-full relative flex justify-center items-center">
                                     <div className={cn(
                                         "absolute inset-0 blur-[100px] opacity-20 dark:opacity-30 rounded-full",
                                         item.color
                                     )} />
                                     
                                     <div className={cn(
-                                        "relative z-10 w-full max-w-[400px] aspect-square rounded-[3rem] border-2",
+                                        "relative z-10 w-full max-w-[400px] aspect-square rounded-[3rem] border-2 overflow-hidden",
                                         "bg-white/10 dark:bg-white/5 backdrop-blur-3xl flex items-center justify-center",
                                         item.borderColor,
                                         "shadow-[0_0_50px_-12px_rgba(0,0,0,0.1)] dark:shadow-[0_0_50px_-12px_rgba(255,255,255,0.05)]"
                                     )}>
-                                        <div className="text-center p-8">
-                                            <div className={cn(
-                                                "w-32 h-32 mx-auto mb-6 flex items-center justify-center rounded-full bg-gradient-to-br opacity-50 blur-xl absolute",
-                                                item.color
-                                            )} />
-                                            <item.icon size={120} className={cn("relative z-10 opacity-80", item.iconColor)} />
-                                        </div>
+                                        <Image 
+                                            src={item.image} 
+                                            alt={item.title} 
+                                            fill 
+                                            className="object-cover opacity-80"
+                                        />
                                         
                                         {/* Abstract Floating Shapes */}
                                         <div className="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-full blur-2xl opacity-40 animate-pulse" />

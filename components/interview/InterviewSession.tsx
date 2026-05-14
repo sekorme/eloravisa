@@ -7,7 +7,14 @@ import Visualizer from '@/components/Visualizer';
 import Transcript from '@/components/Transcript';
 import {getCurrentUserDetails} from "@/action/user";
 import {genAITWO, getGeminiKey} from "@/action/ai";
+import { generateInterviewFeedback } from "@/action/interview";
 import {PhoneCall} from "lucide-react";
+import { auth, db } from "@/firebase/client";
+import { collection, addDoc } from "firebase/firestore";
+import { toast } from "sonner";
+import { onAuthStateChanged, type User } from "firebase/auth";
+import {useRouter} from "next/navigation";
+import { deductTokens, TOKEN_COSTS } from "@/lib/subscriptions";
 
 
 
@@ -22,6 +29,8 @@ const InterviewDash =({apiKeys}: {apiKeys: string | null}) => {
     const [destination, setDestination] = useState("")
     const [visaType, setVisaType] = useState("")
     const [micStream, setMicStream] = useState<MediaStream | null>(null);
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
+    const router = useRouter();
 
     // Audio References
     const nextStartTimeRef = useRef(0);
@@ -30,20 +39,107 @@ const InterviewDash =({apiKeys}: {apiKeys: string | null}) => {
 
     const sessionRef = useRef<any>(null);
 
+    // Refs for state access in callbacks
+    const entriesRef = useRef<TranscriptEntry[]>([]);
+    const currentInputRef = useRef('');
+    const currentOutputRef = useRef('');
 
     useEffect(() => {
-        const fetchUser = async () => {
-            const data = await getCurrentUserDetails()
-            if (data) {
-                setUserData(data)
-                setDestination(data.onboarding?.destination || "")
-                setVisaType(data.onboarding?.visaType || "")
-            }
+        entriesRef.current = entries;
+    }, [entries]);
 
-        }
-        fetchUser()
+    useEffect(() => {
+        currentInputRef.current = currentInputText;
+    }, [currentInputText]);
+
+    useEffect(() => {
+        currentOutputRef.current = currentOutputText;
+    }, [currentOutputText]);
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            setCurrentUser(user);
+            if (user) {
+                const fetchUser = async () => {
+                    const data = await getCurrentUserDetails()
+                    if (data) {
+                        setUserData(data)
+                        setDestination(data.onboarding?.destination || "")
+                        setVisaType(data.onboarding?.visaType || "")
+                    }
+                }
+                fetchUser()
+            }
+        });
+        return () => unsubscribe();
     }, [])
+
+    const saveSession = async (transcript: TranscriptEntry[], pendingInput: string, pendingOutput: string) => {
+        console.log("saveSession called with:", { 
+            user: currentUser?.uid, 
+            transcriptLength: transcript.length,
+            pendingInput,
+            pendingOutput
+        });
+        
+        if (!currentUser) {
+            console.error("No user logged in during save");
+            toast.error("Please sign in to save your session.");
+            return;
+        }
+
+        const finalTranscript = [...transcript];
+        if (pendingInput) {
+            finalTranscript.push({
+                id: 'pending-user',
+                role: 'user',
+                text: pendingInput,
+                timestamp: Date.now()
+            });
+        }
+        if (pendingOutput) {
+            finalTranscript.push({
+                id: 'pending-model',
+                role: 'model',
+                text: pendingOutput,
+                timestamp: Date.now()
+            });
+        }
+        
+        if (finalTranscript.length === 0) {
+            console.warn("Empty transcript, skipping save.");
+            // toast.warning("No conversation to save.");
+            return;
+        }
+
+        const toastId = toast.loading("Saving interview session...");
+
+        try {
+            console.log("Generating feedback...");
+            const feedbackResponse = await generateInterviewFeedback(finalTranscript);
+            const feedback = feedbackResponse.success ? feedbackResponse.data : null;
+            console.log("Feedback generated:", feedback);
+
+            await addDoc(collection(db, "users", currentUser.uid, "interview_sessions"), {
+                date: new Date().toISOString(),
+                transcript: finalTranscript,
+                destination: destination,
+                visaType: visaType,
+                feedback: feedback,
+                status: "completed"
+            });
+            
+            console.log("Session saved to Firestore");
+            toast.success("Interview session and feedback saved!", { id: toastId });
+            router.push("/dashboard/ai-mock-interview");
+        } catch (error) {
+            console.error("Error saving session:", error);
+            toast.error("Failed to save interview session.", { id: toastId });
+        }
+    };
+
     const stopSession = useCallback(() => {
+        console.log("stopSession called");
         if (sessionRef.current) {
             sessionRef.current.close();
             sessionRef.current = null;
@@ -68,6 +164,23 @@ const InterviewDash =({apiKeys}: {apiKeys: string | null}) => {
         setCurrentOutputText('');
     }, [micStream]);
 
+    const handleStop = async () => {
+        console.log("handleStop called. Entries:", entriesRef.current);
+        stopSession();
+
+        if (currentUser) {
+            try {
+                await deductTokens(currentUser.uid, TOKEN_COSTS.MOCK_INTERVIEW);
+            } catch (error) {
+                console.error("Failed to deduct tokens:", error);
+                toast.error("Failed to deduct tokens. Please check your balance.");
+            }
+        }
+
+        await saveSession(entriesRef.current, currentInputRef.current, currentOutputRef.current);
+        setEntries([]);
+    };
+
     const startSession = async () => {
         if (typeof window === 'undefined' || !navigator.mediaDevices) {
             setError("Microphone access is not supported in this environment.");
@@ -76,6 +189,9 @@ const InterviewDash =({apiKeys}: {apiKeys: string | null}) => {
 
         try {
 
+            // Clear previous entries on new start
+            setEntries([]);
+            
             setStatus(SessionStatus.CONNECTING);
             setError(null);
 
@@ -140,16 +256,20 @@ const InterviewDash =({apiKeys}: {apiKeys: string | null}) => {
                     onmessage: async (message: LiveServerMessage) => {
                         // Handle Transcription
                         if (message.serverContent?.inputTranscription) {
-                            setCurrentInputText(prev => prev + message.serverContent!.inputTranscription!.text);
+                            const text = message.serverContent!.inputTranscription!.text;
+                            setCurrentInputText(prev => prev + text);
+                            currentInputRef.current = (currentInputRef.current || '') + text;
                         }
 
                         if (message.serverContent?.outputTranscription) {
-                            setCurrentOutputText(prev => prev + message.serverContent!.outputTranscription!.text);
+                            const text = message.serverContent!.outputTranscription!.text;
+                            setCurrentOutputText(prev => prev + text);
+                            currentOutputRef.current = (currentOutputRef.current || '') + text;
                         }
 
                         if (message.serverContent?.turnComplete) {
-                            const userText = currentInputText;
-                            const modelText = currentOutputText;
+                            const userText = currentInputRef.current || '';
+                            const modelText = currentOutputRef.current || '';
 
                             if (userText || modelText) {
                                 setEntries(prev => [
@@ -161,6 +281,8 @@ const InterviewDash =({apiKeys}: {apiKeys: string | null}) => {
 
                             setCurrentInputText('');
                             setCurrentOutputText('');
+                            currentInputRef.current = '';
+                            currentOutputRef.current = '';
                         }
 
                         //@ts-ignore
@@ -218,7 +340,7 @@ const InterviewDash =({apiKeys}: {apiKeys: string | null}) => {
 
     const toggleSession = () => {
         if (status === SessionStatus.ACTIVE) {
-            stopSession();
+            handleStop();
         } else {
             startSession();
         }
