@@ -10,7 +10,7 @@ import { ComparisonSection } from "./ComparisonSection"
 import { TrustSection } from "./TrustSection"
 import { FinalCTASection } from "./FinalCTASection"
 import PricingSection from "@/components/PriceSection"
-import {AnimatedTestimonialsPlus} from "@/components/landing/AnimatedTestimonials";
+import {Testimonial} from "@/components/landing/Testimonial";
 
 import { GlobalThreeBackground } from "./GlobalThreeBackground"
 
@@ -31,7 +31,7 @@ export function LandingPage() {
       <FeaturesSection />
       <YouTube />
       <ComparisonSection />
-      <AnimatedTestimonialsPlus />
+      <Testimonial />
       <TrustSection />
       <PricingSection />
       <FinalCTASection />
