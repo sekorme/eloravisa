@@ -181,7 +181,7 @@ const router = useRouter()
 
         <Button 
           className="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white font-black text-xl shadow-xl shadow-blue-500/30 transition-all active:scale-95 border-none rounded-2xl gap-3 group/btn" 
-          onClick={() => router.push("/dashboard/interview-page")}
+          onClick={() => router.push("/dashboard/consular")}
           disabled={generating}
         >
           {generating ? (

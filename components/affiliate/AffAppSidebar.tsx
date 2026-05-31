@@ -112,7 +112,7 @@ const AppSidebar = () => {
                          <SidebarMenu>
                             {menuItems.map((item) => (
                                 <SidebarMenuItem key={item.title} className={""}>
-                                    <SidebarMenuButton asChild tooltip={item.title}>
+                                    <SidebarMenuButton asChild tooltip={item.title} isActive={pathname === item.url}>
                                         <Link href={item.url}>
                                             <item.icon />
                                             <span>{item.title}</span>
@@ -131,7 +131,7 @@ const AppSidebar = () => {
                       <SidebarGroupContent>
                           <SidebarMenu>
                               <SidebarMenuItem className={"text-[#00b7fa]"}>
-                                  <SidebarMenuButton asChild tooltip="Settings">
+                                  <SidebarMenuButton asChild tooltip="Settings" isActive={pathname === "/dashboard/settings"}>
                                       <Link href="/dashboard/settings">
                                           <Settings />
                                           <span>Settings</span>
@@ -146,7 +146,7 @@ const AppSidebar = () => {
              <SidebarFooter>
                  <SidebarMenu>
                      <SidebarMenuItem className={"text-[#00b7fa]"}>
-                         <SidebarMenuButton asChild tooltip="Profile">
+                         <SidebarMenuButton asChild tooltip="Profile" isActive={pathname === linked}>
                              <Link href={linked}>
                                  <User2 />
                                  <span>Profile</span>

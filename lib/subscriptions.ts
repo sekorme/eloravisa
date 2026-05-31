@@ -42,6 +42,7 @@ export const TOKEN_COSTS = {
   MOCK_INTERVIEW: 10,
   DOCUMENT_DRAFT: 5,
   INFORMATION_GENERATION: 5,
+  CONSULAR_SESSION: 10,
 } as const;
 
 export type PlanId = keyof typeof SUBSCRIPTION_PLANS;
