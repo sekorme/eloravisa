@@ -22,19 +22,19 @@ import { Footer } from "./Footer"
 export function LandingPage() {
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      <GlobalThreeBackground />
+
       <HeroSection/>
-      <div className="relative z-10">
-        <TargetAudienceSection />
-        <HowItWorksSection />
-        <FeaturesSection />
-        <YouTube />
-        <ComparisonSection />
-        <Testimonial />
-        <TrustSection />
-        <PricingSection />
-        <FinalCTASection />
-      </div>
+
+      <TargetAudienceSection />
+      <HowItWorksSection />
+
+      <FeaturesSection />
+      <YouTube />
+      <ComparisonSection />
+      <Testimonial />
+      <TrustSection />
+      <PricingSection />
+      <FinalCTASection />
       <Footer />
     </div>
   )

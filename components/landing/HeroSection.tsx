@@ -1,73 +1,99 @@
 "use client"
 
-import React, { useEffect, useRef, useState, useSyncExternalStore } from "react"
+import React, { useEffect, useRef, useState } from "react"
 import { gsap } from "gsap"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, ShieldCheck, Send } from "lucide-react"
 import Link from "next/link"
 import { SignupSheet } from "@/components/auth/SignupSheet";
-import { HeroBackground } from "./HeroBackground";
+import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
 import { cn } from "@/lib/utils";
 
 const IMAGES = ["/IMG_9093.jpg", "/30.JPG", "/elora5.jpeg", "/akyere.jpg"];
 
-const emptySubscribe = () => () => {};
-
 export function HeroSection() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const mounted = useSyncExternalStore(
-    emptySubscribe,
-    () => true,
-    () => false
-  )
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    if (!mounted) return
+    setMounted(true)
     
     // GSAP Animations
     const ctx = gsap.context(() => {
-      const tl = gsap.timeline({ defaults: { ease: "power3.out" } })
-      
-      tl.from(".hero-badge", { y: -20, opacity: 0, duration: 0.8 })
-        .from(".hero-title", { y: 30, opacity: 0, duration: 1, ease: "power4.out" }, "-=0.4")
-        .from(".hero-desc", { y: 20, opacity: 0, duration: 0.8 }, "-=0.7")
-        .from(".hero-cta", { y: 20, opacity: 0, duration: 0.8, stagger: 0.1 }, "-=0.6")
-        .from(".hero-trust", { opacity: 0, duration: 1 }, "-=0.4")
-      
-      // Animate images with a floating effect
-      gsap.from(".hero-image-item", {
-        opacity: 0,
-        scale: 0.9,
-        y: 40,
-        duration: 1.2,
-        stagger: 0.15,
-        ease: "power2.out"
-      }, "-=1.2")
-
-      // Continuous floating animation
-      gsap.to(".hero-image-item", {
-        y: "random(-15, 15)",
-        x: "random(-10, 10)",
-        rotation: "random(-2, 2)",
-        duration: "random(3, 5)",
+      // Animate blobs
+      gsap.to(".blob", {
+        x: () => `+=${gsap.utils.random(-150, 150)}`,
+        y: () => `+=${gsap.utils.random(-150, 150)}`,
+        scale: () => gsap.utils.random(0.9, 1.3),
+        duration: 12,
         repeat: -1,
         yoyo: true,
         ease: "sine.inOut",
-        delay: 1 // Add a delay to wait for the entry animation to finish
-      })
+        delay: () => gsap.utils.random(0, 1),
+      });
+
+      // Split text for hero-title
+      const heroTitle = containerRef.current?.querySelector(".hero-title");
+      if (heroTitle) {
+        const spans = heroTitle.querySelectorAll("span");
+        spans.forEach(span => {
+          const text = span.textContent || "";
+          const isGradient = span.classList.contains("bg-clip-text");
+          const gradientClasses = isGradient ? span.className : "";
+          
+          span.innerHTML = text
+            .split("")
+            .map((char) => `<span class="char inline-block whitespace-pre ${isGradient ? gradientClasses : ""}">${char}</span>`)
+            .join("");
+          
+          if (isGradient) {
+            span.classList.remove("bg-clip-text", "text-transparent", "bg-gradient-to-r");
+          }
+        });
+      }
+
+      // Animate content
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } })
+      tl.from(".hero-badge", { y: -20, opacity: 0, duration: 0.6 })
+        .from(".char", {
+          opacity: 0,
+          x: () => gsap.utils.random(-100, 100),
+          y: () => gsap.utils.random(-100, 100),
+          rotation: () => gsap.utils.random(-30, 30),
+          duration: 1.2,
+          stagger: { each: 0.01, from: "random" },
+          ease: "power4.out"
+        }, "-=0.3")
+        .from(".hero-desc", { y: 20, opacity: 0, duration: 0.6 }, "-=0.8")
+        .from(".hero-cta", { y: 20, opacity: 0, duration: 0.6, stagger: 0.1 }, "-=0.4")
+        .from(".hero-trust", { opacity: 0, duration: 0.8 }, "-=0.2")
+        .from(".hero-images", { opacity: 0, x: 50, duration: 1, ease: "power2.out" }, "-=1")
 
     }, containerRef)
 
     return () => {
       ctx.revert();
     }
-  }, [mounted])
+  }, [])
 
   return (
-    <section ref={containerRef} className="relative pt-16 pb-14 md:pt-16 md:pb-24 bg-transparent overflow-hidden min-h-[90vh] flex items-center isolation-auto">
+    <section ref={containerRef} className="relative pt-16 pb-16 md:pt-16 md:pb-24 bg-background overflow-hidden min-h-[90vh] flex items-center">
       
-      <div className="absolute inset-0 z-0">
-        <HeroBackground />
+      {/* Animated Blob Background */}
+      <div className="absolute inset-0 -z-0 opacity-30">
+        <AnimatedGridPattern
+          numSquares={30}
+          maxOpacity={0.1}
+          duration={3}
+          repeatDelay={1}
+          className={cn(
+            "[mask-image:radial-gradient(500px_circle_at_center,white,transparent)]",
+            "inset-x-0 inset-y-[-30%] h-[200%] skew-y-12"
+          )}
+        />
+        <div className="blob absolute top-0 left-0 w-96 h-96 bg-blue-400/70 rounded-full filter blur-3xl"></div>
+        <div className="blob absolute top-0 right-0 w-80 h-80 bg-purple-400/70 rounded-full filter blur-3xl"></div>
+        <div className="blob absolute bottom-0 left-1/4 w-72 h-72 bg-green-400/70 rounded-full filter blur-3xl"></div>
       </div>
 
       <div className="container px-4 md:px-6 mx-auto relative z-10">
@@ -75,85 +101,76 @@ export function HeroSection() {
           
           {/* Left Column: Content */}
           <div className="text-left max-w-2xl mx-auto lg:mx-0">
-            <div className="mb-8 hero-badge">
-              <div className="inline-flex items-center rounded-full border px-4 py-1.5 text-sm font-medium bg-white/50 dark:bg-slate-900/50 backdrop-blur-md text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-900/50 shadow-[0_0_20px_rgba(59,130,246,0.1)]">
-                <ShieldCheck className="w-4 h-4 mr-2" />
-                Trusted by 12,000+ Applicants Worldwide
+            <div className="flex justify-center mb-6 hero-badge">
+              <div className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800 shadow-sm">
+                <ShieldCheck className="w-3.5 h-3.5 mr-1.5" />
+                No Agents. No Hidden Fees.
               </div>
             </div>
 
-            <h1 className="hero-title text-5xl md:text-6xl lg:text-7xl font-black tracking-tight mb-8 leading-[1.05]">
-              <span className="block bg-gradient-to-br from-slate-950 via-slate-800 to-slate-700 dark:from-white dark:via-slate-200 dark:to-slate-400 text-transparent bg-clip-text">
-                Your Global Journey
+            <h1 className="hero-title text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6 leading-[1.1]">
+              <span className="inline-block bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 text-transparent bg-clip-text">
+                Apply for Your Visa Yourself
               </span>
-              <span className="block text-blue-600 dark:text-blue-500">
-                Starts Right Here.
-              </span>
+              {" "}
+              <span className="inline-block text-blue-600 dark:text-blue-400">With Expert Guidance</span>
             </h1>
 
-            <p className="hero-desc text-lg md:text-xl text-muted-foreground/90 mb-10 max-w-xl leading-relaxed">
-              Skip the expensive agents and take control of your visa application with our AI-powered platform and expert-led guidance system.
+            <p className="hero-desc text-lg md:text-xl text-muted-foreground mb-8 max-w-xl">
+              Ditch the middleman. Learn how to apply for visas the right way using step‑by‑step guidance, AI document checks, and realistic mock interviews.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-start gap-5 mb-12 hero-cta relative z-20">
-              <SignupSheet desscription={"Start Your Application Today"} className="h-14 px-10 text-lg bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-[0_10px_30px_rgba(37,99,235,0.3)] hover:shadow-[0_15px_40px_rgba(37,99,235,0.4)] transition-all duration-300 w-full sm:w-auto font-bold"/>
-              <Button variant="outline" size="lg" className="h-14 px-8 text-lg rounded-2xl border-2 border-slate-200 dark:border-slate-800 w-full sm:w-auto hover:bg-slate-50 dark:hover:bg-slate-900 transition-all duration-300 group" asChild>
+            <div className="flex flex-col sm:flex-row items-center justify-start gap-4 mb-10 hero-cta relative z-20">
+              <SignupSheet desscription={"Sign Up Now, It's Self Guided"} className="h-14 px-8 text-lg bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-xl hover:shadow-blue-500/20 transition-all w-full sm:w-auto"/>
+              <Button variant="outline" size="lg" className="h-14 px-8 text-lg rounded-full border-2 w-full sm:w-auto hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors" asChild>
                 <Link href="https://t.me/+wWazCHK2wEMzMzdk" target={"_blank"}>
-                  <Send className="w-5 h-5 mr-2 text-blue-500 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                  Join Our Community
+                  <div className={"rounded-full bg-blue-500 p-1.5 mr-2"}><Send className={"text-white w-4 h-4"}/></div>
+                  Join Telegram
                 </Link>
               </Button>
             </div>
 
-            <div className="hero-trust flex items-center gap-6 p-4 rounded-2xl bg-white/30 dark:bg-slate-900/30 backdrop-blur-sm border border-white/20 dark:border-white/5 w-fit">
+            <div className="hero-trust flex items-center gap-4">
                <div className="flex -space-x-3">
                  {[1,2,3,4].map(i => (
-                   <div key={i} className="w-11 h-11 rounded-full border-2 border-white dark:border-slate-800 bg-slate-200 dark:bg-slate-800 shadow-sm overflow-hidden">
-                     <img src={`https://i.pravatar.cc/100?img=${i+20}`} alt="user" className="w-full h-full object-cover" />
+                   <div key={i} className="w-10 h-10 rounded-full border-2 border-background bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-[10px] font-bold overflow-hidden">
+                     <img src={`https://i.pravatar.cc/100?img=${i+10}`} alt="user" className="w-full h-full object-cover" />
                    </div>
                  ))}
                </div>
-               <div className="flex flex-col">
-                 <p className="text-sm text-foreground font-bold">100% Success Rate</p>
-                 <p className="text-xs text-muted-foreground font-medium">From our last 500 graduates</p>
-               </div>
+               <p className="text-sm text-muted-foreground font-medium">
+                Joined by <span className="text-foreground font-bold">12,000+</span> successful applicants
+              </p>
             </div>
           </div>
 
-          {/* Right Column: Dynamic Image Grid */}
+          {/* Right Column: Images */}
           <div className="hero-images relative lg:block">
-            {mounted && (
-              <div className="relative grid grid-cols-2 gap-6 px-4">
-                {IMAGES.map((src, i) => (
-                  <div 
-                    key={i} 
-                    className={cn(
-                      "hero-image-item relative aspect-[4/5] rounded-[2.5rem] overflow-hidden shadow-2xl group border-4 border-white/50 dark:border-slate-800/50",
-                      i === 0 && "md:translate-y-12",
-                      i === 1 && "md:-translate-y-4",
-                      i === 2 && "md:translate-y-8",
-                      i === 3 && "md:-translate-y-12"
-                    )}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-40 group-hover:opacity-60 transition-opacity z-10" />
-                    <img 
-                      src={src} 
-                      alt={`Applicant ${i}`} 
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                    <div className="absolute bottom-6 left-6 right-6 z-20">
-                      <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center mb-2 shadow-lg">
-                        <ShieldCheck className="w-4 h-4 text-white" />
-                      </div>
-                      <p className="text-white text-xs font-bold uppercase tracking-widest opacity-80">Visa Approved</p>
-                    </div>
+            <div className="grid grid-cols-2 gap-4 relative px-4 sm:px-0">
+              {IMAGES.map((src, i) => (
+                <div 
+                  key={i} 
+                  className={cn(
+                    "relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl transition-transform duration-500 hover:scale-[1.02] group",
+                    i % 2 === 0 ? "md:top-8" : "md:-top-8"
+                  )}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10" />
+                  <img 
+                    src={src} 
+                    alt={`Applicant ${i}`} 
+                    className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-700"
+                  />
+                  <div className="absolute bottom-4 left-4 right-4 z-20 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all">
+                    <p className="text-white text-xs font-medium uppercase tracking-wider">Success Story #{i + 1}</p>
                   </div>
-                ))}
-                
-                {/* Decorative elements */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-blue-500/10 rounded-full blur-[120px] -z-10" />
-              </div>
-            )}
+                </div>
+              ))}
+              
+              {/* Decorative elements */}
+              <div className="absolute -top-12 -right-12 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl animate-pulse -z-10" />
+              <div className="absolute -bottom-12 -left-12 w-40 h-40 bg-purple-500/10 rounded-full blur-2xl animate-pulse -z-10" />
+            </div>
           </div>
 
         </div>
