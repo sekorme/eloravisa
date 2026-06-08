@@ -24,17 +24,17 @@ export function LandingPage() {
     <div className="min-h-screen bg-background relative overflow-hidden">
       <GlobalThreeBackground />
       <HeroSection/>
-
-      <TargetAudienceSection />
-      <HowItWorksSection />
-
-      <FeaturesSection />
-      <YouTube />
-      <ComparisonSection />
-      <Testimonial />
-      <TrustSection />
-      <PricingSection />
-      <FinalCTASection />
+      <div className="relative z-10">
+        <TargetAudienceSection />
+        <HowItWorksSection />
+        <FeaturesSection />
+        <YouTube />
+        <ComparisonSection />
+        <Testimonial />
+        <TrustSection />
+        <PricingSection />
+        <FinalCTASection />
+      </div>
       <Footer />
     </div>
   )

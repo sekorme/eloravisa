@@ -109,7 +109,7 @@ export default function App() {
                         <Globe className="w-5 h-5 text-white animate-[spin_10s_linear_infinite]" />
                     </div>
                     <div>
-                        <h1 className="text-lg md:text-2xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-white/60">CONSULAR.AI</h1>
+                        <h1 className="text-lg md:text-2xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-white/60">CONSULAR AI</h1>
                         <p className="text-[10px] text-cyan-400 font-bold uppercase tracking-[0.2em] opacity-80">Next-Gen Visa Preparation</p>
                     </div>
                 </div>
