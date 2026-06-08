@@ -135,14 +135,16 @@ export function useLiveAPI() {
             let userMessageId = Math.random().toString(36).substring(7);
             let currentAiText = "";
             let currentUserText = "";
-
+            const agentmodels = ["Zephyr", "Charan", "Callirrhoe","Leda","Sadaltager"];
+            const randomIndexModel = Math.floor(Math.random() * agentmodels.length);
+            const selectedAgent = agentmodels[randomIndexModel];
             // 3. Connect to Gemini Live
             const session = await genAI.live.connect({
                 model: "gemini-3.1-flash-live-preview",
                 config: {
                     responseModalities: [Modality.AUDIO],
                     speechConfig: {
-                        voiceConfig: { prebuiltVoiceConfig: { voiceName: "Aoede" } },
+                        voiceConfig: { prebuiltVoiceConfig: { voiceName: selectedAgent } },
                     },
                     systemInstruction: {
                         parts: [{

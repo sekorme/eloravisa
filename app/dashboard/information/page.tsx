@@ -174,7 +174,7 @@ export default function InformationPage() {
   const advice = infoData.mentorAdvice || "A strong visa application is about a believable story, supported by evidence, with clear intent to return.";
 
   return (
-    <div ref={containerRef} className="p-2 max-w-7xl mx-auto">
+    <div ref={containerRef} className="p-4 w-full">
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight mb-2">Visa Application Checklist & Best Practices</h1>
         <p className="text-muted-foreground max-w-3xl">

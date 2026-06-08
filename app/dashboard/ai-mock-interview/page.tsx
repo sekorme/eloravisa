@@ -98,7 +98,7 @@ export default function MockVisaInterviewPage() {
 
     return (
         <main className="min-h-screen p-2 md:p-6 w-full">
-            <div ref={containerRef} className="max-w-5xl mx-auto space-y-8 main-content">
+            <div ref={containerRef} className="w-full space-y-8 main-content">
 
                 {step === "setup" && (
                     <div className="space-y-8">

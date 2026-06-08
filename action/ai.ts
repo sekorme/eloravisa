@@ -111,6 +111,7 @@ export async function getVisaInformation(userData: any) {
   try {
     // Use the specific model version that is known to work for text generation
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const date = new Date();
 
     const prompt = `
       Generate a personalized visa application checklist and best practices guide for a user with the following profile:
@@ -118,6 +119,7 @@ export async function getVisaInformation(userData: any) {
       - **Residence:** ${userData.onboarding?.residence || "Unknown"}
       - **Destination:** ${userData.onboarding?.destination || "Unknown"}
       - **Visa Type:** ${userData.onboarding?.visaType || "Unknown"}
+      - **Date:** ${date.toISOString()}
 
       Please provide 12 specific, actionable sections that cover the most critical requirements and tips for this specific visa route (e.g., specific financial requirements for ${userData.onboarding?.destination}, common refusal reasons for ${userData.country} citizens, etc.).
 

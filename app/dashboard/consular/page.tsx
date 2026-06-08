@@ -100,16 +100,16 @@ export default function App() {
     }, [transcripts]);
 
     return (
-        <div className="min-h-screen bg-[#050505] text-white flex flex-col font-sans py-4">
+        <div className="min-h-screen bg-white dark:bg-[#050505] text-slate-900 dark:text-white flex flex-col font-sans py-4">
             <SystemErrorModal error={error} onClose={() => setError(null)} />
 
             <header className="px-4 md:px-8 h-auto mb-4 flex flex-col sm:flex-row items-center justify-between shrink-0 gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 via-blue-600 to-indigo-700 rounded-xl flex items-center justify-center font-bold text-xl shadow-[0_0_20px_rgba(6,182,212,0.5)] border border-white/20">
+                    <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 via-blue-600 to-indigo-700 rounded-xl flex items-center justify-center font-bold text-xl shadow-[0_0_20px_rgba(6,182,212,0.5)] border border-white/20 dark:border-white/20">
                         <Globe className="w-5 h-5 text-white animate-[spin_10s_linear_infinite]" />
                     </div>
                     <div>
-                        <h1 className="text-lg md:text-2xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-white/60">CONSULAR AI</h1>
+                        <h1 className="text-lg md:text-2xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 dark:from-white dark:via-white dark:to-white/60">CONSULAR AI</h1>
                         <p className="text-[10px] text-cyan-400 font-bold uppercase tracking-[0.2em] opacity-80">Next-Gen Visa Preparation</p>
                     </div>
                 </div>
@@ -124,20 +124,20 @@ export default function App() {
 
                 <div className="flex items-center gap-2 sm:gap-4 shrink-0 self-end sm:self-center">
                     {status === 'connected' ? (
-                        <span className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-mono text-white uppercase shadow-[0_0_10px_rgba(239,68,68,0.2)]">
+                        <span className="flex items-center gap-2 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-mono text-slate-700 dark:text-white uppercase shadow-[0_0_10px_rgba(239,68,68,0.2)]">
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                 <span className="hidden xs:inline">Live Session Active</span>
                 <span className="xs:hidden">Live</span>
               </span>
                     ) : status === 'connecting' ? (
-                        <span className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-mono text-white uppercase shadow-[0_0_10px_rgba(34,211,238,0.2)]">
+                        <span className="flex items-center gap-2 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-mono text-slate-700 dark:text-white uppercase shadow-[0_0_10px_rgba(34,211,238,0.2)]">
                 <Loader2 className="w-4 h-4 animate-spin text-cyan-400" />
                 <span className="hidden xs:inline">Connecting...</span>
                 <span className="xs:hidden">Wait...</span>
               </span>
                     ) : (
-                        <span className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-mono text-white/50 uppercase">
-                <span className="w-2 h-2 rounded-full bg-white/30" />
+                        <span className="flex items-center gap-2 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-mono text-slate-400 dark:text-white/50 uppercase">
+                <span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-white/30" />
                 <span className="hidden xs:inline">Ready to Practice</span>
                 <span className="xs:hidden">Ready</span>
               </span>
@@ -157,11 +157,11 @@ export default function App() {
                             playsInline
                         />
                         {status !== 'disconnected' && isCameraVisible && (
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none"></div>
+                            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 dark:from-black/80 via-transparent to-transparent pointer-events-none"></div>
                         )}
 
                         {status === 'disconnected' && (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center text-white/40 pointer-events-none">
+                            <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 dark:text-white/40 pointer-events-none">
                                 <CameraOff className="w-12 h-12 mb-4 opacity-50" />
                                 <p className="font-mono text-sm uppercase tracking-widest">Camera is off</p>
                                 <p className="text-xs opacity-60 mt-2">Click Start Interview to begin</p>
@@ -169,10 +169,10 @@ export default function App() {
                         )}
 
                         {status !== 'disconnected' && !isCameraVisible && (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center text-white/40 pointer-events-none">
+                            <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 dark:text-white/40 pointer-events-none">
                                 <EyeOff className="w-12 h-12 mb-4 opacity-50" />
                                 <p className="font-mono text-sm uppercase tracking-widest text-center">Camera feed hidden</p>
-                                <p className="text-[10px] font-mono text-cyan-400 opacity-80 mt-2 uppercase text-center max-w-[200px]">Emotion analysis active in background</p>
+                                <p className="text-[10px] font-mono text-cyan-600 dark:text-cyan-400 opacity-80 mt-2 uppercase text-center max-w-[200px]">Emotion analysis active in background</p>
                             </div>
                         )}
 
@@ -180,17 +180,17 @@ export default function App() {
                         {status === 'connected' && (
                             <div className="absolute top-6 left-6 right-6 flex justify-between items-start pointer-events-none">
                                 <div className="flex flex-col gap-2">
-                                    <div className="px-2 py-1 bg-cyan-500/20 text-cyan-400 text-[9px] sm:text-[10px] font-mono border border-cyan-400/30 rounded uppercase whitespace-nowrap">Emotion Tracking: Active</div>
-                                    <div className="px-2 py-1 bg-white/5 border border-white/10 text-white/50 text-[9px] sm:text-[10px] font-mono rounded uppercase flex items-center gap-2">
+                                    <div className="px-2 py-1 bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 text-[9px] sm:text-[10px] font-mono border border-cyan-400/30 rounded uppercase whitespace-nowrap">Emotion Tracking: Active</div>
+                                    <div className="px-2 py-1 bg-slate-900/10 dark:bg-white/5 border border-slate-900/10 dark:border-white/10 text-slate-600 dark:text-white/50 text-[9px] sm:text-[10px] font-mono rounded uppercase flex items-center gap-2">
                                         <Mic className="w-3 h-3 text-red-500 animate-pulse" /> Recording
                                     </div>
                                 </div>
                                 <button
                                     onClick={() => setIsCameraVisible(!isCameraVisible)}
-                                    className="pointer-events-auto w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 border border-white/10 transition-colors"
+                                    className="pointer-events-auto w-10 h-10 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-white/20 border border-slate-200 dark:border-white/10 transition-colors"
                                     title={isCameraVisible ? "Hide Self View" : "Show Self View"}
                                 >
-                                    {isCameraVisible ? <Eye className="w-5 h-5 text-white/70" /> : <EyeOff className="w-5 h-5 text-white/70" />}
+                                    {isCameraVisible ? <Eye className="w-5 h-5 text-slate-600 dark:text-white/70" /> : <EyeOff className="w-5 h-5 text-slate-600 dark:text-white/70" />}
                                 </button>
                             </div>
                         )}
@@ -202,7 +202,7 @@ export default function App() {
                         {status === 'disconnected' ? (
                             <button
                                 onClick={handleStart}
-                                className="group relative flex items-center gap-3 px-6 sm:px-10 py-4 sm:py-5 bg-white text-black hover:bg-cyan-50 rounded-2xl font-black tracking-tighter text-xs sm:text-sm transition-all active:scale-95 shadow-[0_20px_40px_rgba(0,0,0,0.3)]"
+                                className="group relative flex items-center gap-3 px-6 sm:px-10 py-4 sm:py-5 bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:hover:bg-cyan-50 rounded-2xl font-black tracking-tighter text-xs sm:text-sm transition-all active:scale-95 shadow-[0_20px_40px_rgba(0,0,0,0.3)]"
                             >
                                 <PhoneCall className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-600" />
                                 START INTERVIEW
@@ -225,54 +225,46 @@ export default function App() {
 
                     <div className="glass-panel rounded-3xl p-6 shrink-0 hidden lg:block">
                         <div className="flex items-center justify-between mb-6">
-                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/60">Destination</h3>
-                            {/* <button
-                                onClick={handleRandomize}
-                                disabled={status !== 'disconnected'}
-                                className={`flex items-center gap-1.5 px-2 py-1 rounded border text-[10px] font-bold uppercase tracking-widest transition-all ${status === 'disconnected' ? 'bg-white/5 border-white/10 text-cyan-400 hover:bg-white/10' : 'opacity-30 grayscale cursor-not-allowed'}`}
-                            >
-                                <Shuffle className="w-3 h-3" />
-                                Randomize
-                            </button> */}
+                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-white/60">Destination</h3>
                         </div>
 
                         {selectedCountry && (
-                            <div className="flex flex-col gap-3 p-4 bg-white/5 rounded-2xl border border-white/10 mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                            <div className="flex flex-col gap-3 p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10 mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
                                 <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 rounded-full bg-cyan-500/20 flex items-center justify-center">
-                                        <Globe className="w-4 h-4 text-cyan-400" />
+                                        <Globe className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
                                     </div>
                                     <div>
-                                        <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold">Target Country</p>
-                                        <p className="text-sm font-bold text-white">{selectedCountry.name}</p>
+                                        <p className="text-[10px] uppercase tracking-widest text-slate-400 dark:text-white/40 font-bold">Target Country</p>
+                                        <p className="text-sm font-bold text-slate-900 dark:text-white">{selectedCountry.name}</p>
                                     </div>
                                 </div>
-                                <div className="h-px bg-white/5 w-full"></div>
+                                <div className="h-px bg-slate-200 dark:bg-white/5 w-full"></div>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-[10px] uppercase tracking-widest text-white/40 font-bold">Consulate</span>
-                                    <span className="text-[10px] font-mono text-cyan-400 font-bold">{selectedCountry.consulateName}</span>
+                                    <span className="text-[10px] uppercase tracking-widest text-slate-400 dark:text-white/40 font-bold">Consulate</span>
+                                    <span className="text-[10px] font-mono text-cyan-600 dark:text-cyan-400 font-bold">{selectedCountry.consulateName}</span>
                                 </div>
                                 <div className="flex items-center justify-between">
-                                    <span className="text-[10px] uppercase tracking-widest text-white/40">Interview Policy</span>
-                                    <span className={`text-[10px] font-bold uppercase tracking-widest ${selectedCountry.requiresInterview ? 'text-yellow-500' : 'text-green-500'}`}>
+                                    <span className="text-[10px] uppercase tracking-widest text-slate-400 dark:text-white/40">Interview Policy</span>
+                                    <span className={`text-[10px] font-bold uppercase tracking-widest ${selectedCountry.requiresInterview ? 'text-amber-600 dark:text-yellow-500' : 'text-emerald-600 dark:text-green-500'}`}>
                                         {selectedCountry.requiresInterview ? 'In-Person Required' : 'No Interview Needed'}
                                     </span>
                                 </div>
                             </div>
                         )}
 
-                        <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/60 mb-6">Instructions</h3>
-                        <ul className="text-xs text-white/70 space-y-4">
-                            <li className="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/5">
-                                <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#00f5ff] shrink-0"></div>
+                        <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-white/60 mb-6">Instructions</h3>
+                        <ul className="text-xs text-slate-600 dark:text-white/70 space-y-4">
+                            <li className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-white/5 rounded-lg border border-slate-200 dark:border-white/5">
+                                <div className="w-2 h-2 rounded-full bg-cyan-500 dark:bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.4)] shrink-0"></div>
                                 <span>Answer questions naturally, just like a real visa interview.</span>
                             </li>
-                            <li className="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/5">
-                                <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#00f5ff] shrink-0"></div>
+                            <li className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-white/5 rounded-lg border border-slate-200 dark:border-white/5">
+                                <div className="w-2 h-2 rounded-full bg-cyan-500 dark:bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.4)] shrink-0"></div>
                                 <span>The AI evaluates both your verbal answers and facial expressions.</span>
                             </li>
-                            <li className="flex items-center gap-3 p-3 bg-white/5 rounded-lg border border-white/5">
-                                <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#00f5ff] shrink-0"></div>
+                            <li className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-white/5 rounded-lg border border-slate-200 dark:border-white/5">
+                                <div className="w-2 h-2 rounded-full bg-cyan-500 dark:bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.4)] shrink-0"></div>
                                 <span>Ensure your face is well-lit and clearly visible in the camera.</span>
                             </li>
                         </ul>
@@ -280,16 +272,16 @@ export default function App() {
 
                     <div className="glass-panel rounded-3xl p-6 flex-1 flex flex-col justify-center min-h-[120px] lg:min-h-[150px] shrink-0 hidden lg:flex">
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/60">Live Intelligence</h3>
-                            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-white/60">Live Intelligence</h3>
+                            <Sparkles className="w-3.5 h-3.5 text-cyan-500 dark:text-cyan-400" />
                         </div>
                         <div className="flex-1 flex items-center justify-center p-4">
                             {status === 'disconnected' ? (
                                 <div className="text-center space-y-1">
-                                    <p className="text-sm text-white/40 italic">
+                                    <p className="text-sm text-slate-400 dark:text-white/40 italic">
                                         Agent is ready to analyze your performance.
                                     </p>
-                                    <p className="text-[10px] text-white/20 uppercase tracking-tighter">facial cues • tone • content quality</p>
+                                    <p className="text-[10px] text-slate-300 dark:text-white/20 uppercase tracking-tighter">facial cues • tone • content quality</p>
                                 </div>
                             ) : (
                                 <div className="flex flex-col items-center gap-5 text-center w-full">
@@ -306,8 +298,8 @@ export default function App() {
                                         ))}
                                     </div>
                                     <div>
-                                        <p className="text-sm text-cyan-300 font-bold uppercase tracking-wider mb-1">Analyzing Responses</p>
-                                        <p className="text-[10px] uppercase tracking-widest text-white/40 font-mono">Multimodal Processing Active</p>
+                                        <p className="text-sm text-cyan-600 dark:text-cyan-300 font-bold uppercase tracking-wider mb-1">Analyzing Responses</p>
+                                        <p className="text-[10px] uppercase tracking-widest text-slate-400 dark:text-white/40 font-mono">Multimodal Processing Active</p>
                                     </div>
                                 </div>
                             )}
@@ -317,40 +309,40 @@ export default function App() {
                     {/* Transcript Block */}
                     <div className="glass-panel rounded-3xl p-6 flex-1 flex flex-col min-h-[300px] lg:min-h-0 overflow-hidden">
                         <div className="flex items-center justify-between mb-4 shrink-0">
-                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-white/60">Session Log</h3>
+                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-white/60">Session Log</h3>
                             <div className="flex items-center gap-2">
-                                <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></div>
-                                <span className="text-[10px] font-mono text-cyan-400/70 uppercase">Live Recording</span>
+                                <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400 animate-pulse"></div>
+                                <span className="text-[10px] font-mono text-cyan-600/70 dark:text-cyan-400/70 uppercase">Live Recording</span>
                             </div>
                         </div>
 
                         <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
                             {transcripts.length === 0 ? (
                                 <div className="h-full flex flex-col items-center justify-center opacity-30">
-                                    <BotMessageSquare className="w-8 h-8 mb-2" />
-                                    <p className="text-center text-xs italic">Transcript will appear here once the interview starts.</p>
+                                    <BotMessageSquare className="w-8 h-8 mb-2 text-slate-400 dark:text-white" />
+                                    <p className="text-center text-xs italic text-slate-500 dark:text-white">Transcript will appear here once the interview starts.</p>
                                 </div>
                             ) : (
                                 transcripts.map((t) => (
                                     <div key={t.id} className={`flex flex-col gap-1 ${t.role === 'user' ? 'items-end' : 'items-start'} animate-in fade-in slide-in-from-bottom-2 duration-500`}>
-                                        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/40">
+                                        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-white/40">
                                             {t.role === 'user' ? (
-                                                <><span className="text-cyan-400/70">You</span> <User className="w-3 h-3 text-cyan-400/70" /></>
+                                                <><span className="text-cyan-600/70 dark:text-cyan-400/70">You</span> <User className="w-3 h-3 text-cyan-600/70 dark:text-cyan-400/70" /></>
                                             ) : (
-                                                <><BotMessageSquare className="w-3 h-3 text-purple-400/70" /> <span className="text-purple-400/70">Officer</span></>
+                                                <><BotMessageSquare className="w-3 h-3 text-purple-600/70 dark:text-purple-400/70" /> <span className="text-purple-600/70 dark:text-purple-400/70">Officer</span></>
                                             )}
                                         </div>
                                         <div className={`px-4 py-3 rounded-2xl max-w-[95%] sm:max-w-[92%] text-sm leading-relaxed transition-all duration-300 ${
                                             t.role === 'user'
-                                                ? 'bg-cyan-900/20 border border-cyan-400/10 text-cyan-100 rounded-tr-none'
-                                                : 'bg-white/5 border border-white/10 text-white/90 rounded-tl-none'
+                                                ? 'bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-100 dark:border-cyan-400/10 text-cyan-900 dark:text-cyan-100 rounded-tr-none'
+                                                : 'bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white/90 rounded-tl-none'
                                         }`}>
                                             {t.text}
                                             {!t.isFinal && (
                                                 <span className="inline-flex items-center ml-2 gap-1">
-                                                    <span className="w-1 h-1 rounded-full bg-cyan-400 animate-[bounce_1s_infinite_0ms]"></span>
-                                                    <span className="w-1 h-1 rounded-full bg-cyan-400 animate-[bounce_1s_infinite_200ms]"></span>
-                                                    <span className="w-1 h-1 rounded-full bg-cyan-400 animate-[bounce_1s_infinite_400ms]"></span>
+                                                    <span className="w-1 h-1 rounded-full bg-cyan-500 dark:bg-cyan-400 animate-[bounce_1s_infinite_0ms]"></span>
+                                                    <span className="w-1 h-1 rounded-full bg-cyan-500 dark:bg-cyan-400 animate-[bounce_1s_infinite_200ms]"></span>
+                                                    <span className="w-1 h-1 rounded-full bg-cyan-500 dark:bg-cyan-400 animate-[bounce_1s_infinite_400ms]"></span>
                                                 </span>
                                             )}
                                         </div>
