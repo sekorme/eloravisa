@@ -9,7 +9,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/legal/terms-of-service',
     '/legal/cookie-policy',
     '/legal/disclaimer',
-    '/pricing',
+    '/affiliate/signin',
+    '/affiliate/signup',
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
