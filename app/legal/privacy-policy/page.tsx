@@ -1,15 +1,10 @@
 "use client"
 
 import React, { useEffect, useRef } from "react";
-import { Metadata } from "next";
 import { gsap } from "gsap";
 import { ShieldCheck, Lock, Eye, Server, Mail } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy | Elora Visa",
-  description: "Read our privacy policy to understand how Elora Visa handles and protects your personal data.",
-};
 
 export default function PrivacyPolicy() {
   const containerRef = useRef<HTMLDivElement>(null);

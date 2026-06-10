@@ -1,15 +1,10 @@
 "use client"
 
 import React, { useEffect, useRef } from "react";
-import { Metadata } from "next";
 import { gsap } from "gsap";
 import { FileText, Scale, Shield, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export const metadata: Metadata = {
-  title: "Terms of Service | Elora Visa",
-  description: "Read the Terms of Service for Elora Visa to understand the rules and guidelines for using our AI-powered visa application assistance.",
-};
 
 export default function TermsOfService() {
   const containerRef = useRef<HTMLDivElement>(null);

@@ -1,15 +1,10 @@
 "use client"
 
 import React, { useEffect, useRef } from "react";
-import { Metadata } from "next";
 import { gsap } from "gsap";
 import { Cookie, Info, Settings, Shield } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export const metadata: Metadata = {
-  title: "Cookie Policy | Elora Visa",
-  description: "Learn about how Elora Visa uses cookies to improve your user experience and provide personalized services.",
-};
 
 export default function CookiePolicy() {
   const containerRef = useRef<HTMLDivElement>(null);
