@@ -78,50 +78,46 @@ export function TargetAudienceSection() {
     useEffect(() => {
         if (!mounted) return
         const ctx = gsap.context(() => {
-            // Speed up the initial reveal and disable transitions during theme switch
-            gsap.defaults({ overwrite: "auto" })
+            // Split text for section-title
+            const sectionTitle = containerRef.current?.querySelector(".section-title");
+            if (sectionTitle) {
+                const text = sectionTitle.textContent || "";
+                sectionTitle.innerHTML = text
+                    .split("")
+                    .map((char) => `<span class="char inline-block whitespace-pre">${char}</span>`)
+                    .join("");
+            }
 
-            gsap.utils.toArray<HTMLElement>(".audience-section").forEach((section, i) => {
-                const isEven = i % 2 === 0
-                const content = section.querySelector(".section-content")
-                const visual = section.querySelector(".section-visual")
-
-                gsap.from(content, {
-                    x: isEven ? -50 : 50,
-                    opacity: 0,
-                    duration: 0.8,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: section,
-                        start: "top 90%",
-                        toggleActions: "play none none none"
-                    },
-                })
-
-                gsap.from(visual, {
-                    x: isEven ? 50 : -50,
-                    opacity: 0,
-                    scale: 0.9,
-                    duration: 1,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: section,
-                        start: "top 90%",
-                        toggleActions: "play none none none"
-                    },
-                })
-            })
-
-            gsap.from(".section-header", {
-                y: -30,
-                opacity: 0,
-                duration: 1,
-                ease: "power2.out",
+            const tl = gsap.timeline({
                 scrollTrigger: {
                     trigger: containerRef.current,
-                    start: "top 95%",
+                    start: "top 80%",
+                    toggleActions: "play none none none"
                 }
+            });
+
+            tl.from(".char", {
+                opacity: 0,
+                y: 20,
+                duration: 0.4,
+                stagger: 0.02,
+                ease: "power2.out"
             })
+            .from(".section-subtitle", {
+                opacity: 0,
+                y: 20,
+                duration: 0.6,
+                ease: "power2.out"
+            }, "-=0.2")
+            .from(".audience-card", {
+                opacity: 0,
+                y: 40,
+                scale: 0.95,
+                duration: 0.8,
+                stagger: 0.15,
+                ease: "back.out(1.2)"
+            }, "-=0.4");
+
         }, containerRef)
 
         return () => ctx.revert()
@@ -130,100 +126,99 @@ export function TargetAudienceSection() {
     return (
         <section
             ref={containerRef}
-            className="relative py-24 md:py-32 bg-[#f8fafc] dark:bg-[#050510] overflow-hidden"
+            className="relative py-24 md:py-40 bg-background overflow-hidden"
         >
-            {/* Background Image */}
-            <div className="absolute inset-0 z-0">
-                <Image
-                    src="/whothisisfor.png"
-                    alt="Background"
-                    fill
-                    className="object-cover opacity-10"
-                    priority
-                />
+            {/* Background Decorations */}
+            <div className="absolute inset-0 z-0 pointer-events-none">
+                <div className="absolute top-1/4 left-0 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[120px]" />
+                <div className="absolute bottom-1/4 right-0 w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[120px]" />
             </div>
+
             <div className="container px-4 mx-auto relative z-10">
-                <div className="text-center mb-32 section-header">
-                    <h2 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter mb-6">
-                        Who This Is{" "}
-                        <span className="bg-gradient-to-r from-[#00b7fa] to-[#01cfea] bg-clip-text text-transparent italic">
-                            For
-                        </span>
+                <div className="text-center mb-24 section-header">
+                    <div className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold bg-blue-100/50 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300 border-blue-200 dark:border-blue-800 mb-6 section-subtitle">
+                        Who We Support
+                    </div>
+                    <h2 className="section-title text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter mb-6 text-slate-900 dark:text-white">
+                        Designed For Every Journey
                     </h2>
-                    <div className="w-24 h-1.5 bg-gradient-to-r from-[#00b7fa] to-[#01cfea] mx-auto mb-8 rounded-full" />
-                    <p className="text-muted-foreground text-xl max-w-2xl mx-auto leading-relaxed font-medium">
-                        Empowering you to take charge of your journey. No agents, no hidden fees, just expert guidance for every stage.
+                    <p className="section-subtitle text-muted-foreground text-xl max-w-2xl mx-auto leading-relaxed font-medium">
+                        Whether you&apos;re starting fresh or recovering from a setback, we provide the tools you need to succeed.
                     </p>
                 </div>
 
-                <div className="space-y-32 md:space-y-48">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
                     {audiences.map((item, index) => {
-                        const isEven = index % 2 === 0
                         return (
                             <div 
                                 key={index} 
-                                className={cn(
-                                    "audience-section flex flex-col md:flex-row items-center gap-12 md:gap-24",
-                                    !isEven && "md:flex-row-reverse"
-                                )}
+                                className="audience-card group relative"
                             >
-                                {/* Text Content */}
-                                <div className="section-content flex-1 w-full text-center md:text-left">
+                                <div className={cn(
+                                    "relative h-full overflow-hidden rounded-[2.5rem] border p-8 md:p-10 transition-all duration-500",
+                                    "bg-white dark:bg-slate-900/50 backdrop-blur-sm",
+                                    "border-slate-200 dark:border-slate-800",
+                                    "hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-2",
+                                    "group-hover:border-blue-500/30"
+                                )}>
+                                    {/* Card Gradient Overlay */}
                                     <div className={cn(
-                                        "inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-8",
-                                        "shadow-2xl shadow-black/10 transition-transform duration-500 hover:rotate-12",
-                                        item.iconBg,
-                                        item.iconColor
-                                    )}>
-                                        <item.icon size={40} />
-                                    </div>
-                                    
-                                    <h3 className="text-3xl md:text-5xl font-black mb-4 text-slate-900 dark:text-white tracking-tight">
-                                        {item.title}
-                                    </h3>
-                                    
-                                    <h4 className={cn(
-                                        "text-xl md:text-2xl font-bold mb-6 bg-gradient-to-r bg-clip-text text-transparent",
-                                        "from-slate-600 to-slate-400 dark:from-slate-300 dark:to-slate-500"
-                                    )}>
-                                        {item.subtitle}
-                                    </h4>
-
-                                    <p className="text-slate-600 dark:text-slate-400 leading-loose text-lg md:text-xl font-medium max-w-xl mx-auto md:mx-0">
-                                        {item.desc}
-                                    </p>
-
-                                    <div className="mt-10 flex flex-wrap gap-4 justify-center md:justify-start">
-                                        <div className={cn(
-                                            "h-1 w-12 rounded-full bg-gradient-to-r",
-                                            item.color
-                                        )} />
-                                    </div>
-                                </div>
-
-                                {/* Visual Element */}
-                                <div className="section-visual flex-1 w-full relative flex justify-center items-center">
-                                    <div className={cn(
-                                        "absolute inset-0 blur-[100px] opacity-20 dark:opacity-30 rounded-full",
-                                        item.color
+                                        "absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none bg-gradient-to-br",
+                                        item.color,
+                                        "to-transparent"
                                     )} />
-                                    
-                                    <div className={cn(
-                                        "relative z-10 w-full max-w-[400px] aspect-square rounded-[3rem] border-2 overflow-hidden",
-                                        "bg-white/10 dark:bg-white/5 backdrop-blur-3xl flex items-center justify-center",
-                                        item.borderColor,
-                                        "shadow-[0_0_50px_-12px_rgba(0,0,0,0.1)] dark:shadow-[0_0_50px_-12px_rgba(255,255,255,0.05)]"
-                                    )}>
-                                        <Image 
-                                            src={item.image} 
-                                            alt={item.title} 
-                                            fill 
-                                            className="object-cover opacity-80"
-                                        />
-                                        
-                                        {/* Abstract Floating Shapes */}
-                                        <div className="absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br from-blue-400 to-cyan-400 rounded-full blur-2xl opacity-40 animate-pulse" />
-                                        <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full blur-3xl opacity-30 animate-bounce [animation-duration:5s]" />
+
+                                    <div className="relative z-10">
+                                        <div className="flex flex-col md:flex-row md:items-start gap-8">
+                                            {/* Icon & Title Area */}
+                                            <div className="flex-1">
+                                                <div className={cn(
+                                                    "inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-8",
+                                                    "shadow-lg transition-transform duration-500 group-hover:rotate-6",
+                                                    item.iconBg,
+                                                    item.iconColor
+                                                )}>
+                                                    <item.icon size={32} />
+                                                </div>
+                                                
+                                                <h3 className="text-2xl md:text-3xl font-black mb-3 text-slate-900 dark:text-white tracking-tight">
+                                                    {item.title}
+                                                </h3>
+                                                
+                                                <h4 className={cn(
+                                                    "text-lg font-bold mb-4 bg-gradient-to-r bg-clip-text text-transparent",
+                                                    "from-blue-600 to-cyan-600 dark:from-blue-400 dark:to-cyan-400"
+                                                )}>
+                                                    {item.subtitle}
+                                                </h4>
+
+                                                <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-base md:text-lg font-medium">
+                                                    {item.desc}
+                                                </p>
+                                            </div>
+
+                                            {/* Visual Area */}
+                                            <div className="w-full md:w-48 lg:w-56 aspect-square relative shrink-0">
+                                                <div className={cn(
+                                                    "absolute inset-0 blur-3xl opacity-20 group-hover:opacity-40 transition-opacity duration-500 rounded-full",
+                                                    item.color
+                                                )} />
+                                                
+                                                <div className={cn(
+                                                    "relative h-full w-full rounded-3xl border-2 overflow-hidden",
+                                                    "bg-slate-100 dark:bg-slate-800",
+                                                    item.borderColor,
+                                                    "shadow-inner"
+                                                )}>
+                                                    <Image 
+                                                        src={item.image} 
+                                                        alt={item.title} 
+                                                        fill 
+                                                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
