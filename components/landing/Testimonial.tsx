@@ -24,7 +24,7 @@ const testimonials = [
     quote:
       "I have been using Elora Visa for a while now and I must say it has been a game changer. The AI tools have made the process so much easier and the expert guidance has been invaluable.",
     name: "Richard Andoh",
-    designation: "Operations Director at CloudScale",
+    designation: "Student - UK",
     src: "/IMG_9093.jpg",
   },
   {
@@ -36,10 +36,10 @@ const testimonials = [
   },
   {
     quote:
-      "The scalability and performance have been game-changing for our organization. Highly recommend to any growing business.",
+      "I tried so many visa services but none of them was as effective as Elora Visa. At first, I was skeptical but after using Elora Visa, I was amazed by the results.",
     name: "Lisa Thompson",
-    designation: "VP of Technology at FutureNet",
-    src: "https://images.unsplash.com/photo-1624561172888-ac93c696e10c?q=80&w=2592&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    designation: "Health Worker - Canada",
+    src: "/ekua.jpg",
   },
 ];
 
