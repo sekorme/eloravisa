@@ -5,73 +5,24 @@ import ChecklistItem from "./ChecklistItem"
 import { auth, db } from "@/firebase/client"
 import { doc, onSnapshot, collection } from "firebase/firestore"
 import { onAuthStateChanged } from "firebase/auth"
-
-const checklistData = [
-    {
-        key: "passport",
-        title: "Valid Passport",
-        explanation: "Your passport must be valid for your entire stay plus usually 6 months.",
-        example: "Must be valid at least 6 months beyond your intended travel date with 2 blank pages.",
-        mistakes: ["Expired passport", "Damaged pages", "Name mismatch"]
-    },
-    {
-        key: "financialStatement",
-        title: "Proof of Funds",
-        explanation: "This shows you can support yourself without working illegally.",
-        example: "6 months bank statement with consistent balances covering tuition + living expenses.",
-        mistakes: ["Sudden large deposits", "Unclear sponsor source", "Short statement duration"]
-    },
-    {
-        key: "statementOfPurpose",
-        title: "Statement of Purpose (SOP)",
-        explanation: "This explains why you chose this course and country.",
-        example: "Clear study plan linked to your background and future career goals.",
-        mistakes: ["Copy-paste templates", "No career connection", "Contradicting documents"]
-    },
-    {
-        key: "travelItinerary",
-        title: "Travel Itinerary",
-        explanation: "Proof of your travel plans.",
-        example: "Flight reservation showing entry and exit dates.",
-        mistakes: ["Booking actual tickets before visa approval", "Dates mismatch with application"]
-    },
-    {
-        key: "proofOfAccommodation",
-        title: "Proof of Accommodation",
-        explanation: "Where you will stay upon arrival.",
-        example: "Hotel booking or invitation letter from a host.",
-        mistakes: ["Unconfirmed booking", "Address mismatch"]
-    },
-    {
-        key: "purposeOfTravel",
-        title: "Purpose of Travel",
-        explanation: "Evidence supporting your reason for visiting.",
-        example: "Admission letter from university or invitation letter for business.",
-        mistakes: ["Vague purpose", "Invalid documents"]
-    },
-    {
-        key: "homeTies",
-        title: "Home Ties",
-        explanation: "Proof that you will return to your home country.",
-        example: "Employment letter, property deeds, or family certificates.",
-        mistakes: ["No strong ties shown", "Implied intent to immigrate permanently"]
-    }
-]
+import { getRequiredDocuments } from "@/utils/documentConfig"
 
 export default function VisaCheckList() {
     const [documents, setDocuments] = useState<Record<string, any>>({})
     const [reviews, setReviews] = useState<Record<string, any>>({})
+    const [visaType, setVisaType] = useState<string | undefined>(undefined)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
             if (user) {
-                // Listen to user document for uploads
+                // Listen to user document for uploads and visaType
                 const userDocRef = doc(db, "users", user.uid)
                 const unsubUser = onSnapshot(userDocRef, (docSnap) => {
                     if (docSnap.exists()) {
                         const data = docSnap.data()
                         setDocuments(data.documents || {})
+                        setVisaType(data.onboarding?.visaType)
                     }
                 })
 
@@ -106,29 +57,65 @@ export default function VisaCheckList() {
         </div>
     }
 
-    return (
-        <section className="space-y-4">
-            {checklistData.map((item) => {
-                const docData = documents[item.key]
-                const isUploaded = !!docData
-                const docUrl = typeof docData === 'string' ? docData : docData?.url
-                const mimeType = typeof docData === 'string' ? 'application/pdf' : docData?.type
+    const checklistData = getRequiredDocuments(visaType)
+    const uploadedCount = checklistData.filter(item => !!documents[item.key]).length;
 
-                return (
-                    <ChecklistItem
-                        key={item.key}
-                        docKey={item.key}
-                        title={item.title}
-                        explanation={item.explanation}
-                        example={item.example}
-                        mistakes={item.mistakes}
-                        isUploaded={isUploaded}
-                        documentUrl={docUrl}
-                        mimeType={mimeType}
-                        reviewData={reviews[item.key]}
-                    />
-                )
-            })}
+    return (
+        <section className="space-y-8">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 px-2">
+                <div>
+                    <h3 className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.2em] mb-2">
+                        Requirements Masterlist
+                    </h3>
+                    <div className="flex items-baseline gap-2">
+                        <p className="text-4xl font-black text-slate-900 dark:text-white">
+                            {uploadedCount}
+                        </p>
+                        <p className="text-lg font-bold text-slate-400">
+                            / {checklistData.length} <span className="text-xs font-medium ml-1">Documents Uploaded</span>
+                        </p>
+                    </div>
+                </div>
+                
+                <div className="flex flex-col items-start md:items-end gap-2">
+                    <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Completion Status</span>
+                        <span className="text-sm font-black text-blue-600 dark:text-blue-400">
+                            {Math.round(checklistData.length > 0 ? (uploadedCount / checklistData.length) * 100 : 0)}%
+                        </span>
+                    </div>
+                    <div className="w-48 h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-200/50 dark:border-slate-700/50 p-0.5">
+                        <div 
+                            className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full transition-all duration-1000 ease-out shadow-sm" 
+                            style={{ width: `${checklistData.length > 0 ? (uploadedCount / checklistData.length) * 100 : 0}%` }}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid gap-4">
+                {checklistData.map((item) => {
+                    const docData = documents[item.key]
+                    const isUploaded = !!docData
+                    const docUrl = typeof docData === 'string' ? docData : docData?.url
+                    const mimeType = typeof docData === 'string' ? 'application/pdf' : docData?.type
+
+                    return (
+                        <ChecklistItem
+                            key={item.key}
+                            docKey={item.key}
+                            title={item.title}
+                            explanation={item.explanation || ""}
+                            example={item.example || ""}
+                            mistakes={item.mistakes || []}
+                            isUploaded={isUploaded}
+                            documentUrl={docUrl}
+                            mimeType={mimeType}
+                            reviewData={reviews[item.key]}
+                        />
+                    )
+                })}
+            </div>
         </section>
     );
 }

@@ -34,7 +34,7 @@ export default function VisaHeader() {
 
     if (loading) {
         return (
-            <Card className="p-6 md:p-8 h-[140px] animate-pulse bg-gray-100 dark:bg-gray-800 border-none shadow-sm"></Card>
+            <Card className="p-6 md:p-8 h-[160px] animate-pulse bg-gray-100 dark:bg-gray-800 border-none shadow-sm rounded-3xl"></Card>
         )
     }
 
@@ -42,47 +42,48 @@ export default function VisaHeader() {
     const visaType = userData?.onboarding?.visaType || "Visa Type"
 
     return (
-        <Card className="relative overflow-hidden border-none shadow-lg bg-white dark:bg-slate-950">
-            {/* Decorative Background Elements */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/3 pointer-events-none" />
+        <Card className="relative overflow-hidden border-none shadow-2xl rounded-3xl bg-white dark:bg-slate-950">
+            {/* Multi-step Vibrant Gradient Background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-indigo-500/5 to-purple-600/10 dark:from-blue-500/20 dark:via-indigo-500/10 dark:to-purple-500/20" />
             
-            <div className="relative z-10 p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                <div className="flex gap-5 items-start">
-                    <div className="hidden sm:flex items-center justify-center w-14 h-14 rounded-full p-3 bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25 transform transition-transform hover:scale-105 duration-300">
-                        <FileText size={28} strokeWidth={1.5} className={"text-black dark:text-white"} />
+            {/* Animated Glow Elements */}
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 animate-pulse" />
+            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/3" />
+            
+            <div className="relative z-10 p-6 md:p-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
+                <div className="flex flex-col sm:flex-row gap-6 items-start">
+                    <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-xl shadow-blue-500/30 transform transition-transform hover:rotate-3 duration-300 shrink-0">
+                        <FileText size={32} strokeWidth={1.5} />
                     </div>
                     
-                    <div className="space-y-2 col-span-2">
+                    <div className="space-y-4">
                         <div className="flex items-center gap-3 flex-wrap">
-                            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-100 dark:border-blue-800">
-                                <MapPin size={12} />
-                                <span className="text-[11px] font-bold uppercase tracking-wider">Application</span>
+                            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 backdrop-blur-md">
+                                <MapPin size={12} className="animate-bounce" />
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Live Application</span>
                             </div>
                             
-                            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 backdrop-blur-md">
                                 <Lock size={12} />
-                                <span className="text-[11px] font-bold uppercase tracking-wider">Secure</span>
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Encryption Active</span>
                             </div>
                         </div>
                         
                         <div>
-                            <h1 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
-                                {destination} <span className="text-slate-300 dark:text-slate-700 font-light mx-1">/</span> {visaType}
+                            <h1 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-none mb-3">
+                                {destination} <span className="text-blue-500/40 dark:text-blue-500/30 font-light">/</span> {visaType}
                             </h1>
-                            <p className="text-sm md:text-base text-slate-500 dark:text-slate-400 mt-1 max-w-lg leading-relaxed">
-                                Your personalized roadmap to success. Keep your documents updated to significantly increase your approval chances.
+                            <p className="text-base md:text-lg text-slate-500 dark:text-slate-400 max-w-xl leading-relaxed font-medium">
+                                Your path to <span className="text-slate-900 dark:text-white font-bold">{destination}</span> starts here. Complete each step to maximize your approval odds.
                             </p>
                         </div>
                     </div>
                 </div>
 
-
-                <div className="flex-end justify-end w-full">
-
-
-                        <UploadDocumentsModal/>
-
+                <div className="flex lg:justify-end w-full lg:w-auto">
+                    <div className="bg-white/40 dark:bg-white/5 backdrop-blur-xl p-2 rounded-2xl border border-white/20 dark:border-white/10 shadow-xl shadow-black/5">
+                        <UploadDocumentsModal />
+                    </div>
                 </div>
             </div>
         </Card>

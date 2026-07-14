@@ -6,15 +6,17 @@ import { cn } from "@/lib/utils"
 import { auth, db } from "@/firebase/client"
 import { doc, onSnapshot, collection } from "firebase/firestore"
 import { onAuthStateChanged } from "firebase/auth"
+import { getRequiredDocuments } from "@/utils/documentConfig"
 import { format } from "date-fns"
 
-const TOTAL_DOCUMENTS = 7; // Based on UploadDocumentsModal list
 
 export function ProgressTracker() {
   const [userData, setUserData] = useState<any>(null)
   const [reviewsCount, setReviewsCount] = useState(0)
   const [interviewsCount, setInterviewsCount] = useState(0)
   const [loading, setLoading] = useState(true)
+
+  const totalRequiredDocs = getRequiredDocuments(userData?.onboarding?.visaType).length;
 
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
@@ -58,10 +60,10 @@ export function ProgressTracker() {
 
   const completedOnboarding = userData?.completedOnboarding || false
   const uploadedDocsCount = userData?.documents ? Object.keys(userData.documents).length : 0
-  const docsProgress = Math.min(Math.round((uploadedDocsCount / TOTAL_DOCUMENTS) * 100), 100)
-  const docsCompleted = uploadedDocsCount >= TOTAL_DOCUMENTS
+  const docsProgress = Math.min(Math.round((uploadedDocsCount / totalRequiredDocs) * 100), 100)
+  const docsCompleted = uploadedDocsCount >= totalRequiredDocs
 
-  const reviewsProgress = Math.min(Math.round((reviewsCount / TOTAL_DOCUMENTS) * 100), 100)
+  const reviewsProgress = Math.min(Math.round((reviewsCount / totalRequiredDocs) * 100), 100)
   const reviewsCompleted = docsCompleted && reviewsCount >= uploadedDocsCount
 
   const interviewsCompleted = interviewsCount > 0
@@ -82,105 +84,107 @@ export function ProgressTracker() {
   }
 
   return (
-    <div id="progress-tracker-card" className="bg-white dark:bg-card rounded-2xl shadow-sm border border-gray-200 dark:border-border p-4 md:p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-2">
-        <h2 className="text-xl font-bold text-gray-800 dark:text-foreground">Your Progress</h2>
-        <span className="text-sm text-gray-500 dark:text-muted-foreground">5 Steps to Complete</span>
+    <div id="progress-tracker-card" className="bg-white dark:bg-neutral-900 rounded-3xl shadow-xl border border-neutral-100 dark:border-neutral-800 p-6 md:p-8 transition-all duration-300 hover:shadow-2xl group">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+        <div>
+          <h2 className="text-2xl font-black text-neutral-800 dark:text-neutral-100 tracking-tight">Your Journey</h2>
+          <p className="text-sm text-neutral-500 dark:text-neutral-400 font-medium">5 milestones to reach your goal</p>
+        </div>
+        <div className="bg-blue-50 dark:bg-blue-900/20 px-4 py-2 rounded-2xl border border-blue-100 dark:border-blue-800/50">
+           <span className="text-blue-600 dark:text-blue-400 font-bold text-sm">Overall Progress: {Math.round(( (completedOnboarding ? 20 : 0) + (docsCompleted ? 20 : 0) + (reviewsCompleted ? 20 : 0) + (interviewsCompleted ? 20 : 0) + (applicationSubmitted ? 20 : 0) ))} %</span>
+        </div>
       </div>
-      <div className="space-y-5">
+      <div className="space-y-6 relative">
+        <div className="absolute left-[31px] top-6 bottom-6 w-0.5 bg-neutral-100 dark:bg-neutral-800 -z-0"></div>
         
         {/* Step 1: Onboarding */}
-        <div className={cn("flex items-start cursor-pointer p-4 rounded-xl transition-all", completedOnboarding ? "hover:bg-gray-50 dark:hover:bg-accent/50" : "opacity-60")}>
-          <div className={cn("flex items-center justify-center w-12 h-12 rounded-full mr-4 flex-shrink-0", completedOnboarding ? "bg-green-100 dark:bg-green-900/30" : "bg-gray-100 dark:bg-muted")}>
-            {completedOnboarding ? <CheckIcon className="text-green-600 dark:text-green-400 text-xl w-6 h-6" /> : <Loader2 className="text-gray-400 dark:text-muted-foreground text-xl w-6 h-6" />}
+        <div className={cn("flex items-start relative z-10 p-4 rounded-2xl transition-all duration-300 group/step", completedOnboarding ? "bg-white dark:bg-neutral-800/50 hover:shadow-lg" : "opacity-60")}>
+          <div className={cn("flex items-center justify-center w-10 h-10 rounded-full mr-6 flex-shrink-0 transition-all duration-500", completedOnboarding ? "bg-green-500 text-white shadow-lg shadow-green-200 dark:shadow-none" : "bg-neutral-100 dark:bg-neutral-800 text-neutral-400")}>
+            {completedOnboarding ? <CheckIcon className="w-6 h-6 stroke-[3]" /> : <span className="font-bold">1</span>}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-1 gap-2">
-              <h3 className="font-semibold text-gray-800 dark:text-foreground truncate">Visa Requirements Understood</h3>
+              <h3 className={cn("font-bold text-lg tracking-tight", completedOnboarding ? "text-neutral-800 dark:text-neutral-100" : "text-neutral-500")}>Visa Requirements</h3>
               {renderStatus(completedOnboarding, !completedOnboarding, false)}
             </div>
-            <p className="text-sm text-gray-600 dark:text-muted-foreground">{completedOnboarding ? `You've reviewed all requirements for ${userData?.onboarding?.destination || 'your'} ${userData?.onboarding?.visaType || ''} Visa` : "Complete the onboarding process to unlock this step."}</p>
-            {completedOnboarding && userData?.createdAt && <div className="text-xs text-gray-500 dark:text-muted-foreground/70 mt-1">Started on {format(new Date(userData.createdAt), 'EEE, MMM d, yyyy')}</div>}
+            <p className="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">{completedOnboarding ? `You've reviewed all requirements for your visa` : "Complete the onboarding process to unlock this step."}</p>
           </div>
         </div>
 
         {/* Step 2: Documents */}
-        <div className={cn("flex items-start cursor-pointer p-4 rounded-xl transition-all border-2", docsCompleted ? "border-transparent hover:bg-gray-50 dark:hover:bg-accent/50" : "border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/10")}>
-          <div className={cn("flex items-center justify-center w-12 h-12 rounded-full mr-4 flex-shrink-0 relative", docsCompleted ? "bg-green-100 dark:bg-green-900/30" : "bg-blue-100 dark:bg-blue-900/30")}>
-            {docsCompleted ? <CheckIcon className="text-green-600 dark:text-green-400 text-xl w-6 h-6" /> : <><Loader2 className="text-blue-600 dark:text-blue-400 text-xl w-6 h-6 animate-spin" /><div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-600 dark:bg-blue-400 rounded-full animate-pulse"></div></>}
+        <div className={cn("flex items-start relative z-10 p-4 rounded-2xl transition-all duration-300 group/step", docsCompleted ? "bg-white dark:bg-neutral-800/50 hover:shadow-lg" : "bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 shadow-sm")}>
+          <div className={cn("flex items-center justify-center w-10 h-10 rounded-full mr-6 flex-shrink-0 transition-all duration-500 relative", docsCompleted ? "bg-green-500 text-white shadow-lg shadow-green-200 dark:shadow-none" : "bg-blue-600 text-white shadow-lg shadow-blue-200 dark:shadow-none")}>
+            {docsCompleted ? <CheckIcon className="w-6 h-6 stroke-[3]" /> : <span className="font-bold">2</span>}
+            {!docsCompleted && <div className="absolute inset-0 rounded-full border-2 border-white/30 animate-ping"></div>}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-1 gap-2">
-              <h3 className="font-semibold text-gray-800 dark:text-foreground truncate">Documents Prepared</h3>
+              <h3 className={cn("font-bold text-lg tracking-tight", docsCompleted ? "text-neutral-800 dark:text-neutral-100" : "text-blue-600 dark:text-blue-400")}>Documents Preparation</h3>
               {renderStatus(docsCompleted, !docsCompleted, false)}
             </div>
-            <p className="text-sm text-gray-600 dark:text-muted-foreground">Upload all required documents for review</p>
-            <div className="mt-3">
-              <div className="flex justify-between text-xs text-gray-600 dark:text-muted-foreground mb-1">
-                <span>{uploadedDocsCount} of {TOTAL_DOCUMENTS} documents uploaded</span>
-                <span className="font-semibold">{docsProgress}%</span>
+            <p className="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">Upload your supporting documents</p>
+            <div className="mt-4">
+              <div className="flex justify-between text-xs font-bold text-neutral-500 mb-2">
+                <span>{uploadedDocsCount} / {totalRequiredDocs} UPLOADED</span>
+                <span>{docsProgress}%</span>
               </div>
-              <div className="w-full bg-gray-200 dark:bg-secondary rounded-full h-2">
-                <div className={cn("h-2 rounded-full transition-all duration-500", docsCompleted ? "bg-green-600 dark:bg-green-500" : "bg-blue-600 dark:bg-blue-500")} style={{ width: `${docsProgress}%` }}></div>
+              <div className="w-full bg-neutral-100 dark:bg-neutral-800 rounded-full h-3 overflow-hidden p-0.5">
+                <div className={cn("h-full rounded-full transition-all duration-1000 ease-out", docsCompleted ? "bg-green-500" : "bg-gradient-to-r from-blue-500 to-indigo-600")} style={{ width: `${docsProgress}%` }}></div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Step 3: AI Review */}
-        <div className={cn("flex items-start cursor-pointer p-4 rounded-xl transition-all", !docsCompleted && "opacity-60")}>
-          <div className={cn("flex items-center justify-center w-12 h-12 rounded-full mr-4 flex-shrink-0", reviewsCompleted ? "bg-green-100 dark:bg-green-900/30" : docsCompleted ? "bg-blue-100 dark:bg-blue-900/30" : "bg-gray-100 dark:bg-muted")}>
-            {reviewsCompleted ? <CheckIcon className="text-green-600 dark:text-green-400 text-xl w-6 h-6" /> : docsCompleted ? <Bot className="text-blue-600 dark:text-blue-400 text-xl w-6 h-6" /> : <Lock className="text-gray-400 dark:text-muted-foreground text-xl w-6 h-6" />}
+        <div className={cn("flex items-start relative z-10 p-4 rounded-2xl transition-all duration-300 group/step", !docsCompleted ? "opacity-40" : "bg-white dark:bg-neutral-800/50 hover:shadow-lg")}>
+          <div className={cn("flex items-center justify-center w-10 h-10 rounded-full mr-6 flex-shrink-0 transition-all duration-500", reviewsCompleted ? "bg-green-500 text-white shadow-lg shadow-green-200 dark:shadow-none" : docsCompleted ? "bg-purple-600 text-white shadow-lg shadow-purple-200 dark:shadow-none" : "bg-neutral-100 dark:bg-neutral-800 text-neutral-400")}>
+            {reviewsCompleted ? <CheckIcon className="w-6 h-6 stroke-[3]" /> : <span className="font-bold">3</span>}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-1 gap-2">
-              <h3 className="font-semibold text-gray-800 dark:text-foreground truncate">Documents Reviewed (AI)</h3>
+              <h3 className={cn("font-bold text-lg tracking-tight", reviewsCompleted ? "text-neutral-800 dark:text-neutral-100" : docsCompleted ? "text-purple-600 dark:text-purple-400" : "text-neutral-500")}>AI Intelligence Check</h3>
               {renderStatus(reviewsCompleted, docsCompleted && !reviewsCompleted, !docsCompleted)}
             </div>
-            <p className="text-sm text-gray-600 dark:text-muted-foreground">AI will review your documents for errors and suggestions</p>
+            <p className="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">Automated error detection & scoring</p>
             {docsCompleted && (
-                <div className="mt-3">
-                    <div className="flex justify-between text-xs text-gray-600 dark:text-muted-foreground mb-1">
-                        <span>{reviewsCount} of {TOTAL_DOCUMENTS} documents reviewed</span>
-                        <span className="font-semibold">{reviewsProgress}%</span>
+                <div className="mt-4">
+                    <div className="flex justify-between text-xs font-bold text-neutral-500 mb-2">
+                        <span>{reviewsCount} / {totalRequiredDocs} REVIEWED</span>
+                        <span>{reviewsProgress}%</span>
                     </div>
-                    <div className="w-full bg-gray-200 dark:bg-secondary rounded-full h-2">
-                        <div className={cn("h-2 rounded-full transition-all duration-500", reviewsCompleted ? "bg-green-600 dark:bg-green-500" : "bg-blue-600 dark:bg-blue-500")} style={{ width: `${reviewsProgress}%` }}></div>
+                    <div className="w-full bg-neutral-100 dark:bg-neutral-800 rounded-full h-3 overflow-hidden p-0.5">
+                        <div className={cn("h-full rounded-full transition-all duration-1000 ease-out", reviewsCompleted ? "bg-green-500" : "bg-gradient-to-r from-purple-500 to-pink-600")} style={{ width: `${reviewsProgress}%` }}></div>
                     </div>
                 </div>
             )}
-            {!docsCompleted && <div className="text-xs text-gray-500 dark:text-muted-foreground/70 mt-1">Complete previous step to unlock</div>}
           </div>
         </div>
 
         {/* Step 4: Mock Interview */}
-        <div className={cn("flex items-start cursor-pointer p-4 rounded-xl transition-all", !reviewsCompleted && "opacity-60")}>
-          <div className={cn("flex items-center justify-center w-12 h-12 rounded-full mr-4 flex-shrink-0", interviewsCompleted ? "bg-green-100 dark:bg-green-900/30" : reviewsCompleted ? "bg-blue-100 dark:bg-blue-900/30" : "bg-gray-100 dark:bg-muted")}>
-            {interviewsCompleted ? <CheckIcon className="text-green-600 dark:text-green-400 text-xl w-6 h-6" /> : reviewsCompleted ? <Mic className="text-blue-600 dark:text-blue-400 text-xl w-6 h-6" /> : <Lock className="text-gray-400 dark:text-muted-foreground text-xl w-6 h-6" />}
+        <div className={cn("flex items-start relative z-10 p-4 rounded-2xl transition-all duration-300 group/step", !reviewsCompleted ? "opacity-40" : "bg-white dark:bg-neutral-800/50 hover:shadow-lg")}>
+          <div className={cn("flex items-center justify-center w-10 h-10 rounded-full mr-6 flex-shrink-0 transition-all duration-500", interviewsCompleted ? "bg-green-500 text-white shadow-lg shadow-green-200 dark:shadow-none" : reviewsCompleted ? "bg-emerald-600 text-white shadow-lg shadow-emerald-200 dark:shadow-none" : "bg-neutral-100 dark:bg-neutral-800 text-neutral-400")}>
+            {interviewsCompleted ? <CheckIcon className="w-6 h-6 stroke-[3]" /> : <span className="font-bold">4</span>}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-1 gap-2">
-              <h3 className="font-semibold text-gray-800 dark:text-foreground truncate">Mock Interview Completed</h3>
+              <h3 className={cn("font-bold text-lg tracking-tight", interviewsCompleted ? "text-neutral-800 dark:text-neutral-100" : reviewsCompleted ? "text-emerald-600 dark:text-emerald-400" : "text-neutral-500")}>Mock Interview</h3>
               {renderStatus(interviewsCompleted, reviewsCompleted && !interviewsCompleted, !reviewsCompleted)}
             </div>
-            <p className="text-sm text-gray-600 dark:text-muted-foreground">Practice with AI-powered mock interview sessions</p>
-            {!reviewsCompleted && <div className="text-xs text-gray-500 dark:text-muted-foreground/70 mt-1">Complete previous step to unlock</div>}
-            {reviewsCompleted && interviewsCompleted && <div className="text-xs text-green-600 dark:text-green-400 mt-1 font-medium">{interviewsCount} session(s) completed</div>}
+            <p className="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">Practice with AI-powered sessions</p>
           </div>
         </div>
 
         {/* Step 5: Apply */}
-        <div className={cn("flex items-start cursor-pointer p-4 rounded-xl transition-all", !interviewsCompleted && "opacity-60")}>
-          <div className={cn("flex items-center justify-center w-12 h-12 rounded-full mr-4 flex-shrink-0", applicationSubmitted ? "bg-green-100 dark:bg-green-900/30" : interviewsCompleted ? "bg-blue-100 dark:bg-blue-900/30" : "bg-gray-100 dark:bg-muted")}>
-            {applicationSubmitted ? <CheckIcon className="text-green-600 dark:text-green-400 text-xl w-6 h-6" /> : interviewsCompleted ? <Send className="text-blue-600 dark:text-blue-400 text-xl w-6 h-6" /> : <Lock className="text-gray-400 dark:text-muted-foreground text-xl w-6 h-6" />}
+        <div className={cn("flex items-start relative z-10 p-4 rounded-2xl transition-all duration-300 group/step", !interviewsCompleted ? "opacity-40" : "bg-white dark:bg-neutral-800/50 hover:shadow-lg")}>
+          <div className={cn("flex items-center justify-center w-10 h-10 rounded-full mr-6 flex-shrink-0 transition-all duration-500", applicationSubmitted ? "bg-green-500 text-white shadow-lg shadow-green-200 dark:shadow-none" : interviewsCompleted ? "bg-indigo-600 text-white shadow-lg shadow-indigo-200 dark:shadow-none" : "bg-neutral-100 dark:bg-neutral-800 text-neutral-400")}>
+            {applicationSubmitted ? <CheckIcon className="w-6 h-6 stroke-[3]" /> : <span className="font-bold">5</span>}
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-1 gap-2">
-              <h3 className="font-semibold text-gray-800 dark:text-foreground truncate">Ready to Apply</h3>
+              <h3 className={cn("font-bold text-lg tracking-tight", applicationSubmitted ? "text-neutral-800 dark:text-neutral-100" : interviewsCompleted ? "text-indigo-600 dark:text-indigo-400" : "text-neutral-500")}>Visa Application</h3>
               {renderStatus(applicationSubmitted, interviewsCompleted && !applicationSubmitted, !interviewsCompleted)}
             </div>
-            <p className="text-sm text-gray-600 dark:text-muted-foreground">Submit your application to the embassy</p>
-            {!interviewsCompleted && <div className="text-xs text-gray-500 dark:text-muted-foreground/70 mt-1">Complete all previous steps to unlock</div>}
+            <p className="text-sm text-neutral-500 dark:text-neutral-400 leading-relaxed font-medium">Submit to the embassy</p>
           </div>
         </div>
       </div>

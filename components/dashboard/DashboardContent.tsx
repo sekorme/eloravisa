@@ -20,10 +20,13 @@ export function DashboardContent() {
         const ctx = gsap.context(() => {
             gsap.from(".dashboard-section", {
                 opacity: 0,
-                y: 30,
-                duration: 0.8,
-                stagger: 0.2,
-                ease: "power3.out"
+                y: 50,
+                duration: 1,
+                stagger: {
+                    each: 0.15,
+                    ease: "power2.inOut"
+                },
+                ease: "expo.out"
             })
         }, containerRef)
 

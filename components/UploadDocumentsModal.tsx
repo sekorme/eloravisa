@@ -17,23 +17,15 @@ import { auth, db, storage } from "@/firebase/client"
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage"
 import { doc, getDoc, updateDoc, setDoc } from "firebase/firestore"
 import { onAuthStateChanged } from "firebase/auth"
+import { getRequiredDocuments } from "@/utils/documentConfig"
 import { useDropzone } from "react-dropzone"
 import { toast } from "sonner"
 
-const documentSteps = [
-    { key: "passport", title: "Passport", description: "A valid passport with at least 6 months validity." },
-    { key: "financialStatement", title: "Financial Statement", description: "Bank statements, sponsor's statements, etc." },
-    { key: "statementOfPurpose", title: "Statement of Purpose", description: "Explain purpose, duration, funding, and return plan." },
-    { key: "travelItinerary", title: "Travel Itinerary", description: "Flight reservations, etc." },
-    { key: "proofOfAccommodation", title: "Proof of Accommodation", description: "Hotel reservation, host invitation, etc." },
-    { key: "purposeOfTravel", title: "Purpose of Travel", description: "Admission letter, job offer, invitation letter, etc." },
-    { key: "homeTies", title: "Home Ties", description: "Employment letter, business registration, proof of family responsibility, etc." },
-]
 
 export function UploadDocumentsModal() {
     const [user, setUser] = useState<any>(null)
     const [currentStep, setCurrentStep] = useState(0)
-    const [availableSteps, setAvailableSteps] = useState(documentSteps)
+    const [availableSteps, setAvailableSteps] = useState<any[]>([])
     const [file, setFile] = useState<File | null>(null)
     const [uploading, setUploading] = useState(false)
     const [uploadProgress, setUploadProgress] = useState(0)
@@ -49,11 +41,14 @@ export function UploadDocumentsModal() {
                     const userDoc = await getDoc(userDocRef)
                     if (userDoc.exists()) {
                         const userData = userDoc.data()
+                        const visaType = userData.onboarding?.visaType
+                        const requiredDocs = getRequiredDocuments(visaType)
+                        
                         const uploadedKeys = Object.keys(userData.documents || {})
-                        const remainingSteps = documentSteps.filter(step => !uploadedKeys.includes(step.key))
+                        const remainingSteps = requiredDocs.filter(step => !uploadedKeys.includes(step.key))
                         setAvailableSteps(remainingSteps)
                     } else {
-                        setAvailableSteps(documentSteps)
+                        setAvailableSteps(getRequiredDocuments())
                     }
                 }
             } else {

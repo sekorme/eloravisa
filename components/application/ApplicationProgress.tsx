@@ -3,34 +3,38 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { getRequiredDocuments } from "@/utils/documentConfig";
+import { doc, onSnapshot, collection } from "firebase/firestore";
 import { auth, db } from "@/firebase/client";
-import { collection, onSnapshot } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-
-const REQUIRED_DOCS = [
-    "passport",
-    "financialStatement",
-    "statementOfPurpose",
-    "travelItinerary",
-    "proofOfAccommodation",
-    "purposeOfTravel",
-    "homeTies"
-];
 
 export default function ApplicationProgress() {
     const [reviewedCount, setReviewedCount] = useState(0);
     const [totalScore, setTotalScore] = useState(0);
+    const [visaType, setVisaType] = useState<string | undefined>(undefined);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
             if (user) {
+                // Listen to user document for visaType
+                const userDocRef = doc(db, "users", user.uid)
+                const unsubUser = onSnapshot(userDocRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        setVisaType(docSnap.data().onboarding?.visaType)
+                    }
+                })
+
                 const reviewsCollRef = collection(db, "users", user.uid, "reviews");
                 const unsubscribeReviews = onSnapshot(reviewsCollRef, (snapshot) => {
                     let count = 0;
                     let scoreSum = 0;
+                    
+                    // Get required docs based on current visa type
+                    const requiredDocs = getRequiredDocuments(visaType).map(d => d.key);
+
                     snapshot.forEach((doc) => {
-                        if (REQUIRED_DOCS.includes(doc.id)) {
+                        if (requiredDocs.includes(doc.id)) {
                             count++;
                             scoreSum += doc.data().score || 0;
                         }
@@ -40,7 +44,10 @@ export default function ApplicationProgress() {
                     setLoading(false);
                 });
 
-                return () => unsubscribeReviews();
+                return () => {
+                    unsubUser();
+                    unsubscribeReviews();
+                }
             } else {
                 setReviewedCount(0);
                 setTotalScore(0);
@@ -49,9 +56,10 @@ export default function ApplicationProgress() {
         });
 
         return () => unsubscribeAuth();
-    }, []);
+    }, [visaType]);
 
-    const totalDocs = REQUIRED_DOCS.length;
+    const checklistData = getRequiredDocuments(visaType);
+    const totalDocs = checklistData.length;
     const maxScore = totalDocs * 100;
     const percentage = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0;
 

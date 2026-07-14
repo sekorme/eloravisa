@@ -9,9 +9,9 @@ import { doc, onSnapshot, collection } from "firebase/firestore"
 import { onAuthStateChanged } from "firebase/auth"
 import Link from "next/link"
 import { gsap } from "gsap"
+import { getRequiredDocuments } from "@/utils/documentConfig"
 import {NumberTicker} from "@/components/ui/number-ticker";
 
-const TOTAL_DOCUMENTS = 7; // Based on required list
 
 // Local types to avoid `any` and improve clarity
 interface OnboardingChecks {
@@ -44,6 +44,8 @@ export function WelcomeCard() {
 
   const cardRef = useRef<HTMLDivElement>(null);
   const progressCircleRef = useRef<SVGCircleElement>(null);
+
+  const totalRequiredDocs = getRequiredDocuments(userData?.onboarding?.visaType).length;
 
   useEffect(() => {
     let unsubscribeUser: (() => void) | null = null
@@ -160,7 +162,7 @@ export function WelcomeCard() {
 
     const completedOnboarding = userData.completedOnboarding || false;
     const uploadedDocsCount = userData.documents ? Object.keys(userData.documents).length : 0;
-    const docsCompleted = uploadedDocsCount >= TOTAL_DOCUMENTS;
+    const docsCompleted = uploadedDocsCount >= totalRequiredDocs;
     const reviewsCompleted = docsCompleted && reviewsCount >= uploadedDocsCount;
     const interviewsCompleted = interviewsCount > 0;
 
@@ -174,77 +176,84 @@ export function WelcomeCard() {
   const currentStage = getCurrentStage();
 
   return (
-    <Card ref={cardRef} className="bg-gradient-to-br  mb-10 from-blue-600 to-indigo-700 text-white shadow-2xl border-none overflow-hidden relative p-6 md:p-8">
-      <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-12 pointer-events-none"></div>
-      <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+    <Card ref={cardRef} className="bg-gradient-to-br mb-10 from-indigo-600 via-blue-600 to-violet-700 text-white shadow-2xl border-none overflow-hidden relative p-6 md:p-8 group">
+      <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-15 pointer-events-none mix-blend-overlay"></div>
+      <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-colors duration-700"></div>
+      <div className="absolute -top-24 -left-24 w-64 h-64 bg-indigo-400/20 rounded-full blur-3xl group-hover:bg-indigo-400/30 transition-colors duration-700"></div>
+      
+      <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
         <div className="flex-1 w-full">
           <div className="welcome-text">
-            <h2 className="text-3xl md:text-4xl font-extrabold leading-tight">Welcome back, {getFirstName()}!</h2>
-            <p className="text-blue-100 max-w-lg mt-2 text-sm md:text-base">
-              You are on track for your <strong className="font-semibold">{userData?.onboarding?.destination || '...'} {userData?.onboarding?.visaType || '...'} Visa</strong>. Continue to the next step below to make progress.
+            <h2 className="text-4xl md:text-5xl font-black tracking-tight leading-tight">Welcome back, {getFirstName()}!</h2>
+            <p className="text-blue-50/80 max-w-lg mt-3 text-base md:text-lg font-medium">
+              You're making great progress on your <span className="text-white font-bold underline decoration-blue-400 underline-offset-4">{userData?.onboarding?.destination || '...'} {userData?.onboarding?.visaType || '...'} Visa</span>.
             </p>
           </div>
 
-          <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-3">
-            <div className="flex items-center gap-3 bg-white/8 rounded-lg p-3 shadow-sm">
-              <div className="p-2 bg-white/20 rounded-full">
-                <CheckCircle2 className="w-5 h-5 text-white" />
+          <div className="mt-8 flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md rounded-2xl p-4 shadow-inner border border-white/10 flex-1">
+              <div className="p-3 bg-white/20 rounded-xl shadow-sm">
+                <CheckCircle2 className="w-6 h-6 text-white" />
               </div>
               <div>
-                <div className="text-xs text-blue-100">Next Step</div>
-                <div className="font-semibold">{currentStage.title}</div>
+                <div className="text-xs uppercase tracking-wider text-blue-200 font-bold">Next Step</div>
+                <div className="font-bold text-lg">{currentStage.title}</div>
               </div>
             </div>
 
-            <Link href={currentStage.link} className="ml-0 sm:ml-4 mt-2 sm:mt-0">
-              <Button variant="secondary" className="inline-flex items-center gap-2" aria-label={`Go to ${currentStage.title}`}>
+            <Link href={currentStage.link} className="shrink-0">
+              <Button variant="secondary" size="lg" className="w-full sm:w-auto h-16 px-8 rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all flex items-center gap-3 bg-white text-blue-600 hover:bg-blue-50" aria-label={`Go to ${currentStage.title}`}>
                 Continue
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-5 h-5" />
               </Button>
             </Link>
-
-            <div className="ml-auto flex items-center gap-3 mt-2 sm:mt-0">
-              <div className="flex items-center gap-2 bg-white/6 px-3 py-2 rounded-xl">
-                <div className="text-xs text-blue-100">Document Reviews</div>
-                <div className="font-semibold">{reviewsCount}</div>
-              </div>
-              <div className="flex items-center gap-2 bg-white/6 px-3 py-2 rounded-xl">
-                <div className="text-xs text-blue-100">Mock Interviews</div>
-                <div className="font-semibold">{interviewsCount}</div>
-              </div>
+          </div>
+          
+          <div className="mt-6 flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2 bg-black/10 px-4 py-2 rounded-full backdrop-blur-sm border border-white/5">
+              <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></div>
+              <div className="text-sm font-semibold text-blue-100">{reviewsCount} Reviews</div>
+            </div>
+            <div className="flex items-center gap-2 bg-black/10 px-4 py-2 rounded-full backdrop-blur-sm border border-white/5">
+              <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></div>
+              <div className="text-sm font-semibold text-blue-100">{interviewsCount} Interviews</div>
             </div>
           </div>
         </div>
 
-          <div className="stat-badge relative w-48 h-48 md:w-64 md:h-64 flex items-center justify-center flex-shrink-0">
-              <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+          <div className="stat-badge relative w-56 h-56 md:w-72 md:h-72 flex items-center justify-center flex-shrink-0 group/score">
+              <div className="absolute inset-0 bg-white/5 rounded-full blur-2xl group-hover/score:bg-white/10 transition-colors"></div>
+              <svg className="absolute inset-0 w-full h-full drop-shadow-2xl" viewBox="0 0 100 100">
                   <circle
                       className="text-white/10"
                       stroke="currentColor"
                       strokeWidth="6"
                       cx="50"
                       cy="50"
-                      r="45"
+                      r="42"
                       fill="transparent"
                   />
                   <circle
                       ref={progressCircleRef}
-                      className="text-white drop-shadow-lg"
+                      className="text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]"
                       stroke="currentColor"
-                      strokeWidth="6"
+                      strokeWidth="7"
                       strokeLinecap="round"
                       cx="50"
                       cy="50"
-                      r="45"
+                      r="42"
                       fill="transparent"
-                      strokeDasharray={2 * Math.PI * 45}
-                      strokeDashoffset={2 * Math.PI * 45}
+                      strokeDasharray={2 * Math.PI * 42}
+                      strokeDashoffset={2 * Math.PI * 42}
                       transform="rotate(-90 50 50)"
                   />
               </svg>
-              <div className="text-center">
-                  <div className="text-4xl md:text-6xl  font-bold drop-shadow-md">{<NumberTicker className={"text-green-500"} value={readinessScore}/>}%</div>
-                  <div className="text-sm font-medium text-blue-100 dark:text-blue-200 tracking-wider uppercase">Readiness</div>
+              <div className="text-center relative z-10 bg-white/5 backdrop-blur-sm w-40 h-40 md:w-52 md:h-52 rounded-full flex flex-col items-center justify-center border border-white/10 shadow-2xl">
+                  <div className="text-5xl md:text-7xl font-black drop-shadow-2xl flex items-baseline">
+                    <NumberTicker className="text-white" value={readinessScore}/>
+                    <span className="text-2xl md:text-3xl ml-1 opacity-80">%</span>
+                  </div>
+                  <div className="text-xs md:text-sm font-black text-blue-200 tracking-[0.2em] uppercase mt-1">Readiness</div>
               </div>
           </div>
       </div>

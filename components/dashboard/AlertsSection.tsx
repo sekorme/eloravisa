@@ -83,15 +83,25 @@ export function AlertsSection() {
   }
 
   return (
-    <div id="alerts-warnings-card" className=" dark:bg-neutral-900 rounded-2xl shadow-md border border-neutral-200 dark:border-neutral-800 p-4 md:p-6">
-      <div className="flex items-center mb-4">
-        <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 rounded-lg flex items-center justify-center mr-3">
-          <AlertTriangle className="text-amber-600 dark:text-amber-400 text-lg w-5 h-5" />
+    <div id="alerts-warnings-card" className="bg-white dark:bg-neutral-900 rounded-3xl shadow-xl border border-neutral-100 dark:border-neutral-800 p-6 transition-all duration-300 hover:shadow-2xl group">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center">
+          <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center mr-4 group-hover:rotate-12 transition-transform duration-300">
+            <AlertTriangle className="text-amber-600 dark:text-amber-400 w-6 h-6" />
+          </div>
+          <div>
+            <h2 className="text-xl font-black text-neutral-800 dark:text-neutral-100 tracking-tight">Alerts & Warnings</h2>
+            <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">Potential issues in your profile</p>
+          </div>
         </div>
-        <h2 className="text-lg font-bold text-neutral-800 dark:text-neutral-100">Alerts & Warnings</h2>
+        {alerts.length > 0 && (
+          <div className="bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 text-xs font-black px-3 py-1 rounded-full animate-bounce">
+            {alerts.length} NEW
+          </div>
+        )}
       </div>
       
-      <div className="space-y-2">
+      <div className="space-y-3">
         {alerts.length > 0 ? (
           <Accordion type="single" collapsible className="w-full space-y-2">
             {alerts.map((alert) => (

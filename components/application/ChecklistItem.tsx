@@ -90,62 +90,82 @@ export default function ChecklistItem({
 
     return (
         <>
-            <Card className={`overflow-hidden border-l-4 transition-all duration-300 ${
-                status === 'completed' ? 'border-l-emerald-500' : 
-                status === 'in-progress' ? 'border-l-amber-500' : 
+            <Card className={`overflow-hidden border-l-4 transition-all duration-500 group ${
+                status === 'completed' ? 'border-l-emerald-500 shadow-emerald-500/5' : 
+                status === 'in-progress' ? 'border-l-amber-500 shadow-amber-500/5' : 
                 'border-l-slate-300 dark:border-l-slate-700'
-            } bg-white dark:bg-card hover:shadow-md border border-slate-200 dark:border-border`}>
+            } bg-white dark:bg-slate-900 hover:shadow-xl hover:shadow-blue-500/5 border border-slate-200 dark:border-slate-800 rounded-2xl`}>
                 <button
                     onClick={toggle}
-                    className="flex items-center justify-between w-full p-5 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-900/50"
+                    className="flex items-center justify-between w-full p-6 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
                 >
-                    <div className="flex items-center gap-4">
-                        {getStatusIcon()}
+                    <div className="flex items-center gap-5">
+                        <div className={`transition-transform duration-500 ${open ? 'scale-110' : 'group-hover:scale-110'}`}>
+                            {getStatusIcon()}
+                        </div>
                         <div>
-                            <h4 className="font-bold text-slate-900 dark:text-white leading-tight">{title}</h4>
-                            <Badge variant="outline" className={`mt-1.5 text-[10px] uppercase font-bold tracking-wider ${getStatusStyles()}`}>
-                                {getStatusLabel()}
-                            </Badge>
+                            <h4 className="font-bold text-slate-900 dark:text-white leading-tight text-lg tracking-tight">{title}</h4>
+                            <div className="flex items-center gap-2 mt-2">
+                                <Badge variant="outline" className={`text-[9px] uppercase font-black tracking-[0.15em] px-2 py-0.5 rounded-md ${getStatusStyles()}`}>
+                                    {getStatusLabel()}
+                                </Badge>
+                                {isUploaded && !reviewData && (
+                                    <Badge variant="secondary" className="text-[9px] uppercase font-black tracking-[0.15em] bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border-none">
+                                        Ready for AI
+                                    </Badge>
+                                )}
+                            </div>
                         </div>
                     </div>
-                    <ChevronDown
-                        size={20}
-                        className={`text-slate-400 transition-transform duration-300 ${open ? "rotate-180 text-blue-500" : ""}`}
-                    />
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${open ? 'bg-blue-500 text-white rotate-180' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-700'}`}>
+                        <ChevronDown size={16} />
+                    </div>
                 </button>
 
-                <div ref={contentRef} className="overflow-hidden h-0 opacity-0 bg-slate-50/50 dark:bg-slate-900/20">
-                    <div className="p-6 pt-2 space-y-6 border-t border-slate-100 dark:border-slate-800">
+                <div ref={contentRef} className="overflow-hidden h-0 opacity-0">
+                    <div className="p-8 pt-2 space-y-8 border-t border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-900/10">
                         
                         {reviewData ? (
                             <ReviewDetails reviewData={reviewData} />
                         ) : (
-                            <div className="space-y-4">
-                                <div className="space-y-2">
-                                    <p className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">Why it matters</p>
-                                    <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{explanation}</p>
+                            <div className="grid gap-6">
+                                <div className="space-y-3">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">Why it matters</p>
+                                    </div>
+                                    <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-medium pl-3.5">{explanation}</p>
                                 </div>
                                 
-                                <div className="p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800">
-                                    <p className="text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-2">Pro Example</p>
-                                    <p className="text-sm text-slate-700 dark:text-slate-300 italic">{example}</p>
+                                <div className="p-5 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 border border-blue-100/50 dark:border-blue-800/50 relative overflow-hidden group/example">
+                                    <div className="absolute top-0 right-0 p-3 opacity-10 group-hover/example:scale-110 transition-transform">
+                                        <Sparkles size={24} className="text-blue-600" />
+                                    </div>
+                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400 mb-3 flex items-center gap-2">
+                                        <CheckCircle2 size={12} />
+                                        Pro Example
+                                    </p>
+                                    <p className="text-sm text-slate-700 dark:text-slate-300 italic font-medium leading-relaxed leading-snug">"{example}"</p>
                                 </div>
 
-                                <div className="space-y-3">
-                                    <p className="text-xs font-bold uppercase tracking-widest text-red-500 dark:text-red-400">Common Pitfalls</p>
-                                    <ul className="space-y-2">
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
+                                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-red-500 dark:text-red-400">Common Pitfalls</p>
+                                    </div>
+                                    <div className="grid sm:grid-cols-2 gap-3 pl-3.5">
                                         {mistakes.map((m: string) => (
-                                            <li key={m} className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-400">
-                                                <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" />
-                                                {m}
-                                            </li>
+                                            <div key={m} className="flex items-start gap-3 p-3 rounded-xl bg-red-500/5 border border-red-500/10 text-sm text-slate-600 dark:text-slate-400 group/pitfall">
+                                                <AlertCircle size={14} className="text-red-500 mt-0.5 shrink-0 group-hover/pitfall:scale-110 transition-transform" />
+                                                <span className="font-medium leading-tight">{m}</span>
+                                            </div>
                                         ))}
-                                    </ul>
+                                    </div>
                                 </div>
                             </div>
                         )}
 
-                        <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                        <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
                             {!isUploaded ? (
                                 <div className="w-full">
                                     <UploadDocumentsModal /> 
@@ -155,10 +175,10 @@ export default function ChecklistItem({
                                     {!reviewData && (
                                         <Button 
                                             onClick={() => setIsReviewModalOpen(true)}
-                                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white border-none gap-2 shadow-lg shadow-blue-500/20"
+                                            className="flex-1 h-12 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white border-none gap-3 shadow-xl shadow-blue-500/25 rounded-xl transition-all hover:-translate-y-0.5 active:translate-y-0"
                                         >
-                                            <Sparkles size={16} />
-                                            Review with AI
+                                            <Sparkles size={18} />
+                                            <span className="font-bold tracking-tight">Review with AI Analysis</span>
                                         </Button>
                                     )}
                                 </>
