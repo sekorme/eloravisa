@@ -1,11 +1,19 @@
 "use server"
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { checkRateLimit } from "@/lib/ratelimit";
+import { getClientIp } from "@/lib/getClientIp";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 export async function generateInterviewQuestions(userData: any, count: number) {
   try {
+    const ip = await getClientIp();
+    const rateLimit = await checkRateLimit("aiGeneration", `ip:${ip}`);
+    if (!rateLimit.success) {
+      return { success: false, error: "Too many requests. Please slow down and try again shortly." };
+    }
+
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `
@@ -38,6 +46,12 @@ export async function generateInterviewQuestions(userData: any, count: number) {
 
 export async function analyzeAnswer(question: string, answer: string) {
     try {
+        const ip = await getClientIp();
+        const rateLimit = await checkRateLimit("aiGeneration", `ip:${ip}`);
+        if (!rateLimit.success) {
+          return { success: false, error: "Too many requests. Please slow down and try again shortly." };
+        }
+
         const model = genAI.getGenerativeModel({ model: "gemini-3.1-pro-preview" });
     
         const prompt = `
@@ -68,6 +82,12 @@ export async function analyzeAnswer(question: string, answer: string) {
 
 export async function generateInterviewFeedback(transcript: any[]) {
   try {
+    const ip = await getClientIp();
+    const rateLimit = await checkRateLimit("aiGeneration", `ip:${ip}`);
+    if (!rateLimit.success) {
+      return { success: false, error: "Too many requests. Please slow down and try again shortly." };
+    }
+
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     // Format transcript for the prompt

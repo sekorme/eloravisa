@@ -9,6 +9,7 @@ import { QuickStats } from "./QuickStats"
 import { ResourcesSection } from "./ResourcesSection"
 import { MessageCircle, X } from "lucide-react"
 import gsap from "gsap"
+import { DashboardDataProvider } from "@/context/DashboardDataContext"
 
 
 
@@ -34,35 +35,37 @@ export function DashboardContent() {
     }, [])
 
     return (
-        <div ref={containerRef} className="relative p-2 md:p-4 w-full min-h-screen">
+        <DashboardDataProvider>
+            <div ref={containerRef} className="relative p-2 md:p-4 w-full min-h-screen">
 
-            {/* Dashboard Sections */}
-            <div className="dashboard-section">
-                <WelcomeCard />
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-                <div className="lg:col-span-2 dashboard-section">
-                    <ProgressTracker />
+                {/* Dashboard Sections */}
+                <div className="dashboard-section">
+                    <WelcomeCard />
                 </div>
-                <div className="space-y-6 dashboard-section">
-                    <NextActionCard />
-                    <AlertsSection />
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <div className="lg:col-span-2 dashboard-section">
+                        <ProgressTracker />
+                    </div>
+                    <div className="space-y-6 dashboard-section">
+                        <NextActionCard />
+                        <AlertsSection />
+                    </div>
+                </div>
+
+                <div className="dashboard-section">
+                    <QuickStats />
+                </div>
+
+                <div className="dashboard-section">
+                    <ResourcesSection />
+                </div>
+
+                {/* Floating Chat */}
+                <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end">
+
                 </div>
             </div>
-
-            <div className="dashboard-section">
-                <QuickStats />
-            </div>
-
-            <div className="dashboard-section">
-                <ResourcesSection />
-            </div>
-
-            {/* Floating Chat */}
-            <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end">
-
-            </div>
-        </div>
+        </DashboardDataProvider>
     )
 }

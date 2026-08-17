@@ -1,88 +1,32 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { FileText, Bot, Mic, Loader2, TrendingUp, Award, Clock } from "lucide-react"
-import { auth, db } from "@/firebase/client"
-import { doc, onSnapshot, collection } from "firebase/firestore"
-import { onAuthStateChanged } from "firebase/auth"
 import Link from "next/link"
 import gsap from "gsap"
 import { getRequiredDocuments } from "@/utils/documentConfig"
+import { useDashboardData } from "@/context/DashboardDataContext"
 
 
 export function QuickStats() {
-  const [userData, setUserData] = useState<any>(null)
-  const [metrics, setMetrics] = useState({
-    uploadedDocs: 0,
-    reviewScore: 0,
-    reviewsCount: 0,
-    interviewScore: 0,
-    interviewsCount: 0
-  })
-  const [loading, setLoading] = useState(true)
+  const { userData, reviews, interviewSessions, loading } = useDashboardData()
   const containerRef = useRef<HTMLDivElement>(null)
 
   const totalRequiredDocs = getRequiredDocuments(userData?.onboarding?.visaType).length;
 
-  useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // 1. User Doc (Documents)
-        const userDocRef = doc(db, "users", user.uid)
-        const unsubUser = onSnapshot(userDocRef, (docSnap) => {
-          if (docSnap.exists()) {
-            const data = docSnap.data()
-            setUserData(data)
-            const docs = data.documents ? Object.keys(data.documents).length : 0
-            setMetrics(prev => ({ ...prev, uploadedDocs: docs }))
-          }
-        })
+  const metrics = useMemo(() => {
+    const uploadedDocs = userData?.documents ? Object.keys(userData.documents).length : 0
 
-        // 2. Reviews
-        const reviewsRef = collection(db, "users", user.uid, "reviews")
-        const unsubReviews = onSnapshot(reviewsRef, (snapshot) => {
-          let totalScore = 0
-          let count = 0
-          snapshot.forEach(doc => {
-            totalScore += doc.data().score || 0
-            count++
-          })
-          setMetrics(prev => ({ 
-            ...prev, 
-            reviewsCount: count,
-            reviewScore: count > 0 ? Math.round(totalScore / count) : 0 
-          }))
-        })
+    const reviewsCount = reviews.length
+    const reviewTotal = reviews.reduce((sum, r) => sum + (r.score || 0), 0)
+    const reviewScore = reviewsCount > 0 ? Math.round(reviewTotal / reviewsCount) : 0
 
-        // 3. Interviews
-        const interviewsRef = collection(db, "users", user.uid, "interview_sessions")
-        const unsubInterviews = onSnapshot(interviewsRef, (snapshot) => {
-          let totalScore = 0
-          let count = 0
-          snapshot.forEach(doc => {
-            totalScore += doc.data().feedback?.overallScore || 0
-            count++
-          })
-          setMetrics(prev => ({ 
-            ...prev, 
-            interviewsCount: count,
-            interviewScore: count > 0 ? Math.round(totalScore / count) : 0 
-          }))
-          setLoading(false)
-        })
+    const interviewsCount = interviewSessions.length
+    const interviewTotal = interviewSessions.reduce((sum, s) => sum + (s.feedback?.overallScore || 0), 0)
+    const interviewScore = interviewsCount > 0 ? Math.round(interviewTotal / interviewsCount) : 0
 
-        return () => {
-          unsubUser()
-          unsubReviews()
-          unsubInterviews()
-        }
-      } else {
-        setLoading(false)
-      }
-    })
-
-    return () => unsubscribeAuth()
-  }, [])
+    return { uploadedDocs, reviewScore, reviewsCount, interviewScore, interviewsCount }
+  }, [userData, reviews, interviewSessions])
 
   useEffect(() => {
     if (!loading && containerRef.current) {

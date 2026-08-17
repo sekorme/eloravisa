@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useTheme } from "next-themes"
-import { Facebook, Instagram, Linkedin, Send } from "lucide-react"
+import { Send } from "lucide-react"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 
@@ -55,11 +55,9 @@ export function Footer() {
             <p className="text-muted-foreground text-base leading-relaxed max-w-sm mb-8">
               Empowering applicants to navigate the visa process with confidence. No agents, just expert guidance and AI-powered tools for a transparent journey.
             </p>
+            {/* Facebook, Instagram and LinkedIn are hidden until real profile URLs are configured. */}
             <div className="flex gap-5">
               {[
-                { icon: Facebook, href: "#", color: "hover:text-blue-600", label: "Facebook" },
-                { icon: Instagram, href: "#", color: "hover:text-pink-600", label: "Instagram" },
-                { icon: Linkedin, href: "#", color: "hover:text-blue-700", label: "LinkedIn" },
                 { icon: Send, href: "https://t.me/+wWazCHK2wEMzMzdk", color: "hover:text-blue-400", label: "Telegram" }
               ].map((social, idx) => (
                 <Link 
@@ -77,10 +75,10 @@ export function Footer() {
           <div className="footer-content">
             <h3 className="font-bold mb-6 text-sm uppercase tracking-widest text-foreground/80">Product</h3>
             <ul className="space-y-4 text-sm text-muted-foreground">
-              <li><Link href="#features" className="hover:text-blue-500 transition-colors flex items-center gap-2">Features</Link></li>
+              <li><Link href="#ai-tools" className="hover:text-blue-500 transition-colors flex items-center gap-2">Features</Link></li>
               <li><Link href="#how-it-works" className="hover:text-blue-500 transition-colors flex items-center gap-2">How it Works</Link></li>
-              <li><Link href="/pricing" className="hover:text-blue-500 transition-colors flex items-center gap-2">Pricing</Link></li>
-              <li><Link href="#" className="hover:text-blue-500 transition-colors flex items-center gap-2">Success Stories</Link></li>
+              <li><Link href="#pricing" className="hover:text-blue-500 transition-colors flex items-center gap-2">Pricing</Link></li>
+              <li><Link href="#success-stories" className="hover:text-blue-500 transition-colors flex items-center gap-2">Success Stories</Link></li>
             </ul>
           </div>
 

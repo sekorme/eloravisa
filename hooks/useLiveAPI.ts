@@ -6,7 +6,7 @@ import { Country } from "@/components/countries";
 import {onAuthStateChanged, User} from "firebase/auth";
 import {auth} from "@/firebase/client";
 import {getCurrentUserDetails} from "@/action/user";
-import {deductTokens, TOKEN_COSTS} from "@/lib/subscriptions";
+import {mintGeminiSessionToken} from "@/lib/geminiSession";
 
 export interface TranscriptItem {
     id: string;
@@ -36,6 +36,10 @@ export function useLiveAPI() {
     const sessionRef = useRef<any>(null);
     const audioSourcesRef = useRef<AudioBufferSourceNode[]>([]);
     const transcriptTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    // Set right before we close the session ourselves, so onclose can tell a
+    // normal hangup (empty/synthetic close event, nothing to report) apart
+    // from the server or network dropping the connection unexpectedly.
+    const intentionalCloseRef = useRef(false);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -79,21 +83,11 @@ export function useLiveAPI() {
                 throw new Error(`The destination country ${selectedCountry.name} does not require an interview for your visa category.`);
             }
 
-            // Deduct tokens before connecting
-            if (auth.currentUser) {
-                try {
-                    await deductTokens(auth.currentUser.uid, TOKEN_COSTS.MOCK_INTERVIEW);
-                } catch (error) {
-                    console.error("Failed to deduct tokens:", error);
-                    toast.error("Failed to deduct tokens. Please check your balance.");
-                    throw error;
-                }
-            }
-
-            const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-            if (!apiKey) throw new Error("NEXT_PUBLIC_GEMINI_API_KEY is not set");
-
-            const genAI = new GoogleGenAI({ apiKey });
+            // Mints a short-lived token server-side (which also deducts the
+            // interview cost atomically) so the real Gemini API key never
+            // reaches the browser.
+            const ephemeralToken = await mintGeminiSessionToken("consular_interview");
+            const genAI = new GoogleGenAI({ apiKey: ephemeralToken, httpOptions: { apiVersion: "v1alpha" } });
 
             // 1. Setup Audio Context
             audioCtxRef.current = new AudioContext({ sampleRate: 24000 });
@@ -354,11 +348,21 @@ If feedback mode is enabled after the interview:
                         }
                     },
                     onerror: (error) => {
-                        console.error("Gemini Live Error:", error);
+                        console.error("Gemini Live Error:", error?.message || error);
                     },
-                    onclose: () => {
-                        disconnect();
+                    onclose: (e) => {
+                        const wasIntentional = intentionalCloseRef.current;
+                        intentionalCloseRef.current = false;
 
+                        // A close we triggered ourselves (hanging up) doesn't
+                        // come with a real CloseEvent — nothing to report.
+                        if (!wasIntentional) {
+                            console.error("Gemini Live socket closed:", { code: e?.code, reason: e?.reason, wasClean: e?.wasClean });
+                            if (!e || e.code !== 1000) {
+                                setError(e?.reason || `Connection closed unexpectedly${e?.code ? ` (code ${e.code})` : ""}.`);
+                            }
+                        }
+                        disconnect();
                     }
                 }
             });
@@ -374,26 +378,40 @@ If feedback mode is enabled after the interview:
             processor.connect(audioCtxRef.current.destination);
 
             processor.onaudioprocess = (e) => {
+                // sessionRef.current is cleared by disconnect() as soon as the
+                // socket closes; the interval/processor callbacks can still be
+                // mid-flight after that, so check the ref (not the closed-over
+                // `session`) to avoid sending on an already-closed socket.
+                if (sessionRef.current !== session) return;
                 const inputData = e.inputBuffer.getChannelData(0);
                 const base64 = pcmToBase64(inputData);
-                session.sendRealtimeInput({
-                    audio: { data: base64, mimeType: "audio/pcm;rate=16000" },
-                });
+                try {
+                    session.sendRealtimeInput({
+                        audio: { data: base64, mimeType: "audio/pcm;rate=16000" },
+                    });
+                } catch (sendErr) {
+                    console.warn("Failed to send audio chunk:", sendErr);
+                }
             };
 
             // Video sending loop (2 times a second)
             const canvas = document.createElement("canvas");
             const ctx = canvas.getContext("2d");
             videoIntervalRef.current = window.setInterval(() => {
+                if (sessionRef.current !== session) return;
                 if (videoElement.readyState >= 2 && ctx) {
                     canvas.width = videoElement.videoWidth;
                     canvas.height = videoElement.videoHeight;
                     ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
                     const dataUrl = canvas.toDataURL("image/jpeg", 0.5);
                     const base64 = dataUrl.split(",")[1];
-                    session.sendRealtimeInput({
-                        video: { data: base64, mimeType: "image/jpeg" }
-                    });
+                    try {
+                        session.sendRealtimeInput({
+                            video: { data: base64, mimeType: "image/jpeg" }
+                        });
+                    } catch (sendErr) {
+                        console.warn("Failed to send video frame:", sendErr);
+                    }
                 }
             }, 500);
 
@@ -420,6 +438,7 @@ If feedback mode is enabled after the interview:
         setStatus("disconnected");
         stopAllAudio();
         if (sessionRef.current) {
+            intentionalCloseRef.current = true;
             sessionRef.current.close();
             sessionRef.current = null;
         }

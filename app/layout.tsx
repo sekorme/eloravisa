@@ -6,6 +6,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { Toaster } from "@/components/ui/sonner";
 import Script from "next/script";
 import {TrackVisit} from "@/components/TrackVisit";
+import { LenisProvider } from "@/components/LenisProvider";
 
 
 
@@ -159,10 +160,11 @@ export default function RootLayout({
             disableTransitionOnChange
         >
             <TrackVisit/>
-            <AuthProvider>
-                {children}
-
-            </AuthProvider>
+            <LenisProvider>
+                <AuthProvider>
+                    {children}
+                </AuthProvider>
+            </LenisProvider>
             <Toaster />
         </ThemeProvider>
         </body>

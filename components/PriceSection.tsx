@@ -6,6 +6,8 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Check, X, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { SUBSCRIPTION_PLANS, TOKEN_COSTS } from "@/lib/subscriptions";
+import { SignupSheet } from "@/components/auth/SignupSheet";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -14,68 +16,72 @@ type Feature = {
   included: boolean;
 };
 
-type Plan = {
+type PlanDisplay = {
   name: string;
-  price: string;
-  cadence?: string;
+  price: number;
+  tokens: number;
+  cadence: string;
   description: string;
   features: Feature[];
   cta: string;
   highlight?: boolean;
   badge?: string;
-  color: string;
 };
 
-const plans: Plan[] = [
+const reviewsFromTokens = (tokens: number) => Math.floor(tokens / TOKEN_COSTS.DOCUMENT_REVIEW);
+const interviewsFromTokens = (tokens: number) => Math.floor(tokens / TOKEN_COSTS.MOCK_INTERVIEW);
+
+// Sourced from lib/subscriptions.ts so pricing here never drifts from what's actually billed.
+const plans: PlanDisplay[] = [
   {
-    name: "Basic Plan",
-    price: "$0",
+    name: SUBSCRIPTION_PLANS.FREE.name,
+    price: SUBSCRIPTION_PLANS.FREE.price,
+    tokens: SUBSCRIPTION_PLANS.FREE.tokens,
     cadence: "/mo",
     description: "Perfect for exploring the platform",
     features: [
-      { name: "10 Tokens", included: true },
-      { name: "AI Chatbot Assistant", included: false },
-      { name: "Document Review", included: true },
-      { name: "Special Telegram Group", included: false },
-      { name: "One AI Mock Interview", included: true },
-      { name: "Document Storage", included: true },
+      { name: `${SUBSCRIPTION_PLANS.FREE.tokens} AI tokens per month`, included: true },
+      { name: `Up to ${reviewsFromTokens(SUBSCRIPTION_PLANS.FREE.tokens)} document reviews`, included: true },
+      { name: `Up to ${interviewsFromTokens(SUBSCRIPTION_PLANS.FREE.tokens)} mock interview`, included: true },
+      { name: "AI Chatbot Assistant", included: SUBSCRIPTION_PLANS.FREE.hasChatbot },
+      { name: "Private Telegram Group", included: SUBSCRIPTION_PLANS.FREE.hasTelegram },
+      { name: "Secure Document Storage", included: true },
     ],
-    cta: "Get started",
-    color: "blue"
+    cta: "Start Free",
   },
   {
-    name: "Pro Plan",
-    price: "$20",
+    name: SUBSCRIPTION_PLANS.PRO.name,
+    price: SUBSCRIPTION_PLANS.PRO.price,
+    tokens: SUBSCRIPTION_PLANS.PRO.tokens,
     cadence: "/mo",
     description: "Most popular for active applicants",
     features: [
-      { name: "100 AI Tokens", included: true },
-      { name: "Limited AI Chatbot Access", included: true },
-      { name: "Document Review", included: true },
-      { name: "Special Telegram Group", included: false },
-      { name: "Multiple AI Mock Interviews", included: true },
-      { name: "Document Storage", included: true },
+      { name: `${SUBSCRIPTION_PLANS.PRO.tokens} AI tokens per month`, included: true },
+      { name: `Up to ${reviewsFromTokens(SUBSCRIPTION_PLANS.PRO.tokens)} document reviews`, included: true },
+      { name: `Up to ${interviewsFromTokens(SUBSCRIPTION_PLANS.PRO.tokens)} mock interviews`, included: true },
+      { name: "AI Chatbot Assistant", included: SUBSCRIPTION_PLANS.PRO.hasChatbot },
+      { name: "Private Telegram Group", included: SUBSCRIPTION_PLANS.PRO.hasTelegram },
+      { name: "Secure Document Storage", included: true },
     ],
-    cta: "Upgrade to Pro",
+    cta: "Choose Pro",
     highlight: true,
     badge: "Most Popular",
-    color: "indigo"
   },
   {
-    name: "Full Features",
-    price: "$40",
+    name: SUBSCRIPTION_PLANS.FULL.name,
+    price: SUBSCRIPTION_PLANS.FULL.price,
+    tokens: SUBSCRIPTION_PLANS.FULL.tokens,
     cadence: "/mo",
     description: "Everything you need for success",
     features: [
-      { name: "200 AI Tokens", included: true },
-      { name: "Full AI Chatbot Access", included: true },
-      { name: "Document Review", included: true },
-      { name: "Special Telegram Group", included: true },
-      { name: "Multiple AI mock interviews", included: true },
-      { name: "Document Storage", included: true },
+      { name: `${SUBSCRIPTION_PLANS.FULL.tokens} AI tokens per month`, included: true },
+      { name: `Up to ${reviewsFromTokens(SUBSCRIPTION_PLANS.FULL.tokens)} document reviews`, included: true },
+      { name: `Up to ${interviewsFromTokens(SUBSCRIPTION_PLANS.FULL.tokens)} mock interviews`, included: true },
+      { name: "AI Chatbot Assistant", included: SUBSCRIPTION_PLANS.FULL.hasChatbot },
+      { name: "Private Telegram Group", included: SUBSCRIPTION_PLANS.FULL.hasTelegram },
+      { name: "Secure Document Storage", included: true },
     ],
-    cta: "Boost your application",
-    color: "purple"
+    cta: "Get Full Access",
   },
 ];
 
@@ -125,7 +131,7 @@ export default function PriceSection() {
   }, [mounted]);
 
   return (
-    <section ref={containerRef} className="relative py-24 md:py-32 overflow-hidden bg-slate-50/50 dark:bg-[#030308]/50">
+    <section id="pricing" ref={containerRef} className="relative py-24 md:py-32 overflow-hidden bg-slate-50/50 dark:bg-[#030308]/50">
 
       <div className="container relative z-10 px-4 mx-auto">
         <div className="price-header text-center mb-16 md:mb-24">
@@ -136,18 +142,18 @@ export default function PriceSection() {
             <span className="text-foreground">Pricing</span>
           </h2>
           <p className="max-w-2xl mx-auto text-muted-foreground text-xl">
-            Choose the plan that's right for your ambition. No hidden fees, ever.
+            Choose the plan that's right for your ambition. Prices in USD, billed monthly.
           </p>
         </div>
 
         <div className="price-grid grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {plans.map((plan, idx) => (
-            <div 
+            <div
               key={idx}
               className={cn(
                 "price-card relative p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 border transition-all duration-500 flex flex-col group",
-                plan.highlight 
-                  ? "border-blue-500/50 shadow-[0_20px_50px_rgba(59,130,246,0.15)] scale-105 z-10 dark:bg-slate-900/80" 
+                plan.highlight
+                  ? "border-blue-500/50 shadow-[0_20px_50px_rgba(59,130,246,0.15)] scale-105 z-10 dark:bg-slate-900/80"
                   : "border-slate-200 dark:border-slate-800 hover:border-blue-500/30 shadow-xl hover:shadow-2xl"
               )}
             >
@@ -163,8 +169,8 @@ export default function PriceSection() {
               </div>
 
               <div className="mb-8 flex items-baseline gap-1">
-                <span className="text-5xl font-extrabold">{plan.price}</span>
-                <span className="text-muted-foreground">{plan.cadence}</span>
+                <span className="text-5xl font-extrabold">${plan.price}</span>
+                <span className="text-muted-foreground">{plan.cadence} USD</span>
               </div>
 
               <div className="space-y-4 mb-10 flex-grow">
@@ -186,16 +192,15 @@ export default function PriceSection() {
                 ))}
               </div>
 
-              <button 
+              <SignupSheet
+                desscription={plan.cta}
                 className={cn(
-                  "w-full py-4 px-6 rounded-2xl font-bold transition-all duration-300",
+                  "w-full py-4 px-6 rounded-2xl font-bold transition-all duration-300 h-auto",
                   plan.highlight
                     ? "bg-blue-600 text-white shadow-lg hover:bg-blue-700 hover:shadow-blue-500/25"
                     : "bg-slate-100 dark:bg-slate-800 text-foreground hover:bg-blue-500 hover:text-white"
                 )}
-              >
-                {plan.cta}
-              </button>
+              />
 
               {plan.highlight && (
                 <div className="absolute inset-0 rounded-[2.5rem] bg-gradient-to-b from-blue-500/5 to-transparent pointer-events-none"></div>
@@ -203,9 +208,9 @@ export default function PriceSection() {
             </div>
           ))}
         </div>
-        
+
         <p className="mt-12 text-center text-sm text-muted-foreground">
-          Prices in USD. All plans include 24/7 basic support.
+          All prices in USD. No hidden agent or processing fees.
         </p>
       </div>
     </section>

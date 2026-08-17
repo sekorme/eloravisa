@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth, db } from '@/firebase/admin';
 import admin from "firebase-admin";
+import { requireAdmin } from '@/lib/requireAdmin';
 
 if (!admin.apps.length) {
     const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
@@ -28,14 +29,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing withdrawalId' }, { status: 400 });
     }
 
-    // Verify Admin (Basic check - in production, check custom claims or specific admin UID)
-    const authHeader = req.headers.get('authorization') || '';
-    const match = authHeader.match(/^Bearer (.+)$/);
-    if (!match) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-    const idToken = match[1];
-    await auth.verifyIdToken(idToken);
-    // TODO: Add check for admin role here
+    const adminCheck = await requireAdmin(req, auth);
+    if (adminCheck.error) {
+      return NextResponse.json({ error: adminCheck.error }, { status: adminCheck.status });
+    }
 
     const withdrawalRef = db.collection('withdrawals').doc(withdrawalId);
 

@@ -192,9 +192,12 @@ export function ComparisonSection() {
         {/* Bottom CTA or Summary */}
         <div className="mt-24 text-center">
           <p className="text-slate-500 dark:text-slate-500 font-bold tracking-widest uppercase text-sm mb-6">Experience the difference</p>
-          <div className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black text-lg transition-transform hover:scale-105 cursor-pointer">
+          <a
+            href="#pricing"
+            className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black text-lg transition-transform hover:scale-105"
+          >
             Start Your Journey <Sparkles size={20} className="text-yellow-400" />
-          </div>
+          </a>
         </div>
       </div>
     </section>

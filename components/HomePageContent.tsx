@@ -7,7 +7,7 @@ import { doc, onSnapshot } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import Link from 'next/link';
 
-export default function HomePageContent({key}: {key: string}) {
+export default function HomePageContent() {
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [hasAccess, setHasAccess] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -48,7 +48,7 @@ export default function HomePageContent({key}: {key: string}) {
                 {isChatOpen ? (
                     <div className="w-full h-full animate-in slide-in-from-bottom-10 fade-in duration-300">
                         {hasAccess ? (
-                            <ChatInterface key={key} onClose={() => setIsChatOpen(false)} />
+                            <ChatInterface onClose={() => setIsChatOpen(false)} />
                         ) : (
                             <div className="w-full h-full bg-white dark:bg-neutral-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-neutral-800 flex flex-col items-center justify-center p-8 text-center space-y-6">
                                 <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-full text-indigo-600">

@@ -2,12 +2,13 @@
 
 import React, { useEffect, useRef } from "react"
 import * as THREE from "three"
+import { prefersReducedMotion } from "@/lib/motion"
 
 export function GlobalThreeBackground() {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!containerRef.current) return
+    if (!containerRef.current || prefersReducedMotion()) return
 
     const container = containerRef.current
     const scene = new THREE.Scene()
@@ -102,8 +103,9 @@ export function GlobalThreeBackground() {
   }, [])
 
   return (
-    <div 
-      ref={containerRef} 
+    <div
+      ref={containerRef}
+      aria-hidden="true"
       className="fixed inset-0 pointer-events-none -z-10 bg-transparent"
       style={{ isolation: "isolate" }}
     />

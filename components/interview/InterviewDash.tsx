@@ -14,8 +14,9 @@ import { toast } from "sonner";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import {useRouter} from "next/navigation";
 import { deductTokens, TOKEN_COSTS } from "@/lib/subscriptions";
+import { mintGeminiSessionToken } from "@/lib/geminiSession";
 
-const InterviewDash =({apiKeys}: {apiKeys: string | null}) => {
+const InterviewDash = () => {
     const [status, setStatus] = useState<SessionStatus>(SessionStatus.IDLE);
     const [entries, setEntries] = useState<TranscriptEntry[]>([]);
     const [currentInputText, setCurrentInputText] = useState('');
@@ -234,7 +235,8 @@ const InterviewDash =({apiKeys}: {apiKeys: string | null}) => {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             setMicStream(stream);
 
-            const ai = new GoogleGenAI({ apiKey: apiKeys! });
+            const ephemeralToken = await mintGeminiSessionToken("interview_dash");
+            const ai = new GoogleGenAI({ apiKey: ephemeralToken, httpOptions: { apiVersion: "v1alpha" } });
 
             // Use a single AudioContext with default sample rate to avoid mismatch errors
             const win = window as unknown as { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext };

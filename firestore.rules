@@ -1,0 +1,119 @@
+rules_version = '2';
+
+// Drafted from the actual read/write patterns in this codebase (client SDK
+// call sites in components/, app/, lib/) since no rules file previously
+// existed in the repo — everything was running on whatever default is set
+// in the Firebase console. Deploy with `firebase deploy --only firestore:rules`
+// after reviewing against the Firebase console's current rules, and test
+// with the Firestore emulator before rolling out to production.
+//
+// Server code using firebase-admin (everything under app/api/**, action/**)
+// authenticates with a service account and always bypasses these rules —
+// they only constrain the browser-facing client SDK.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // ── users/{uid} ──────────────────────────────────────────────────────
+    // Profile + onboarding + document metadata. `tokens` is the paid
+    // resource: client writes may only ever decrease it (deductTokens uses
+    // this), never increase it — increases only happen server-side via
+    // firebase-admin after a verified payment (app/api/paystack-success).
+    // `planId` similarly can only change server-side after payment.
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+
+      allow create: if isOwner(uid)
+        && request.resource.data.planId == 'free'
+        && request.resource.data.tokens is number
+        && request.resource.data.tokens <= 50;
+
+      allow update: if isOwner(uid)
+        && request.resource.data.planId == resource.data.planId
+        && request.resource.data.tokens <= resource.data.tokens;
+
+      allow delete: if false;
+
+      // AI document-review results and mock-interview session history.
+      // Only ever read/written by their owner from their own dashboard.
+      match /reviews/{reviewId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /interview_sessions/{sessionId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      // Cached AI output (e.g. visa checklist) to avoid re-generating on
+      // every visit. Owner-only, no cross-user sensitivity.
+      match /cache/{cacheId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      // Created server-side only (app/api/notifications/broadcast uses
+      // firebase-admin, bypassing these rules). Client may read its own and
+      // mark items read, not create or delete.
+      match /notifications/{notificationId} {
+        allow read: if isOwner(uid);
+        allow update: if isOwner(uid)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
+        allow create, delete: if false;
+      }
+    }
+
+    // ── influencers/{uid} ────────────────────────────────────────────────
+    // totalCommission is only ever adjusted server-side (withdrawal
+    // request/reject routes, paystack-success) via firebase-admin
+    // transactions, so client updates must leave it unchanged.
+    match /influencers/{uid} {
+      allow read: if isOwner(uid);
+
+      allow create: if isOwner(uid)
+        && request.resource.data.totalCommission == 0;
+
+      allow update: if isOwner(uid)
+        && request.resource.data.totalCommission == resource.data.totalCommission;
+
+      allow delete: if false;
+    }
+
+    // ── promo_codes/{code} ───────────────────────────────────────────────
+    // Created once at influencer signup; read by the checkout flow to
+    // validate/apply a code. No client-side mutation after creation.
+    match /promo_codes/{code} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == request.resource.data.influencerId;
+      allow update, delete: if false;
+    }
+
+    // ── payments/{id} ────────────────────────────────────────────────────
+    // Written only by app/api/paystack-success (firebase-admin). Readable
+    // by the payer and, separately, by the influencer credited on it.
+    match /payments/{paymentId} {
+      allow read: if isSignedIn()
+        && (resource.data.userId == request.auth.uid || resource.data.influencerId == request.auth.uid);
+      allow write: if false;
+    }
+
+    // ── withdrawals/{id} ─────────────────────────────────────────────────
+    // Written only by app/api/affiliate/withdrawals and
+    // app/api/admin/withdrawals/reject (firebase-admin). Readable by the
+    // influencer who requested it.
+    match /withdrawals/{withdrawalId} {
+      allow read: if isSignedIn() && resource.data.influencerId == request.auth.uid;
+      allow write: if false;
+    }
+
+    // Deny anything not explicitly matched above.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

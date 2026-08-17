@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { GoogleGenAI, LiveServerMessage, Modality } from '@google/genai';
 import { createPcmBlob, decodeAudioData, base64ToBytes } from '../utils/audio';
-import {config} from "@/lib/config";
+import { mintGeminiSessionToken } from "@/lib/geminiSession";
 
 interface UseLiveSessionProps {
     onTranscript?: (text: string, isUser: boolean) => void;
@@ -37,12 +37,12 @@ export const useLiveSession = ({ onTranscript }: UseLiveSessionProps ={}) => {
         }
     };
 
-    const connect = async ({key}: {key:string}) => {
+    const connect = async () => {
         setError(null);
         try {
             ensureAudioContexts();
-            const geminiKey = config.geminiKey
-            const ai = new GoogleGenAI({ apiKey: key! || geminiKey });
+            const ephemeralToken = await mintGeminiSessionToken("assistant_voice");
+            const ai = new GoogleGenAI({ apiKey: ephemeralToken, httpOptions: { apiVersion: "v1alpha" } });
 
             // Request Microphone Access
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });

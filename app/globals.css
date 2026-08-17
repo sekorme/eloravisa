@@ -38,6 +38,19 @@
     --color-popover: var(--popover);
     --color-card-foreground: var(--card-foreground);
     --color-card: var(--card);
+
+    /* Marketing/landing accent tokens — additive only. Fixed brand colors
+       used deliberately on specific landing sections (e.g. a navy hero
+       background), independent of the app-wide light/dark toggle that the
+       dashboard, auth, and admin surfaces rely on. Do not repurpose
+       --color-primary/--color-background for this. */
+    --color-landing-navy: var(--landing-navy);
+    --color-landing-navy-deep: var(--landing-navy-deep);
+    --color-landing-cyan: var(--landing-cyan);
+    --color-landing-blue: var(--landing-blue);
+    --color-landing-violet: var(--landing-violet);
+    --color-landing-magenta: var(--landing-magenta);
+
     --radius-sm: calc(var(--radius) - 4px);
     --radius-md: calc(var(--radius) - 2px);
     --radius-lg: var(--radius);
@@ -89,6 +102,14 @@
     --sidebar-accent-foreground: oklch(0.205 0 0);
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.708 0 0);
+
+    /* Fixed brand accents for landing sections; same value in light/dark. */
+    --landing-navy: #071426;
+    --landing-navy-deep: #0B1F3A;
+    --landing-cyan: #22D3EE;
+    --landing-blue: #2563EB;
+    --landing-violet: #7C3AED;
+    --landing-magenta: #EC16D7;
 }
 
 .dark {

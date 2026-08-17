@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import admin from "firebase-admin";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { getMessaging } from "firebase-admin/messaging";
+import { getAuth } from "firebase-admin/auth";
+import { requireAdmin } from "@/lib/requireAdmin";
 
 // ── Initialise Firebase Admin once ───────────────────────────────────────────
 if (!admin.apps.length) {
@@ -36,14 +38,31 @@ const chunk = <T>(arr: T[], size: number) =>
         arr.slice(i * size, i * size + size),
     );
 
+// How many user docs one invocation reads/sends per call. At 50k+ users a
+// single unbounded collection scan risks hitting the serverless function's
+// time/memory limits, so the caller pages through with `cursor` /
+// `nextCursor` until the response comes back with `done: true`.
+const PAGE_SIZE = 2000;
+
+// Allow enough headroom for a full page's worth of FCM multicast round-trips
+// and BulkWriter flushes. Actual ceiling is still capped by the hosting
+// plan (e.g. Vercel Hobby caps at 60s regardless of this value).
+export const maxDuration = 300;
+
 // ── POST /api/notifications/broadcast ────────────────────────────────────────
 export async function POST(req: NextRequest) {
     try {
         const db = getDb();
         const messaging = getMsg();
 
+        /* 0️⃣  require an authenticated admin ------------------------------------ */
+        const adminCheck = await requireAdmin(req, getAuth());
+        if (adminCheck.error) {
+            return NextResponse.json({ success: false, error: adminCheck.error }, { status: adminCheck.status });
+        }
+
         /* 1️⃣  validate input ---------------------------------------------------- */
-        const { title, body } = await req.json();
+        const { title, body, cursor } = await req.json();
 
         if (!title || !body) {
             return NextResponse.json(
@@ -52,8 +71,18 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        /* 2️⃣  collect unique tokens & map → userId ----------------------------- */
-        const snap = await db.collection("users").select("fcmToken").get();
+        /* 2️⃣  collect unique tokens & map → userId, one page at a time --------- */
+        let pageQuery = db
+            .collection("users")
+            .select("fcmToken")
+            .orderBy(admin.firestore.FieldPath.documentId())
+            .limit(PAGE_SIZE);
+
+        if (typeof cursor === "string" && cursor) {
+            pageQuery = pageQuery.startAfter(cursor);
+        }
+
+        const snap = await pageQuery.get();
         const tokenToUid: Record<string, string> = {};
 
         snap.forEach((d) => {
@@ -63,12 +92,17 @@ export async function POST(req: NextRequest) {
         });
 
         const tokens = Object.keys(tokenToUid);
+        const lastDoc = snap.docs[snap.docs.length - 1];
+        const nextCursor = snap.size === PAGE_SIZE && lastDoc ? lastDoc.id : null;
 
         if (!tokens.length) {
-            return NextResponse.json(
-                { success: false, error: "No FCM tokens found." },
-                { status: 404 },
-            );
+            return NextResponse.json({
+                success: true,
+                successCount: 0,
+                failureCount: 0,
+                nextCursor,
+                done: nextCursor === null,
+            });
         }
 
         /* 3️⃣  send FCM in ≤500‑token chunks ------------------------------------ */
@@ -127,11 +161,13 @@ export async function POST(req: NextRequest) {
 
         await bw.close(); // flush all queued writes
 
-        /* 5️⃣  done ------------------------------------------------------------- */
+        /* 5️⃣  done for this page ------------------------------------------------ */
         return NextResponse.json({
             success: true,
             successCount,
             failureCount,
+            nextCursor,
+            done: nextCursor === null,
         });
     } catch (err: any) {
         console.error("🔥 Broadcast error:", err);

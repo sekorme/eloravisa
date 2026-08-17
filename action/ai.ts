@@ -1,35 +1,23 @@
 "use server"
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { checkRateLimit } from "@/lib/ratelimit";
+import { getClientIp } from "@/lib/getClientIp";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
-
-export async function getGeminiKey() {
-    // WARNING: This exposes the API key to the client. 
-    // In a production app, you should use a proxy or a temporary token if available.
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-        console.error("GEMINI_API_KEY is not set in the environment variables.");
-        return null; // Return null if key is not found
-    }
-    return apiKey;
-}
-
-export async function getGeminiKeys() {
-    // WARNING: This exposes the API key to the client.
-    // In a production app, you should use a proxy or a temporary token if available.
-    const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-    if (!apiKey) {
-        console.error("GEMINI_API_KEY is not set in the environment variables.");
-        return null; // Return null if key is not found
-    }
-    return apiKey;
-}
-
 
 
 export async function analyzeDocument(documentUrl: string, documentType: string, userData: any, mimeType: string) {
   try {
+    // These Server Actions don't verify a Firebase ID token today, so there's
+    // no uid to key a limiter on — fall back to IP. See app/api/gemini/* for
+    // the uid-keyed version used by routes that do authenticate.
+    const ip = await getClientIp();
+    const rateLimit = await checkRateLimit("aiGeneration", `ip:${ip}`);
+    if (!rateLimit.success) {
+      return { success: false, error: "Too many requests. Please slow down and try again shortly." };
+    }
+
     // 1. Fetch the file
     const response = await fetch(documentUrl);
     if (!response.ok) throw new Error("Failed to fetch document");
@@ -109,6 +97,12 @@ export async function analyzeDocument(documentUrl: string, documentType: string,
 
 export async function getVisaInformation(userData: any) {
   try {
+    const ip = await getClientIp();
+    const rateLimit = await checkRateLimit("aiGeneration", `ip:${ip}`);
+    if (!rateLimit.success) {
+      return { success: false, error: "Too many requests. Please slow down and try again shortly." };
+    }
+
     // Use the specific model version that is known to work for text generation
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     const date = new Date();

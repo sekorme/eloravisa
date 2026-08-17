@@ -54,27 +54,29 @@ export interface UserSubscription {
   lastUpdated: number;
 }
 
-import { doc, getDoc, updateDoc, increment } from "firebase/firestore";
+import { doc, getDoc, runTransaction } from "firebase/firestore";
 import { db } from "@/firebase/client";
 
 export async function deductTokens(userId: string, amount: number) {
   const userRef = doc(db, "users", userId);
-  const userDoc = await getDoc(userRef);
-  
-  if (!userDoc.exists()) {
-    throw new Error("User not found");
-  }
 
-  const userData = userDoc.data();
-  const currentTokens = userData.tokens || 0;
+  await runTransaction(db, async (transaction) => {
+    const userDoc = await transaction.get(userRef);
 
-  if (currentTokens < amount) {
-    throw new Error("Insufficient tokens");
-  }
+    if (!userDoc.exists()) {
+      throw new Error("User not found");
+    }
 
-  await updateDoc(userRef, {
-    tokens: increment(-amount),
-    updatedAt: Date.now(),
+    const currentTokens = userDoc.data().tokens || 0;
+
+    if (currentTokens < amount) {
+      throw new Error("Insufficient tokens");
+    }
+
+    transaction.update(userRef, {
+      tokens: currentTokens - amount,
+      updatedAt: Date.now(),
+    });
   });
 
   return true;

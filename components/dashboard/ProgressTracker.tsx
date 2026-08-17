@@ -1,56 +1,18 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { Check as CheckIcon, Loader2, Bot, Mic, Send, Lock } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { auth, db } from "@/firebase/client"
-import { doc, onSnapshot, collection } from "firebase/firestore"
-import { onAuthStateChanged } from "firebase/auth"
 import { getRequiredDocuments } from "@/utils/documentConfig"
 import { format } from "date-fns"
+import { Check as CheckIcon, Loader2, Bot, Mic, Send, Lock } from "lucide-react"
+import { useDashboardData } from "@/context/DashboardDataContext"
 
 
 export function ProgressTracker() {
-  const [userData, setUserData] = useState<any>(null)
-  const [reviewsCount, setReviewsCount] = useState(0)
-  const [interviewsCount, setInterviewsCount] = useState(0)
-  const [loading, setLoading] = useState(true)
+  const { userData, reviews, interviewSessions, loading } = useDashboardData()
+  const reviewsCount = reviews.length
+  const interviewsCount = interviewSessions.length
 
   const totalRequiredDocs = getRequiredDocuments(userData?.onboarding?.visaType).length;
-
-  useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        const userDocRef = doc(db, "users", user.uid)
-        const unsubscribeUser = onSnapshot(userDocRef, (docSnap) => {
-          if (docSnap.exists()) {
-            setUserData(docSnap.data())
-          }
-          setLoading(false)
-        })
-
-        const reviewsCollRef = collection(db, "users", user.uid, "reviews")
-        const unsubscribeReviews = onSnapshot(reviewsCollRef, (snapshot) => {
-            setReviewsCount(snapshot.size)
-        })
-
-        const interviewsCollRef = collection(db, "users", user.uid, "interview_sessions")
-        const unsubscribeInterviews = onSnapshot(interviewsCollRef, (snapshot) => {
-            setInterviewsCount(snapshot.size)
-        })
-
-        return () => {
-            unsubscribeUser()
-            unsubscribeReviews()
-            unsubscribeInterviews()
-        }
-      } else {
-        setLoading(false)
-      }
-    })
-
-    return () => unsubscribeAuth()
-  }, [])
 
   if (loading) {
     return (

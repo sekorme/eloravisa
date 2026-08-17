@@ -33,8 +33,18 @@ import { db, auth } from "@/firebase/client"
 import { signInWithGoogle } from "@/lib/googleSignin"
 import { signOut } from "firebase/auth"
 import { toast } from "sonner"
+import confetti from "canvas-confetti"
 import { SUBSCRIPTION_PLANS } from "@/lib/subscriptions"
 import {registrationEmail} from "@/lib/registrationEmail";
+
+function celebrateSignup() {
+    confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        zIndex: 100,
+    });
+}
 
 export function SignupSheet({className, desscription}: {className?: string, desscription?: string}) {
     const router = useRouter()
@@ -98,6 +108,7 @@ export function SignupSheet({className, desscription}: {className?: string, dess
                 });
 
                 toast.success("Account created successfully")
+                celebrateSignup()
                 await registrationEmail({email, name:fullName})
                 // 3. Redirect to onboarding
                 router.push("/onboarding")
@@ -140,6 +151,7 @@ export function SignupSheet({className, desscription}: {className?: string, dess
                         planId: SUBSCRIPTION_PLANS.FREE.id
                     });
                     toast.success("Account created successfully")
+                    celebrateSignup()
                     router.push("/onboarding")
                 } else {
                     // If user exists, check if they completed onboarding
@@ -298,11 +310,11 @@ export function SignupSheet({className, desscription}: {className?: string, dess
 
                         <p className="text-center text-xs text-muted-foreground mt-4">
                             By clicking continue, you agree to our{" "}
-                            <a href="#" className="underline hover:text-primary">
+                            <a href="/legal/terms-of-service" target="_blank" className="underline hover:text-primary">
                                 Terms of Service
                             </a>{" "}
                             and{" "}
-                            <a href="#" className="underline hover:text-primary">
+                            <a href="/legal/privacy-policy" target="_blank" className="underline hover:text-primary">
                                 Privacy Policy
                             </a>
                             .

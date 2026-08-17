@@ -1,17 +1,15 @@
 'use client'
 import React, { useState, useEffect, useRef } from 'react';
-import { GoogleGenAI, Chat } from '@google/genai';
 import { Message, MessageRole, ChatMode } from '../types';
 import { useLiveSession } from '../hooks/useLiveSession';
 import { X, Mic, Send, Keyboard, AudioWaveform, User, Bot, AlertCircle, Loader2 } from 'lucide-react';
-import {config} from "@/lib/config";
+import { auth } from '@/firebase/client';
 
 interface ChatInterfaceProps {
     onClose: () => void;
-    key:string
 }
 
-export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose, key }) => {
+export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
     const [messages, setMessages] = useState<Message[]>([
         {
             id: '1',
@@ -24,24 +22,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose, key }) =>
     const [isLoading, setIsLoading] = useState(false);
     const [mode, setMode] = useState<ChatMode>(ChatMode.TEXT);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    const [chatSession, setChatSession] = useState<Chat | null>(null);
-
-    // Initialize Chat Session for Text Mode
-    useEffect(() => {
-        try {
-            const geminiKey = config.geminiKey
-            const ai = new GoogleGenAI({ apiKey: key!|| geminiKey });
-            const newChat = ai.chats.create({
-                model: 'gemini-2.5-flash',
-                config: {
-                    systemInstruction: "You are Elora, a professional, warm, and helpful AI assistant for Elora Visa. You help users with visa applications, requirements, and status checks. Keep responses concise and easy to read. Use formatting like bullet points where appropriate. Avoid special formatting symbols such as asterisks or decorative characters.",
-                }
-            });
-            setChatSession(newChat);
-        } catch (e) {
-            console.error("Failed to initialize chat", e);
-        }
-    }, []);
 
     // Auto-scroll to bottom
     const scrollToBottom = () => {
@@ -54,7 +34,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose, key }) =>
 
     // Handle Text Submission
     const handleSend = async () => {
-        if (!input.trim() || !chatSession) return;
+        if (!input.trim()) return;
 
         const userMsg: Message = {
             id: Date.now().toString(),
@@ -62,12 +42,30 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose, key }) =>
             text: input,
             timestamp: new Date()
         };
+        const historyBeforeSend = messages;
         setMessages(prev => [...prev, userMsg]);
         setInput('');
         setIsLoading(true);
 
         try {
-            const result = await chatSession.sendMessageStream({ message: userMsg.text });
+            if (!auth.currentUser) throw new Error("You must be logged in.");
+            const idToken = await auth.currentUser.getIdToken();
+
+            const res = await fetch('/api/gemini/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` },
+                body: JSON.stringify({
+                    message: userMsg.text,
+                    history: historyBeforeSend
+                        .filter(m => m.role !== MessageRole.SYSTEM)
+                        .map(m => ({ role: m.role === MessageRole.USER ? 'user' : 'model', text: m.text })),
+                }),
+            });
+
+            if (!res.ok || !res.body) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.error || 'Failed to get a response');
+            }
 
             let fullResponse = '';
             const botMsgId = (Date.now() + 1).toString();
@@ -80,14 +78,15 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose, key }) =>
                 timestamp: new Date()
             }]);
 
-            for await (const chunk of result) {
-                const text = chunk.text;
-                if (text) {
-                    fullResponse += text;
-                    setMessages(prev => prev.map(msg =>
-                        msg.id === botMsgId ? { ...msg, text: fullResponse } : msg
-                    ));
-                }
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder();
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                fullResponse += decoder.decode(value, { stream: true });
+                setMessages(prev => prev.map(msg =>
+                    msg.id === botMsgId ? { ...msg, text: fullResponse } : msg
+                ));
             }
         } catch (error) {
             console.error(error);
@@ -133,7 +132,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose, key }) =>
     const toggleMode = () => {
         if (mode === ChatMode.TEXT) {
             setMode(ChatMode.VOICE);
-            connect({key});
+            connect();
         } else {
             setMode(ChatMode.TEXT);
             disconnect();

@@ -5,14 +5,22 @@ import { useTheme } from "next-themes"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { SignupSheet } from "@/components/auth/SignupSheet"
-import { Sparkles, ArrowRight } from "lucide-react"
+import { Sparkles, ArrowRight, ShieldCheck, Globe, Eye } from "lucide-react"
+import { useMagnetic } from "@/hooks/useMagnetic"
 
 gsap.registerPlugin(ScrollTrigger)
+
+const TRUST_ROW = [
+  { icon: ShieldCheck, label: "Secure document handling" },
+  { icon: Globe, label: "Built for global applicants" },
+  { icon: Eye, label: "Self-guided and transparent" },
+]
 
 export function FinalCTASection() {
   const containerRef = useRef<HTMLDivElement>(null)
   const { resolvedTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
+  const learnMoreRef = useMagnetic<HTMLAnchorElement>(0.25)
 
   useEffect(() => {
     setMounted(true)
@@ -71,28 +79,26 @@ export function FinalCTASection() {
             </h2>
             
             <p className="cta-elements text-xl md:text-2xl text-blue-100 mb-12 max-w-2xl mx-auto font-medium opacity-90">
-              Join thousands of successful applicants who used EloraVisa to navigate their journey with total transparency.
+              Prepare your documents, practise your interview and understand every step — before you submit your visa application yourself.
             </p>
-            
+
             <div className="cta-elements flex flex-col sm:flex-row gap-6">
-                <SignupSheet 
-                    desscription={"Create Free Account"} 
+                <SignupSheet
+                    desscription={"Create Free Account"}
                     className="h-16 px-10 text-lg bg-white text-blue-600 rounded-2xl shadow-xl hover:scale-105 transition-all font-bold flex items-center gap-2 group/btn"
                 />
-                <button className="h-16 px-10 text-lg bg-transparent border-2 border-white/30 hover:border-white/60 text-white rounded-2xl backdrop-blur-md transition-all font-semibold flex items-center justify-center gap-2">
+                <a href="#how-it-works" ref={learnMoreRef} className="h-16 px-10 text-lg bg-transparent border-2 border-white/30 hover:border-white/60 text-white rounded-2xl backdrop-blur-md transition-all font-semibold flex items-center justify-center gap-2">
                     Learn More <ArrowRight className="w-5 h-5" />
-                </button>
+                </a>
             </div>
 
-            <div className="cta-elements mt-12 flex items-center gap-4 text-blue-200/80 text-sm">
-                <div className="flex -space-x-2">
-                    {[1, 2, 3, 4].map(i => (
-                        <div key={i} className="w-8 h-8 rounded-full border-2 border-blue-600 bg-slate-200 overflow-hidden">
-                            <img src={`https://i.pravatar.cc/100?img=${i + 10}`} alt="User" />
-                        </div>
-                    ))}
-                </div>
-                <span>Joined by 500+ applicants this week</span>
+            <div className="cta-elements mt-12 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-blue-200/80 text-sm">
+                {TRUST_ROW.map((item) => (
+                  <div key={item.label} className="flex items-center gap-2">
+                    <item.icon className="w-4 h-4 shrink-0" />
+                    <span>{item.label}</span>
+                  </div>
+                ))}
             </div>
           </div>
 

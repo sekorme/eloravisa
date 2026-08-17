@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import {FileText, Download, Printer, Coins, Loader2, Sparkles, Wand2, Info, BookOpen, Send, Plane, ShieldCheck, Briefcase} from "lucide-react"
 import { toast } from "sonner"
-import { TOKEN_COSTS, deductTokens } from '@/lib/subscriptions'
+import { TOKEN_COSTS } from '@/lib/subscriptions'
 import Link from 'next/link'
 import { Badge } from "@/components/ui/badge"
 
@@ -75,15 +75,18 @@ export default function DraftPage() {
     setGenerated('')
 
     try {
-      // Deduct tokens before generation
-      await deductTokens(user.uid, TOKEN_COSTS.DOCUMENT_DRAFT);
+      const idToken = await user.getIdToken()
 
+      // Tokens are now deducted atomically server-side in /api/generate-letter,
+      // so calling the route directly can't bypass payment.
       const res = await fetch('/api/generate-letter', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
         body: JSON.stringify({
           docType,
-          userData,
           extra
         })
       })

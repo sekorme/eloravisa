@@ -1,44 +1,20 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Bolt, CircleCheck, Circle, Sparkles } from "lucide-react"
 import { UploadDocumentsModal } from "@/components/UploadDocumentsModal"
 import { DocumentReviewModal } from "@/components/dashboard/DocumentReviewModal"
-import { auth, db } from "@/firebase/client"
-import { doc, onSnapshot } from "firebase/firestore"
-import { onAuthStateChanged } from "firebase/auth"
 import { Button } from "@/components/ui/button"
 import { getRequiredDocuments } from "@/utils/documentConfig"
+import { useDashboardData } from "@/context/DashboardDataContext"
 
 
 export function NextActionCard() {
-  const [userData, setUserData] = useState<any>(null)
-  const [uploadedDocs, setUploadedDocs] = useState<Record<string, any>>({})
-  const [loading, setLoading] = useState(true)
+  const { userData, loading } = useDashboardData()
   const [reviewDoc, setReviewDoc] = useState<{ key: string, url: string, label: string, type: string } | null>(null)
 
   const requiredDocuments = getRequiredDocuments(userData?.onboarding?.visaType);
-
-  useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        const userDocRef = doc(db, "users", user.uid)
-        const unsubscribeSnapshot = onSnapshot(userDocRef, (docSnap) => {
-          if (docSnap.exists()) {
-            const data = docSnap.data()
-            setUserData(data)
-            setUploadedDocs(data.documents || {})
-          }
-          setLoading(false)
-        })
-        return () => unsubscribeSnapshot()
-      } else {
-        setLoading(false)
-      }
-    })
-
-    return () => unsubscribeAuth()
-  }, [])
+  const uploadedDocs: Record<string, any> = userData?.documents || {}
 
   const nextPendingDoc = requiredDocuments.find(doc => !uploadedDocs[doc.key])
 

@@ -1,16 +1,14 @@
 "use client"
 
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, CheckCircle2 } from "lucide-react"
-import { auth, db } from "@/firebase/client"
-import { doc, onSnapshot, collection } from "firebase/firestore"
-import { onAuthStateChanged } from "firebase/auth"
 import Link from "next/link"
 import { gsap } from "gsap"
 import { getRequiredDocuments } from "@/utils/documentConfig"
 import {NumberTicker} from "@/components/ui/number-ticker";
+import { useDashboardData } from "@/context/DashboardDataContext"
 
 
 // Local types to avoid `any` and improve clarity
@@ -35,86 +33,23 @@ interface UserData {
 }
 
 export function WelcomeCard() {
-  const [userData, setUserData] = useState<UserData | null>(null)
-  const [reviewsCount, setReviewsCount] = useState(0)
-  const [interviewsCount, setInterviewsCount] = useState(0)
-  const [readinessScore, setReadinessScore] = useState(0)
-  const [loading, setLoading] = useState(true)
-  const [scores, setScores] = useState({ docAvg: 0, interviewMax: 0 });
+  const { userData: rawUserData, reviews, interviewSessions, loading } = useDashboardData()
+  const userData = rawUserData as UserData | null
 
   const cardRef = useRef<HTMLDivElement>(null);
   const progressCircleRef = useRef<SVGCircleElement>(null);
 
   const totalRequiredDocs = getRequiredDocuments(userData?.onboarding?.visaType).length;
 
-  useEffect(() => {
-    let unsubscribeUser: (() => void) | null = null
-    let unsubscribeReviews: (() => void) | null = null
-    let unsubscribeInterviews: (() => void) | null = null
+  const reviewsCount = reviews.length
+  const interviewsCount = interviewSessions.length
 
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        const userDocRef = doc(db, "users", user.uid)
-        unsubscribeUser = onSnapshot(userDocRef, (docSnap) => {
-          if (docSnap.exists()) {
-            // defer to avoid sync setState in effect
-            void Promise.resolve().then(() => setUserData(docSnap.data() as UserData))
-          }
-        })
-
-        const reviewsCollRef = collection(db, "users", user.uid, "reviews")
-        unsubscribeReviews = onSnapshot(reviewsCollRef, (snapshot) => {
-            // defer updates to avoid synchronous setState-in-effect
-            void Promise.resolve().then(() => setReviewsCount(snapshot.size))
-            let totalScore = 0;
-            snapshot.forEach(doc => { totalScore += doc.data().score || 0; });
-            const avgDocScore = snapshot.size > 0 ? totalScore / snapshot.size : 0;
-            // avoid synchronous setState-in-effect by deferring
-            void Promise.resolve().then(() => setScores(prev => ({ ...prev, docAvg: avgDocScore })));
-        })
-
-        const interviewsCollRef = collection(db, "users", user.uid, "interview_sessions")
-        unsubscribeInterviews = onSnapshot(interviewsCollRef, (snapshot) => {
-            // defer updates to avoid synchronous setState-in-effect
-            void Promise.resolve().then(() => setInterviewsCount(snapshot.size))
-            let maxScore = 0;
-            snapshot.forEach(doc => {
-                const score = doc.data().feedback?.overallScore || 0;
-                if (score > maxScore) maxScore = score;
-            });
-            // avoid synchronous setState-in-effect by deferring
-            void Promise.resolve().then(() => setScores(prev => ({ ...prev, interviewMax: maxScore })));
-        })
-
-        // listeners attached - mark loading false once
-        void Promise.resolve().then(() => setLoading(false))
-
-      } else {
-        // defer to avoid sync setState in effect
-        void Promise.resolve().then(() => setLoading(false))
-      }
-    })
-
-    return () => {
-      // cleanup all listeners
-      try { unsubscribeAuth(); } catch {}
-      if (unsubscribeUser) {
-        try { unsubscribeUser(); } catch {}
-      }
-      if (unsubscribeReviews) {
-        try { unsubscribeReviews(); } catch {}
-      }
-      if (unsubscribeInterviews) {
-        try { unsubscribeInterviews(); } catch {}
-      }
-    }
-  }, [])
-
-  useEffect(() => {
-    const weightedScore = Math.round((scores.docAvg * 0.6) + (scores.interviewMax * 0.4));
-    // defer to avoid set-state-in-effect lint rule
-    void Promise.resolve().then(() => setReadinessScore(weightedScore));
-  }, [scores]);
+  const readinessScore = useMemo(() => {
+    const totalScore = reviews.reduce((sum, r) => sum + (r.score || 0), 0)
+    const docAvg = reviews.length > 0 ? totalScore / reviews.length : 0
+    const interviewMax = interviewSessions.reduce((max, s) => Math.max(max, s.feedback?.overallScore || 0), 0)
+    return Math.round((docAvg * 0.6) + (interviewMax * 0.4))
+  }, [reviews, interviewSessions])
 
   useEffect(() => {
     // Do not start animations while loading

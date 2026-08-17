@@ -1,178 +1,127 @@
 "use client"
 
-import React, { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 import { gsap } from "gsap"
-import { Button } from "@/components/ui/button"
-import { ArrowRight, ShieldCheck, Send } from "lucide-react"
-import Link from "next/link"
-import { SignupSheet } from "@/components/auth/SignupSheet";
-import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
-import { cn } from "@/lib/utils";
+import { ArrowDown, ArrowRight, Check, ShieldCheck, Sparkles } from "lucide-react"
+import { SignupSheet } from "@/components/auth/SignupSheet"
+import { prefersReducedMotion } from "@/lib/motion"
 
-const IMAGES = ["/IMG_9093.jpg", "/30.JPG", "/elora5.jpeg", "/akyere.jpg"];
+const HERO_BENEFITS = [
+  "Personalised visa checklist",
+  "AI document review",
+  "Realistic interview practice",
+]
 
 export function HeroSection() {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [mounted, setMounted] = useState(false)
+  const containerRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
-    setMounted(true)
-    
-    // GSAP Animations
     const ctx = gsap.context(() => {
-      // Animate blobs
-      gsap.to(".blob", {
-        x: () => `+=${gsap.utils.random(-150, 150)}`,
-        y: () => `+=${gsap.utils.random(-150, 150)}`,
-        scale: () => gsap.utils.random(0.9, 1.3),
-        duration: 12,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-        delay: () => gsap.utils.random(0, 1),
-      });
+      if (prefersReducedMotion()) return
 
-      // Split text for hero-title
-      const heroTitle = containerRef.current?.querySelector(".hero-title");
-      if (heroTitle) {
-        const spans = heroTitle.querySelectorAll("span");
-        spans.forEach(span => {
-          const text = span.textContent || "";
-          const isGradient = span.classList.contains("bg-clip-text");
-          const gradientClasses = isGradient ? span.className : "";
-          
-          span.innerHTML = text
-            .split("")
-            .map((char) => `<span class="char inline-block whitespace-pre ${isGradient ? gradientClasses : ""}">${char}</span>`)
-            .join("");
-          
-          if (isGradient) {
-            span.classList.remove("bg-clip-text", "text-transparent", "bg-gradient-to-r");
-          }
-        });
-      }
-
-      // Animate content
-      const tl = gsap.timeline({ defaults: { ease: "power3.out" } })
-      tl.from(".hero-badge", { y: -20, opacity: 0, duration: 0.6 })
-        .from(".char", {
-          opacity: 0,
-          x: () => gsap.utils.random(-100, 100),
-          y: () => gsap.utils.random(-100, 100),
-          rotation: () => gsap.utils.random(-30, 30),
-          duration: 1.2,
-          stagger: { each: 0.01, from: "random" },
-          ease: "power4.out"
-        }, "-=0.3")
-        .from(".hero-desc", { y: 20, opacity: 0, duration: 0.6 }, "-=0.8")
-        .from(".hero-cta", { y: 20, opacity: 0, duration: 0.6, stagger: 0.1 }, "-=0.4")
-        .from(".hero-trust", { opacity: 0, duration: 0.8 }, "-=0.2")
-        .from(".hero-images", { opacity: 0, x: 50, duration: 1, ease: "power2.out" }, "-=1")
-
+      gsap
+        .timeline({ defaults: { ease: "power3.out" } })
+        .from(".hero-kicker", { y: 16, opacity: 0, duration: 0.6 })
+        .from(
+          ".hero-line-inner",
+          { yPercent: 110, duration: 0.9, stagger: 0.12, ease: "power4.out" },
+          "-=0.25"
+        )
+        .from(".hero-copy", { y: 20, opacity: 0, duration: 0.65 }, "-=0.45")
+        .from(".hero-action", { y: 18, opacity: 0, duration: 0.55, stagger: 0.1 }, "-=0.35")
+        .from(".hero-benefit", { y: 12, opacity: 0, duration: 0.45, stagger: 0.07 }, "-=0.25")
+        .from(".hero-proof", { opacity: 0, y: 14, duration: 0.6 }, "-=0.2")
     }, containerRef)
 
-    return () => {
-      ctx.revert();
-    }
+    return () => ctx.revert()
   }, [])
 
   return (
-    <section ref={containerRef} className="relative pt-16 pb-16 md:pt-16 md:pb-24 bg-background overflow-hidden min-h-[90vh] flex items-center">
-      
-      {/* Animated Blob Background */}
-      <div className="absolute inset-0 -z-0 opacity-30">
-        <AnimatedGridPattern
-          numSquares={30}
-          maxOpacity={0.1}
-          duration={3}
-          repeatDelay={1}
-          className={cn(
-            "[mask-image:radial-gradient(500px_circle_at_center,white,transparent)]",
-            "inset-x-0 inset-y-[-30%] h-[200%] skew-y-12"
-          )}
-        />
-        <div className="blob absolute top-0 left-0 w-96 h-96 bg-blue-400/70 rounded-full filter blur-3xl"></div>
-        <div className="blob absolute top-0 right-0 w-80 h-80 bg-purple-400/70 rounded-full filter blur-3xl"></div>
-        <div className="blob absolute bottom-0 left-1/4 w-72 h-72 bg-green-400/70 rounded-full filter blur-3xl"></div>
-      </div>
+    <section
+      ref={containerRef}
+      className="relative isolate flex min-h-screen items-end overflow-hidden bg-slate-950 text-white"
+      aria-labelledby="hero-heading"
+    >
+      <video
+        className="absolute inset-0 -z-30 h-full w-full object-cover object-center"
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        aria-hidden="true"
+      >
+        <source src="/herovideo.mp4" type="video/mp4" />
+      </video>
 
-      <div className="container px-4 md:px-6 mx-auto relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          
-          {/* Left Column: Content */}
-          <div className="text-left max-w-2xl mx-auto lg:mx-0">
-            <div className="flex justify-center mb-6 hero-badge">
-              <div className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border-blue-200 dark:border-blue-800 shadow-sm">
-                <ShieldCheck className="w-3.5 h-3.5 mr-1.5" />
-                No Agents. No Hidden Fees.
-              </div>
-            </div>
+      <div className="absolute inset-0 -z-20 bg-slate-950/55" />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-r from-slate-950 via-slate-950/75 to-slate-950/15" />
+      <div className="absolute inset-0 -z-10 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/45" />
 
-            <h1 className="hero-title text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-6 leading-[1.1]">
-              <span className="inline-block bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 text-transparent bg-clip-text">
-                Apply for Your Visa Yourself
-              </span>
-              {" "}
-              <span className="inline-block text-blue-600 dark:text-blue-400">With Expert Guidance</span>
-            </h1>
-
-            <p className="hero-desc text-lg md:text-xl text-muted-foreground mb-8 max-w-xl">
-              Ditch the middleman. Learn how to apply for visas the right way using step‑by‑step guidance, AI document checks, and realistic mock interviews.
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-center justify-start gap-4 mb-10 hero-cta relative z-20">
-              <SignupSheet desscription={"Sign Up Now, It's Self Guided"} className="h-14 px-8 text-lg bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-xl hover:shadow-blue-500/20 transition-all w-full sm:w-auto"/>
-              <Button variant="outline" size="lg" className="h-14 px-8 text-lg rounded-full border-2 w-full sm:w-auto hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors" asChild>
-                <Link href="https://t.me/+wWazCHK2wEMzMzdk" target={"_blank"}>
-                  <div className={"rounded-full bg-blue-500 p-1.5 mr-2"}><Send className={"text-white w-4 h-4"}/></div>
-                  Join Telegram
-                </Link>
-              </Button>
-            </div>
-
-            <div className="hero-trust flex items-center gap-4">
-               <div className="flex -space-x-3">
-                 {[1,2,3,4].map(i => (
-                   <div key={i} className="w-10 h-10 rounded-full border-2 border-background bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-[10px] font-bold overflow-hidden">
-                     <img src={`https://i.pravatar.cc/100?img=${i+10}`} alt="user" className="w-full h-full object-cover" />
-                   </div>
-                 ))}
-               </div>
-               <p className="text-sm text-muted-foreground font-medium">
-                Joined by <span className="text-foreground font-bold">12,000+</span> successful applicants
-              </p>
-            </div>
+      <div className="container mx-auto flex min-h-screen w-full flex-col justify-end px-4 pb-8 pt-28 md:px-6 md:pb-10 lg:pb-12">
+        <div className="max-w-4xl pb-10 md:pb-14 lg:pb-16">
+          <div className="hero-kicker mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white backdrop-blur-md">
+            <Sparkles className="h-4 w-4 text-landing-cyan" aria-hidden="true" />
+            Your visa journey, made clearer
           </div>
 
-          {/* Right Column: Images */}
-          <div className="hero-images relative lg:block">
-            <div className="grid grid-cols-2 gap-4 relative px-4 sm:px-0">
-              {IMAGES.map((src, i) => (
-                <div 
-                  key={i} 
-                  className={cn(
-                    "relative aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl transition-transform duration-500 hover:scale-[1.02] group",
-                    i % 2 === 0 ? "md:top-8" : "md:-top-8"
-                  )}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-10" />
-                  <img 
-                    src={src} 
-                    alt={`Applicant ${i}`} 
-                    className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-700"
-                  />
-                  <div className="absolute bottom-4 left-4 right-4 z-20 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all">
-                    <p className="text-white text-xs font-medium uppercase tracking-wider">Success Story #{i + 1}</p>
-                  </div>
-                </div>
-              ))}
-              
-              {/* Decorative elements */}
-              <div className="absolute -top-12 -right-12 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl animate-pulse -z-10" />
-              <div className="absolute -bottom-12 -left-12 w-40 h-40 bg-purple-500/10 rounded-full blur-2xl animate-pulse -z-10" />
+          <h1
+            id="hero-heading"
+            className="max-w-4xl text-5xl font-semibold leading-none tracking-tight sm:text-6xl md:text-7xl lg:text-8xl"
+          >
+            <span className="hero-line block overflow-hidden pb-1">
+              <span className="hero-line-inner block">Prepare smarter.</span>
+            </span>
+            <span className="hero-line block overflow-hidden pb-2">
+              <span className="hero-line-inner block text-white/65">Travel with confidence.</span>
+            </span>
+          </h1>
+
+          <p className="hero-copy mt-6 max-w-2xl text-lg leading-relaxed text-white/75 md:text-xl">
+            Elora Visa gives you the tools, guidance, and practice to prepare your application yourself, from your first checklist to your final interview.
+          </p>
+
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="hero-action">
+              <SignupSheet
+                desscription="Start your free application"
+                className="h-14 w-full rounded-full bg-white px-7 text-base font-semibold text-slate-950 shadow-2xl transition-transform hover:scale-[1.02] hover:bg-white/90 sm:w-auto"
+              />
             </div>
+            <a
+              href="#how-it-works"
+              className="hero-action inline-flex h-14 w-full items-center justify-center gap-2 rounded-full border border-white/30 bg-white/10 px-7 text-base font-semibold text-white backdrop-blur-md transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:w-auto"
+            >
+              See how it works
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </a>
           </div>
 
+          <ul className="mt-7 flex flex-col gap-3 text-sm text-white/70 sm:flex-row sm:flex-wrap sm:gap-x-6">
+            {HERO_BENEFITS.map((benefit) => (
+              <li key={benefit} className="hero-benefit flex items-center gap-2">
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-landing-cyan/20 text-landing-cyan">
+                  <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                </span>
+                {benefit}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="hero-proof flex items-center justify-between gap-4 border-t border-white/20 pt-5 text-xs text-white/60 md:text-sm">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="h-5 w-5 text-landing-cyan" aria-hidden="true" />
+            <span>Private, secure, and always in your control</span>
+          </div>
+          <a
+            href="#how-it-works"
+            aria-label="Scroll to learn how Elora Visa works"
+            className="hidden min-h-11 items-center gap-2 rounded-full px-3 font-medium uppercase tracking-widest text-white/70 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white md:flex"
+          >
+            Explore
+            <ArrowDown className="h-4 w-4" aria-hidden="true" />
+          </a>
         </div>
       </div>
     </section>

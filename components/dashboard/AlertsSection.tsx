@@ -1,10 +1,7 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useMemo } from "react"
 import { AlertTriangle, AlertCircle, Info, AlertOctagon } from "lucide-react"
-import { auth, db } from "@/firebase/client"
-import { collection, onSnapshot } from "firebase/firestore"
-import { onAuthStateChanged } from "firebase/auth"
 import {
   Accordion,
   AccordionContent,
@@ -12,69 +9,55 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { cn } from "@/lib/utils"
+import { useDashboardData } from "@/context/DashboardDataContext"
 
 export function AlertsSection() {
-  const [alerts, setAlerts] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const { reviews, loading } = useDashboardData()
 
-  useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        const reviewsRef = collection(db, "users", user.uid, "reviews")
-        const unsubscribeSnapshot = onSnapshot(reviewsRef, (snapshot) => {
-          const newAlerts: any[] = []
+  const alerts = useMemo(() => {
+    const newAlerts: any[] = []
 
-          snapshot.forEach((doc) => {
-            const data = doc.data()
-            const docName = doc.id.replace(/([A-Z])/g, ' $1').trim()
+    reviews.forEach((data) => {
+      const docName = data.id.replace(/([A-Z])/g, ' $1').trim()
 
-            if (data.inconsistencies && data.inconsistencies.length > 0) {
-              newAlerts.push({
-                id: `inconsistency-${doc.id}`,
-                type: "critical",
-                title: `Profile Mismatch: ${docName}`,
-                details: data.inconsistencies,
-                icon: AlertOctagon
-              })
-            }
-
-            if (data.risk_flags && data.risk_flags.length > 0) {
-              newAlerts.push({
-                id: `risk-${doc.id}`,
-                type: "critical",
-                title: `Risk Detected: ${docName}`,
-                details: data.risk_flags,
-                icon: AlertCircle
-              })
-            }
-
-            if (data.missing_info && data.missing_info.length > 0) {
-              newAlerts.push({
-                id: `missing-${doc.id}`,
-                type: "warning",
-                title: `Missing Info: ${docName}`,
-                details: data.missing_info,
-                icon: AlertTriangle
-              })
-            }
-          })
-
-          newAlerts.sort((a, b) => {
-            if (a.type === b.type) return 0;
-            return a.type === "critical" ? -1 : 1;
-          })
-
-          setAlerts(newAlerts.slice(0, 5))
-          setLoading(false)
+      if (data.inconsistencies && data.inconsistencies.length > 0) {
+        newAlerts.push({
+          id: `inconsistency-${data.id}`,
+          type: "critical",
+          title: `Profile Mismatch: ${docName}`,
+          details: data.inconsistencies,
+          icon: AlertOctagon
         })
-        return () => unsubscribeSnapshot()
-      } else {
-        setLoading(false)
+      }
+
+      if (data.risk_flags && data.risk_flags.length > 0) {
+        newAlerts.push({
+          id: `risk-${data.id}`,
+          type: "critical",
+          title: `Risk Detected: ${docName}`,
+          details: data.risk_flags,
+          icon: AlertCircle
+        })
+      }
+
+      if (data.missing_info && data.missing_info.length > 0) {
+        newAlerts.push({
+          id: `missing-${data.id}`,
+          type: "warning",
+          title: `Missing Info: ${docName}`,
+          details: data.missing_info,
+          icon: AlertTriangle
+        })
       }
     })
 
-    return () => unsubscribeAuth()
-  }, [])
+    newAlerts.sort((a, b) => {
+      if (a.type === b.type) return 0;
+      return a.type === "critical" ? -1 : 1;
+    })
+
+    return newAlerts.slice(0, 5)
+  }, [reviews])
 
   if (loading) {
     return (

@@ -5,14 +5,15 @@ import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
 import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
 import { cn } from "@/lib/utils";
 
+const founderStory = {
+  quote:
+    "Securing a visa can be a daunting process, but with Elora Visa, it's a breeze. The AI tools and expert guidance make it so much easier.",
+  name: "Alex Asiedu Sekorme",
+  designation: "Founder & CEO, Elora Visa",
+  src: "/16.JPG",
+};
+
 const testimonials = [
-  {
-    quote:
-      "Securing a visa can be a daunting process, but with Elora Visa, it's a breeze. The AI tools and expert guidance make it so much easier.",
-    name: "Alex Asiedu Sekorme",
-    designation: "CEO at Elora Visa",
-    src: "/16.JPG",
-  },
   {
     quote:
       "I love to explore the world, Elora Visa makes it easy for me to apply for a visa. No agents, just expert guidance and AI tools.",
@@ -45,10 +46,20 @@ const testimonials = [
 
 export function Testimonial() {
   return (
-    <section className="relative py-20 md:py-32 overflow-hidden">
+    <section id="success-stories" className="relative py-20 md:py-32 overflow-hidden">
       <div className="container mx-auto px-4 relative z-10">
+        <div className="max-w-2xl mx-auto text-center mb-16 md:mb-20">
+          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Why we built Elora Visa</p>
+          <p className="text-lg md:text-xl text-foreground/90 font-medium leading-relaxed mb-4">
+            &ldquo;{founderStory.quote}&rdquo;
+          </p>
+          <p className="text-sm text-muted-foreground">
+            <span className="font-semibold text-foreground">{founderStory.name}</span> &middot; {founderStory.designation}
+          </p>
+        </div>
+
         <h2 className="bg-gradient-to-r from-[#00b7fa] to-[#01cfea] bg-clip-text text-transparent text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-center mb-12">
-          What Our Users Say
+          Real People. Better-Prepared Applications.
         </h2>
         <AnimatedTestimonials testimonials={testimonials} autoplay={true} />
       </div>
