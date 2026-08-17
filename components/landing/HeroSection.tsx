@@ -7,9 +7,10 @@ import { SignupSheet } from "@/components/auth/SignupSheet"
 import { prefersReducedMotion } from "@/lib/motion"
 
 const HERO_BENEFITS = [
-  "Personalised visa checklist",
-  "AI document review",
-  "Realistic interview practice",
+  "Secure document handling",
+  "Built for global applicants",
+  "Self-guided and transparent",
+  "No hidden processing fees",
 ]
 
 export function HeroSection() {
@@ -39,7 +40,7 @@ export function HeroSection() {
   return (
     <section
       ref={containerRef}
-      className="relative isolate flex min-h-screen items-end overflow-hidden bg-slate-950 text-white"
+      className="relative isolate flex min-h-screen items-end overflow-hidden text-white"
       aria-labelledby="hero-heading"
     >
       <video
@@ -51,34 +52,39 @@ export function HeroSection() {
         preload="metadata"
         aria-hidden="true"
       >
-        <source src="/herovideo.mp4" type="video/mp4" />
+        <source src="/herovideo1.mp4" type="video/mp4" />
       </video>
 
-      <div className="absolute inset-0 -z-20 bg-slate-950/55" />
-      <div className="absolute inset-0 -z-10 bg-gradient-to-r from-slate-950 via-slate-950/75 to-slate-950/15" />
-      <div className="absolute inset-0 -z-10 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/45" />
+      <div
+        className="pointer-events-none absolute inset-0 -z-20 bg-gradient-to-t from-black via-black/70 to-black/20"
+        aria-hidden="true"
+      />
+      <div
+        className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-r from-black/60 via-black/10 to-transparent"
+        aria-hidden="true"
+      />
 
       <div className="container mx-auto flex min-h-screen w-full flex-col justify-end px-4 pb-8 pt-28 md:px-6 md:pb-10 lg:pb-12">
         <div className="max-w-4xl pb-10 md:pb-14 lg:pb-16">
-          <div className="hero-kicker mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-widest text-white backdrop-blur-md">
+          <div className="hero-kicker mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white backdrop-blur-md">
             <Sparkles className="h-4 w-4 text-landing-cyan" aria-hidden="true" />
-            Your visa journey, made clearer
+            AI-powered visa preparation
           </div>
 
           <h1
             id="hero-heading"
-            className="max-w-4xl text-5xl font-semibold leading-none tracking-tight sm:text-6xl md:text-7xl lg:text-8xl"
+            className="max-w-4xl text-5xl font-semibold leading-[0.95] tracking-tight text-white drop-shadow-[0_2px_24px_rgba(0,0,0,0.35)] sm:text-6xl md:text-7xl lg:text-8xl"
           >
             <span className="hero-line block overflow-hidden pb-1">
-              <span className="hero-line-inner block">Prepare smarter.</span>
+              <span className="hero-line-inner block">Apply for your visa yourself,</span>
             </span>
             <span className="hero-line block overflow-hidden pb-2">
-              <span className="hero-line-inner block text-white/65">Travel with confidence.</span>
+              <span className="hero-line-inner block bg-gradient-to-r from-landing-cyan via-landing-blue to-landing-magenta bg-clip-text text-transparent">with confidence.</span>
             </span>
           </h1>
 
-          <p className="hero-copy mt-6 max-w-2xl text-lg leading-relaxed text-white/75 md:text-xl">
-            Elora Visa gives you the tools, guidance, and practice to prepare your application yourself, from your first checklist to your final interview.
+          <p className="hero-copy mt-6 max-w-2xl text-lg font-light leading-relaxed text-white/80 md:text-xl">
+            Get a personalized checklist, review your documents with AI, practise realistic visa interviews and understand every step before you submit.
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -97,7 +103,11 @@ export function HeroSection() {
             </a>
           </div>
 
-          <ul className="mt-7 flex flex-col gap-3 text-sm text-white/70 sm:flex-row sm:flex-wrap sm:gap-x-6">
+          <p className="hero-benefit mt-5 text-sm font-medium text-white/70">
+            Start free <span aria-hidden="true">•</span> No agent fees <span aria-hidden="true">•</span> You control your application
+          </p>
+
+          <ul className="mt-5 flex flex-col gap-3 text-sm text-white/70 sm:flex-row sm:flex-wrap sm:gap-x-6">
             {HERO_BENEFITS.map((benefit) => (
               <li key={benefit} className="hero-benefit flex items-center gap-2">
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-landing-cyan/20 text-landing-cyan">

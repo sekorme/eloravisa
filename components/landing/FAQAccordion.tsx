@@ -1,5 +1,7 @@
 "use client"
 
+import Link from "next/link"
+import { ArrowUpRight, HelpCircle, MessageCircle, ShieldCheck, Sparkles } from "lucide-react"
 import {
   Accordion,
   AccordionItem,
@@ -68,25 +70,70 @@ const FAQS = [
 
 export function FAQAccordion() {
   return (
-    <section className="relative py-20 md:py-28 bg-background">
-      <div className="container px-4 mx-auto max-w-3xl">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-black tracking-tight mb-4">
-            Frequently asked questions
+    <section id="faq" className="relative isolate overflow-hidden bg-slate-50 py-20 dark:bg-slate-950 md:py-28">
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_12%_18%,var(--color-landing-cyan),transparent_26%)] opacity-10" aria-hidden="true" />
+      <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_88%_82%,var(--color-landing-violet),transparent_24%)] opacity-10" aria-hidden="true" />
+
+      <div className="container mx-auto grid gap-12 px-4 md:px-6 lg:grid-cols-[0.72fr_1.28fr] lg:gap-16">
+        <div className="lg:sticky lg:top-28 lg:self-start">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-landing-cyan/25 bg-landing-cyan/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-landing-blue dark:text-landing-cyan">
+            <Sparkles className="h-4 w-4" aria-hidden="true" />
+            Clear answers
+          </div>
+          <h2 className="max-w-xl text-4xl font-black leading-tight tracking-tight sm:text-5xl md:text-6xl">
+            Questions are part of good preparation.
           </h2>
-          <p className="text-muted-foreground text-lg">
-            Transparent answers about how Elora Visa works.
+          <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted-foreground">
+            Straightforward answers about Elora Visa, AI tools, pricing and the responsibility you keep throughout your application.
           </p>
+
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+            <Link
+              href="/contact"
+              className="group flex min-h-20 items-center gap-4 rounded-2xl border border-border bg-background/80 p-4 shadow-sm backdrop-blur-md transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-landing-blue dark:focus-visible:ring-landing-cyan"
+            >
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-landing-blue/10 text-landing-blue dark:bg-landing-cyan/10 dark:text-landing-cyan">
+                <MessageCircle className="h-5 w-5" aria-hidden="true" />
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-bold">Still need help?</span>
+                <span className="mt-0.5 block text-xs text-muted-foreground">Contact the Elora Visa team</span>
+              </span>
+              <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true" />
+            </Link>
+
+            <div className="flex min-h-20 items-center gap-4 rounded-2xl border border-border bg-background/80 p-4 shadow-sm backdrop-blur-md">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-landing-violet/10 text-landing-violet">
+                <ShieldCheck className="h-5 w-5" aria-hidden="true" />
+              </span>
+              <span>
+                <span className="block text-sm font-bold">Transparent by design</span>
+                <span className="mt-0.5 block text-xs text-muted-foreground">No approval guarantees or hidden claims</span>
+              </span>
+            </div>
+          </div>
         </div>
 
-        <Accordion type="single" collapsible className="w-full">
+        <Accordion type="single" collapsible defaultValue="item-0" className="flex w-full flex-col gap-3">
           {FAQS.map((faq, i) => (
-            <AccordionItem key={faq.q} value={`item-${i}`}>
-              <AccordionTrigger className="text-base md:text-lg font-semibold">
-                {faq.q}
+            <AccordionItem
+              key={faq.q}
+              value={`item-${i}`}
+              className="overflow-hidden rounded-2xl border border-border bg-background/85 px-5 shadow-sm backdrop-blur-md transition-all data-[state=open]:border-landing-blue/30 data-[state=open]:shadow-lg dark:data-[state=open]:border-landing-cyan/30 sm:px-6"
+            >
+              <AccordionTrigger className="gap-4 py-5 text-base font-bold hover:no-underline focus-visible:ring-2 focus-visible:ring-landing-blue data-[state=open]:text-landing-blue dark:focus-visible:ring-landing-cyan dark:data-[state=open]:text-landing-cyan md:text-lg [&>svg]:h-5 [&>svg]:w-5 [&>svg]:rounded-full [&>svg]:bg-muted [&>svg]:p-1">
+                <span className="flex min-w-0 items-start gap-4">
+                  <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold tabular-nums text-muted-foreground">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span>{faq.q}</span>
+                </span>
               </AccordionTrigger>
-              <AccordionContent className="text-muted-foreground text-sm md:text-base leading-relaxed">
-                {faq.a}
+              <AccordionContent className="pb-6 pl-11 pr-2 text-sm leading-relaxed text-muted-foreground md:text-base">
+                <div className="flex gap-3 rounded-2xl bg-muted/55 p-4 sm:p-5">
+                  <HelpCircle className="mt-0.5 h-5 w-5 shrink-0 text-landing-blue dark:text-landing-cyan" aria-hidden="true" />
+                  <p>{faq.a}</p>
+                </div>
               </AccordionContent>
             </AccordionItem>
           ))}

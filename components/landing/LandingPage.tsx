@@ -13,6 +13,7 @@ import { TrustMetrics } from "./TrustMetrics"
 import { JourneySelector } from "./JourneySelector"
 import { AffiliatePreview } from "./AffiliatePreview"
 import { FAQAccordion } from "./FAQAccordion"
+import HomePage from "@/components/home/HomePage"
 
 import { GlobalThreeBackground } from "./GlobalThreeBackground"
 
@@ -25,7 +26,7 @@ export function LandingPage() {
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
 
-      <GlobalThreeBackground />
+
 
       <HeroSection/>
 
@@ -33,6 +34,7 @@ export function LandingPage() {
       <JourneySelector />
       <TargetAudienceSection />
       <HowItWorksSection />
+
 
       <AIToolsBento />
       <YouTube />

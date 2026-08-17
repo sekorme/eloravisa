@@ -26,10 +26,12 @@ import { cn } from "@/lib/utils"
 import { prefersReducedMotion } from "@/lib/motion"
 
 const NAV_SECTIONS = [
-  { id: "how-it-works", label: "How It Works" },
-  { id: "ai-tools", label: "AI Tools" },
-  { id: "success-stories", label: "Success Stories" },
-  { id: "pricing", label: "Pricing" },
+  { id: "how-it-works", label: "How It Works", href: "/how-it-works" },
+  { id: "ai-tools", label: "AI Tools", href: "/ai-tools" },
+  { id: "visa-guidance", label: "Visa Guidance", href: "/visa-guidance" },
+  { id: "pricing", label: "Pricing", href: "/pricing" },
+  { id: "success-stories", label: "Success Stories", href: "/success-stories" },
+  { id: "resources", label: "Resources", href: "/resources" },
 ]
 
 function AccountMenu({ user }: { user: NonNullable<ReturnType<typeof useAuth>["user"]> }) {
@@ -127,16 +129,33 @@ export function LandingNavbar() {
     >
       <div
         className={cn(
-          "container mx-auto flex h-16 items-center justify-between rounded-2xl border px-3 transition-all duration-300 md:px-4",
+          "group container relative isolate mx-auto flex h-16 items-center justify-between overflow-hidden rounded-3xl border border-white/20 bg-slate-950/80 px-3 text-white shadow-2xl backdrop-blur-2xl backdrop-saturate-150 transition-all duration-500 supports-[backdrop-filter:blur(1px)]:bg-slate-950/35 md:px-4",
           scrolled || mobileOpen
-            ? "border-border/70 bg-background/90 text-foreground shadow-lg backdrop-blur-xl"
-            : "border-white/15 bg-slate-950/20 text-white shadow-2xl backdrop-blur-md"
+            ? "h-14 border-white/30 bg-slate-950/85 supports-[backdrop-filter:blur(1px)]:bg-slate-950/55"
+            : "hover:border-white/30 hover:bg-slate-950/85 supports-[backdrop-filter:blur(1px)]:hover:bg-slate-950/40"
         )}
       >
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-white/20 via-white/[0.03] to-landing-cyan/10"
+        />
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-12 -top-16 -z-10 h-32 w-48 rounded-full bg-white/20 blur-3xl transition-transform duration-700 group-hover:translate-x-6"
+        />
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-20 right-8 -z-10 h-32 w-48 rounded-full bg-landing-violet/20 blur-3xl"
+        />
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-px -z-10 rounded-3xl border border-white/10 shadow-inner"
+        />
+
         <Link
           href="/"
           aria-label="Elora Visa home"
-          className="flex min-h-11 items-center gap-2 rounded-xl pr-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-landing-cyan"
+          className="relative z-10 flex min-h-11 items-center gap-2 rounded-xl pr-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-landing-cyan"
         >
           <Image
             src="/eloravisa.PNG"
@@ -149,16 +168,16 @@ export function LandingNavbar() {
           <span className="hidden text-base font-bold tracking-tight sm:block">Elora Visa</span>
         </Link>
 
-        <nav aria-label="Primary navigation" className="hidden items-center gap-1 text-sm font-medium lg:flex">
+        <nav aria-label="Primary navigation" className="relative z-10 hidden items-center text-xs font-medium xl:flex 2xl:text-sm">
           {NAV_SECTIONS.map((section) => (
             <a
               key={section.id}
-              href={`#${section.id}`}
+              href={section.href}
               className={cn(
-                "relative rounded-full px-4 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-landing-cyan",
+                "relative rounded-full px-3 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-landing-cyan 2xl:px-4",
                 activeSection === section.id
-                  ? scrolled ? "bg-accent text-foreground" : "bg-white/15 text-white"
-                  : scrolled ? "text-foreground/65 hover:bg-accent hover:text-foreground" : "text-white/70 hover:bg-white/10 hover:text-white"
+                  ? "bg-white/20 text-white shadow-inner backdrop-blur-md"
+                  : "text-white/70 hover:bg-white/10 hover:text-white"
               )}
             >
               {section.label}
@@ -167,8 +186,8 @@ export function LandingNavbar() {
           <Link
             href="/affiliate"
             className={cn(
-              "flex items-center gap-1 rounded-full px-4 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-landing-cyan",
-              scrolled ? "text-foreground/65 hover:bg-accent hover:text-foreground" : "text-white/70 hover:bg-white/10 hover:text-white"
+              "flex items-center gap-1 rounded-full px-3 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-landing-cyan 2xl:px-4",
+              "text-white/70 hover:bg-white/10 hover:text-white"
             )}
           >
             Affiliate
@@ -176,7 +195,7 @@ export function LandingNavbar() {
           </Link>
         </nav>
 
-        <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="relative z-10 flex items-center gap-1.5 sm:gap-2">
           <ClientOnly>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -184,8 +203,7 @@ export function LandingNavbar() {
                   variant="ghost"
                   size="icon"
                   className={cn(
-                    "h-10 w-10 rounded-full",
-                    !scrolled && !mobileOpen && "text-white hover:bg-white/10 hover:text-white"
+                    "h-10 w-10 rounded-full text-white hover:bg-white/10 hover:text-white"
                   )}
                 >
                   <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
@@ -207,16 +225,14 @@ export function LandingNavbar() {
                 <AccountMenu user={user} />
               ) : !loading ? (
                 <>
-                  <div className={cn(!scrolled && !mobileOpen && "[&_button]:text-white [&_button:hover]:bg-white/10")}>
+                  <div className="[&_button]:text-white [&_button:hover]:bg-white/10">
                     <LoginModal />
                   </div>
                   <SignupSheet
                     desscription="Start free"
                     className={cn(
                       "rounded-full px-5 font-semibold shadow-lg transition-transform hover:scale-[1.02]",
-                      scrolled || mobileOpen
-                        ? "bg-foreground text-background hover:bg-foreground/90"
-                        : "bg-white text-slate-950 hover:bg-white/90"
+                      "bg-white text-slate-950 hover:bg-white/90"
                     )}
                   />
                 </>
@@ -230,8 +246,7 @@ export function LandingNavbar() {
             onClick={() => setMobileOpen((v) => !v)}
             aria-controls="mobile-navigation"
             className={cn(
-              "flex h-11 w-11 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-landing-cyan lg:hidden",
-              scrolled || mobileOpen ? "hover:bg-accent" : "text-white hover:bg-white/10"
+              "flex h-11 w-11 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-landing-cyan xl:hidden"
             )}
           >
             {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -247,14 +262,18 @@ export function LandingNavbar() {
             exit={{ opacity: 0, y: -12 }}
             transition={panelTransition}
             id="mobile-navigation"
-            className="fixed inset-x-3 bottom-3 top-24 overflow-y-auto rounded-3xl border border-border/70 bg-background/95 shadow-2xl backdrop-blur-2xl lg:hidden"
+            className="fixed inset-x-3 bottom-3 top-24 isolate overflow-hidden overflow-y-auto rounded-3xl border border-white/20 bg-background/95 shadow-2xl backdrop-blur-3xl backdrop-saturate-150 supports-[backdrop-filter:blur(1px)]:bg-background/75 xl:hidden"
           >
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-white/20 via-transparent to-landing-violet/10 dark:from-white/10"
+            />
             <nav aria-label="Mobile navigation" className="flex min-h-full flex-col p-5 text-lg font-medium sm:p-6">
               <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Explore Elora Visa</p>
               {NAV_SECTIONS.map((section) => (
                 <a
                   key={section.id}
-                  href={`#${section.id}`}
+                  href={section.href}
                   onClick={() => setMobileOpen(false)}
                   className={cn(
                     "flex min-h-14 items-center justify-between border-b border-border/50 px-2 transition-colors",

@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const isProtectedRoute = pathname.startsWith("/dashboard") || pathname.startsWith("/onboarding");
         const isAffiliateDashboard = pathname.startsWith("/affiliate/dashboard");
         const isAffiliateAuthPage = pathname === "/affiliate/signin" || pathname === "/affiliate/signup";
-        const isPublicAuthPage = pathname === "/" || pathname === "/login";
+        const isPublicAuthPage = pathname === "/" || pathname === "/login" || pathname === "/signup";
 
         // Handle normal user routes
         if (!user && isProtectedRoute) {
@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                         // Decide destination based on onboarding flag
                         const userDoc = await getDoc(doc(db, "users", user.uid));
                         if (userDoc.exists()) {
-                            const data = userDoc.data() as any;
+                            const data = userDoc.data();
                             if (data.completedOnboarding) {
                                 router.push("/dashboard");
                             } else {
@@ -83,7 +83,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     if (!isInfluencer && isPublicAuthPage) {
                         const userDoc = await getDoc(doc(db, "users", user.uid));
                         if (userDoc.exists()) {
-                            const data = userDoc.data() as any;
+                            const data = userDoc.data();
                             if (data.completedOnboarding) {
                                 router.push("/dashboard");
                             } else {
@@ -99,7 +99,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     if (!isInfluencer && pathname.startsWith("/dashboard")) {
                         const userDoc = await getDoc(doc(db, "users", user.uid));
                         if (userDoc.exists()) {
-                            const data = userDoc.data() as any;
+                            const data = userDoc.data();
                             if (!data.completedOnboarding) {
                                 router.push("/onboarding");
                             }
@@ -110,7 +110,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     if (!isInfluencer && pathname.startsWith("/onboarding")) {
                         const userDoc = await getDoc(doc(db, "users", user.uid));
                         if (userDoc.exists()) {
-                            const data = userDoc.data() as any;
+                            const data = userDoc.data();
                             if (data.completedOnboarding) {
                                 router.push("/dashboard");
                             }
