@@ -69,17 +69,19 @@ export const HERO_MEDIA = {
     /**
      * "video" plays HERO_VIDEO over HERO_IMAGE; "image" uses the still only.
      *
-     * Set to "image" after actually watching `herovideo.mp4` rendered behind the
-     * hero: the footage is a backlit silhouette of a person outdoors holding a
-     * long blade-like object. Whatever it actually depicts, at hero scale behind
-     * the words "Your visa journey" it reads as a figure with a weapon — which
-     * is not a risk worth taking on the first screen of a product people trust
-     * with their passport details.
+     * "video" is the shipped setting.
      *
-     * Flip back to "video" if you know the footage and want it; nothing else
-     * needs to change, and HERO_IMAGE stays the poster either way.
+     * The footage is a backlit silhouette of a child holding a toy aeroplane
+     * against an open sky — aspiration to travel, which is exactly the note the
+     * hero wants. (An earlier pass misread the aeroplane's wing as a blade at
+     * thumbnail size and switched this off; seen at full size it is clearly a
+     * toy plane.)
+     *
+     * Set this to "image" to fall back to HERO_IMAGE alone. HERO_IMAGE is the
+     * poster either way, so there is never a blank or broken frame — which is
+     * also why autoplay being refused costs the visitor nothing.
      */
-    kind: "image" as "video" | "image",
+    kind: "video" as "video" | "image",
 } as const
 
 /** Live classes — learning alongside other people. */

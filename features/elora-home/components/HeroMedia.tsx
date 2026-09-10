@@ -17,12 +17,16 @@ import { useReducedMotion } from "../motion/useMotion"
  * play — so there is never a black rectangle, never a spinner, and never a
  * layout shift, regardless of connection speed or codec support.
  *
- * The video is skipped entirely when:
+ * The video is skipped when:
  *   - `prefers-reduced-motion` is set (autoplaying footage is exactly what that
  *     setting is for),
- *   - the viewport is small — mobile data and battery are not worth a
- *     decorative loop,
- *   - the browser reports a saveData preference or a slow connection.
+ *   - the browser reports a saveData preference or a 2G connection.
+ *
+ * There is deliberately NO viewport-width gate. An earlier version skipped the
+ * video below 900px to save mobile data, which meant phones — most of this
+ * product's audience — never saw the hero as designed. The connection and
+ * saveData checks are the meaningful protection, and they apply at every size;
+ * the file is well under a megabyte, and it never blocks the still behind it.
  *
  * ------------------------------------------------------------------------
  * READABILITY IS NOT OPTIONAL
@@ -43,7 +47,6 @@ export function HeroMedia() {
     useEffect(() => {
         if (HERO_MEDIA.kind !== "video") return
         if (reduced) return
-        if (window.innerWidth < 900) return
 
         // `connection` is advisory and absent in Safari; absence means "assume
         // it's fine" rather than blocking.
@@ -63,14 +66,35 @@ export function HeroMedia() {
         const v = videoRef.current
         if (!v || !useVideo) return
 
-        const onPlaying = () => setVideoReady(true)
-        v.addEventListener("playing", onPlaying)
+        const reveal = () => setVideoReady(true)
 
-        // Autoplay can still be refused (low power mode, browser policy). If the
-        // promise rejects we simply never reveal the video and the still stays.
-        void v.play().catch(() => setVideoReady(false))
+        // Three signals, because no single one fires reliably everywhere:
+        // `playing` is the correct event but is skipped by some browsers when a
+        // muted video starts from cache; `loadeddata` and `canplay` cover those.
+        v.addEventListener("playing", reveal)
+        v.addEventListener("loadeddata", reveal)
+        v.addEventListener("canplay", reveal)
 
-        return () => v.removeEventListener("playing", onPlaying)
+        // `load()` is needed because the element renders with preload="metadata"
+        // and may already have settled before this effect attaches.
+        if (v.readyState === 0) v.load()
+
+        // Autoplay can still be refused (iOS low-power mode, browser policy).
+        // On rejection the still simply stays — never a black rectangle.
+        void v.play().catch(() => {
+            // Some engines reject the first call but succeed once data arrives.
+            const retry = () => void v.play().catch(() => undefined)
+            v.addEventListener("canplay", retry, { once: true })
+        })
+
+        // Already buffered before the listeners attached.
+        if (v.readyState >= 2) reveal()
+
+        return () => {
+            v.removeEventListener("playing", reveal)
+            v.removeEventListener("loadeddata", reveal)
+            v.removeEventListener("canplay", reveal)
+        }
     }, [useVideo])
 
     return (
@@ -98,7 +122,7 @@ export function HeroMedia() {
                     muted
                     loop
                     playsInline
-                    preload="none"
+                    preload="metadata"
                     // Poster is the same still, so the swap is invisible.
                     poster={HERO_IMAGE.src}
                 >

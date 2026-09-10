@@ -113,7 +113,10 @@ export function LiveClasses({ classes }: LiveClassesProps) {
                     </header>
 
                     {/* ------------------------------------------- broadcast */}
-                    <div className="eh-broadcast">
+                    {/* `eh-dark`: this card is a dark surface sitting on a white
+                        page. Without the scope its heading and body inherit the
+                        light-surface foreground and render dark-on-dark. */}
+                    <div className="eh-broadcast eh-dark">
                         {/* Streaming-inspired chrome. The "live" indicator only
                             appears when something is genuinely live. */}
                         <div className="eh-broadcast-top">
