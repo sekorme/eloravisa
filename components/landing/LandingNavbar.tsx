@@ -1,321 +1,75 @@
 "use client"
 
-import * as React from "react"
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import Image from "next/image"
-import { Moon, Sun, Menu, X, LayoutDashboard, LogOut, ArrowUpRight } from "lucide-react"
+import { Compass, Menu, Moon, Sun, ArrowUpRight } from "lucide-react"
+import { motion, useReducedMotion } from "motion/react"
 import { useTheme } from "next-themes"
-import { motion, AnimatePresence } from "motion/react"
-import { signOut } from "firebase/auth"
-import { auth } from "@/firebase/client"
-import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
-import { ClientOnly } from "@/components/ClientOnly"
-import { LoginModal } from "@/components/auth/LoginModal"
-import { SignupSheet } from "@/components/auth/SignupSheet"
+import { usePathname } from "next/navigation"
+import { Sheet, SheetContent, SheetTitle, SheetDescription, SheetTrigger, SheetClose } from "@/components/ui/sheet"
 import { useAuth } from "@/context/AuthContext"
 import { cn } from "@/lib/utils"
-import { prefersReducedMotion } from "@/lib/motion"
+import { NAVIGATION } from "@/lib/landing/navigation"
+import { trackEvent } from "@/lib/analytics"
 
-const NAV_SECTIONS = [
-  { id: "how-it-works", label: "How It Works", href: "/how-it-works" },
-  { id: "ai-tools", label: "AI Tools", href: "/ai-tools" },
-  { id: "visa-guidance", label: "Visa Guidance", href: "/visa-guidance" },
-  { id: "pricing", label: "Pricing", href: "/pricing" },
-  { id: "success-stories", label: "Success Stories", href: "/success-stories" },
-  { id: "resources", label: "Resources", href: "/resources" },
-]
-
-function AccountMenu({ user }: { user: NonNullable<ReturnType<typeof useAuth>["user"]> }) {
-  const initial = (user.displayName?.[0] ?? user.email?.[0] ?? "?").toUpperCase()
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          aria-label="Account menu"
-          className="rounded-full ring-offset-2 ring-offset-background transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-landing-cyan"
-        >
-          <Avatar>
-            <AvatarImage src={user.photoURL ?? undefined} alt="" />
-            <AvatarFallback className="text-xs font-semibold">{initial}</AvatarFallback>
-          </Avatar>
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuItem asChild>
-          <Link href="/dashboard" className="flex items-center gap-2 cursor-pointer">
-            <LayoutDashboard className="h-4 w-4" />
-            Dashboard
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => signOut(auth)}
-          className="flex items-center gap-2 cursor-pointer text-destructive focus:text-destructive"
-        >
-          <LogOut className="h-4 w-4" />
-          Sign out
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
-}
-
-export function LandingNavbar() {
-  const { setTheme } = useTheme()
-  const { user, loading } = useAuth()
+export function LandingNavbar({ tone = "dark" }: { tone?: "dark" | "light" }) {
   const [scrolled, setScrolled] = useState(false)
-  const [activeSection, setActiveSection] = useState<string | null>(null)
-  const [mobileOpen, setMobileOpen] = useState(false)
-
+  const [active, setActive] = useState("")
+  const [open, setOpen] = useState(false)
+  const { resolvedTheme, setTheme } = useTheme()
+  const { user } = useAuth()
+  const pathname = usePathname()
+  const reduced = useReducedMotion()
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 40)
-    handleScroll()
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => window.removeEventListener("scroll", handleScroll)
+    const onScroll = () => setScrolled(window.scrollY > 24)
+    onScroll()
+    window.addEventListener("scroll", onScroll, { passive: true })
+    const observer = new IntersectionObserver((entries) => { for (const entry of entries) if (entry.isIntersecting) setActive(entry.target.id) }, { rootMargin: "-20% 0px -55% 0px" })
+    NAVIGATION.forEach(({ id }) => { const element = document.getElementById(id); if (element) observer.observe(element) })
+    return () => { window.removeEventListener("scroll", onScroll); observer.disconnect() }
+  }, [pathname])
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 1280px)")
+    const close = () => { if (desktop.matches) setOpen(false) }
+    desktop.addEventListener("change", close)
+    return () => desktop.removeEventListener("change", close)
   }, [])
-
-  useEffect(() => {
-    const observers: IntersectionObserver[] = []
-    NAV_SECTIONS.forEach(({ id }) => {
-      const el = document.getElementById(id)
-      if (!el) return
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) setActiveSection(id)
-        },
-        { rootMargin: "-45% 0px -45% 0px", threshold: 0 }
-      )
-      observer.observe(el)
-      observers.push(observer)
-    })
-    return () => observers.forEach((o) => o.disconnect())
-  }, [])
-
-  // Lock body scroll while the mobile panel is open
-  useEffect(() => {
-    document.body.style.overflow = mobileOpen ? "hidden" : ""
-    return () => { document.body.style.overflow = "" }
-  }, [mobileOpen])
-
-  useEffect(() => {
-    if (!mobileOpen) return
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setMobileOpen(false)
-    }
-    window.addEventListener("keydown", closeOnEscape)
-    return () => window.removeEventListener("keydown", closeOnEscape)
-  }, [mobileOpen])
-
-  const panelTransition = prefersReducedMotion()
-    ? { duration: 0.15 }
-    : { type: "spring" as const, stiffness: 300, damping: 30 }
-
+  const href = (id: string) => pathname === "/" ? `#${id}` : `/#${id}`
+  const dark = tone === "dark"
+  const cta = user ? "/dashboard" : "/signup"
   return (
-    <header
-      className={cn(
-        "fixed inset-x-0 top-0 z-50 px-3 transition-all duration-300 md:px-5",
-        scrolled ? "pt-2" : "pt-4 md:pt-5"
-      )}
-    >
-      <div
-        className={cn(
-          "group container relative isolate mx-auto flex h-16 items-center justify-between overflow-hidden rounded-3xl border border-white/20 bg-slate-950/80 px-3 text-white shadow-2xl backdrop-blur-2xl backdrop-saturate-150 transition-all duration-500 supports-[backdrop-filter:blur(1px)]:bg-slate-950/35 md:px-4",
-          scrolled || mobileOpen
-            ? "h-14 border-white/30 bg-slate-950/85 supports-[backdrop-filter:blur(1px)]:bg-slate-950/55"
-            : "hover:border-white/30 hover:bg-slate-950/85 supports-[backdrop-filter:blur(1px)]:hover:bg-slate-950/40"
-        )}
-      >
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-white/20 via-white/[0.03] to-landing-cyan/10"
-        />
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute -left-12 -top-16 -z-10 h-32 w-48 rounded-full bg-white/20 blur-3xl transition-transform duration-700 group-hover:translate-x-6"
-        />
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute -bottom-20 right-8 -z-10 h-32 w-48 rounded-full bg-landing-violet/20 blur-3xl"
-        />
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-px -z-10 rounded-3xl border border-white/10 shadow-inner"
-        />
-
-        <Link
-          href="/"
-          aria-label="Elora Visa home"
-          className="relative z-10 flex min-h-11 items-center gap-2 rounded-xl pr-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-landing-cyan"
-        >
-          <Image
-            src="/eloravisa.PNG"
-            alt=""
-            width={48}
-            height={48}
-            priority
-            className="h-11 w-11 object-contain"
-          />
-          <span className="hidden text-base font-bold tracking-tight sm:block">Elora Visa</span>
-        </Link>
-
-        <nav aria-label="Primary navigation" className="relative z-10 hidden items-center text-xs font-medium xl:flex 2xl:text-sm">
-          {NAV_SECTIONS.map((section) => (
-            <a
-              key={section.id}
-              href={section.href}
-              className={cn(
-                "relative rounded-full px-3 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-landing-cyan 2xl:px-4",
-                activeSection === section.id
-                  ? "bg-white/20 text-white shadow-inner backdrop-blur-md"
-                  : "text-white/70 hover:bg-white/10 hover:text-white"
-              )}
-            >
-              {section.label}
-            </a>
-          ))}
-          <Link
-            href="/affiliate"
-            className={cn(
-              "flex items-center gap-1 rounded-full px-3 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-landing-cyan 2xl:px-4",
-              "text-white/70 hover:bg-white/10 hover:text-white"
-            )}
-          >
-            Affiliate
-            <ArrowUpRight className="h-3.5 w-3.5" aria-hidden="true" />
-          </Link>
+    <header className="landing-nav fixed inset-x-0 top-0 z-50 px-3 pt-3 md:px-6 md:pt-5">
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:z-50 focus:rounded-lg focus:bg-lp-card focus:px-4 focus:py-3 focus:text-lp-fg">Skip to content</a>
+      <div className={cn("mx-auto flex max-w-[1360px] items-center justify-between gap-2 rounded-full border px-3 transition-[height,background-color,box-shadow] duration-300 sm:px-5", scrolled ? "h-16 shadow-lg shadow-slate-950/5 backdrop-blur-xl" : "h-[72px]", dark ? "border-white/15 bg-lp-navy/90 text-white" : scrolled ? "border-lp-line bg-lp-card/95 text-lp-fg" : "border-lp-line bg-lp-card/65 text-lp-fg backdrop-blur-md")}>
+        <Link href="/" aria-label="Elora Visa home" className="inline-flex min-h-11 shrink-0 items-center gap-2 rounded-xl font-display text-base font-bold tracking-tight sm:text-lg"><span className="flex size-9 items-center justify-center rounded-xl bg-lp-azure text-white"><Compass className="size-5" aria-hidden="true" /></span><span>Elora<span className="font-medium opacity-65"> Visa</span></span></Link>
+        <nav aria-label="Primary navigation" className="hidden items-center gap-1 xl:flex">
+          {NAVIGATION.map((item) => <Link key={item.id} href={href(item.id)} aria-current={active === item.id ? "location" : undefined} className={cn("relative flex min-h-11 items-center rounded-full px-3 text-xs font-medium transition-colors", dark ? "hover:bg-white/10" : "hover:bg-lp-azure/5")}>
+            {active === item.id && <motion.span layoutId="nav-active" transition={{ duration: reduced ? 0 : .25 }} className={cn("absolute inset-0 rounded-full", dark ? "bg-white/10" : "bg-lp-azure/10")} />}
+            <span className="relative">{item.label}</span>
+          </Link>)}
         </nav>
-
-        <div className="relative z-10 flex items-center gap-1.5 sm:gap-2">
-          <ClientOnly>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={cn(
-                    "h-10 w-10 rounded-full text-white hover:bg-white/10 hover:text-white"
-                  )}
-                >
-                  <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                  <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                  <span className="sr-only">Toggle theme</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setTheme("light")}>Light</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("dark")}>Dark</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("system")}>System</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </ClientOnly>
-
-          <div className="hidden items-center gap-1 sm:flex">
-            <ClientOnly>
-              {!loading && user ? (
-                <AccountMenu user={user} />
-              ) : !loading ? (
-                <>
-                  <div className="[&_button]:text-white [&_button:hover]:bg-white/10">
-                    <LoginModal />
-                  </div>
-                  <SignupSheet
-                    desscription="Start free"
-                    className={cn(
-                      "rounded-full px-5 font-semibold shadow-lg transition-transform hover:scale-[1.02]",
-                      "bg-white text-slate-950 hover:bg-white/90"
-                    )}
-                  />
-                </>
-              ) : null}
-            </ClientOnly>
-          </div>
-
-          <button
-            aria-label={mobileOpen ? "Close navigation" : "Open navigation"}
-            aria-expanded={mobileOpen}
-            onClick={() => setMobileOpen((v) => !v)}
-            aria-controls="mobile-navigation"
-            className={cn(
-              "flex h-11 w-11 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-landing-cyan xl:hidden"
-            )}
-          >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+        <div className="flex items-center gap-1 sm:gap-2">
+          <button type="button" onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")} aria-label="Toggle color theme" className="relative hidden size-11 items-center justify-center rounded-full hover:bg-lp-azure/10 sm:flex"><Sun className="size-4 dark:hidden" aria-hidden="true" /><Moon className="hidden size-4 dark:block" aria-hidden="true" /></button>
+          {!user && <Link href="/login" className="hidden min-h-11 items-center rounded-full px-3 text-sm font-medium sm:inline-flex">Sign In</Link>}
+          <Link href={cta} onClick={() => trackEvent("section_cta_click", { location: "navigation", label: user ? "dashboard" : "signup" })} className="inline-flex min-h-11 items-center justify-center rounded-full bg-lp-azure px-3 text-xs font-semibold text-white transition-colors hover:bg-lp-azure-2 sm:px-5 sm:text-sm">{user ? "Dashboard" : "Start for Free"}</Link>
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild><button type="button" aria-label="Open navigation" className="inline-flex size-11 items-center justify-center rounded-full xl:hidden"><Menu className="size-5" aria-hidden="true" /></button></SheetTrigger>
+            <SheetContent side="right" className="inset-0 h-dvh w-full max-w-none border-0 bg-lp-page p-6 text-lp-fg sm:max-w-none [&>button]:size-11 [&>button]:rounded-full [&>button]:text-lp-fg">
+              <SheetTitle className="pt-3 font-display text-xl text-lp-fg">Explore Elora Visa</SheetTitle>
+              <SheetDescription className="text-lp-muted">A clearer path to your next chapter.</SheetDescription>
+              <nav aria-label="Mobile navigation" className="mt-6 flex-1 overflow-y-auto">
+                {NAVIGATION.map((item, i) => <motion.div key={item.id} initial={false} animate={{ x: 0 }} transition={{ delay: reduced ? 0 : i * .04 }}><SheetClose asChild><Link href={href(item.id)} className="flex min-h-16 items-center justify-between border-b border-lp-line text-lg font-medium"><span>{item.label}</span><ArrowUpRight className="size-4 text-lp-azure" aria-hidden="true" /></Link></SheetClose></motion.div>)}
+              </nav>
+              <div className="flex flex-col gap-3 pb-4">
+                <button type="button" onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")} className="flex min-h-11 items-center justify-center gap-2 rounded-full border border-lp-line text-sm"><Sun className="size-4" aria-hidden="true" />Toggle color theme</button>
+                {!user && <SheetClose asChild><Link href="/login" className="flex min-h-12 items-center justify-center rounded-full border border-lp-line font-semibold">Sign In</Link></SheetClose>}
+                <SheetClose asChild><Link href={cta} className="flex min-h-14 items-center justify-center rounded-full bg-lp-azure font-semibold text-white">{user ? "Open dashboard" : "Start for Free"}<ArrowUpRight className="ml-2 size-4" aria-hidden="true" /></Link></SheetClose>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
-
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={panelTransition}
-            id="mobile-navigation"
-            className="fixed inset-x-3 bottom-3 top-24 isolate overflow-hidden overflow-y-auto rounded-3xl border border-white/20 bg-background/95 shadow-2xl backdrop-blur-3xl backdrop-saturate-150 supports-[backdrop-filter:blur(1px)]:bg-background/75 xl:hidden"
-          >
-            <span
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-white/20 via-transparent to-landing-violet/10 dark:from-white/10"
-            />
-            <nav aria-label="Mobile navigation" className="flex min-h-full flex-col p-5 text-lg font-medium sm:p-6">
-              <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Explore Elora Visa</p>
-              {NAV_SECTIONS.map((section) => (
-                <a
-                  key={section.id}
-                  href={section.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={cn(
-                    "flex min-h-14 items-center justify-between border-b border-border/50 px-2 transition-colors",
-                    activeSection === section.id ? "text-foreground" : "text-foreground/65 hover:text-foreground"
-                  )}
-                >
-                  {section.label}
-                  <ArrowUpRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-                </a>
-              ))}
-              <Link
-                href="/affiliate"
-                onClick={() => setMobileOpen(false)}
-                className="flex min-h-14 items-center justify-between border-b border-border/50 px-2 text-foreground/65 transition-colors hover:text-foreground"
-              >
-                Affiliate
-                <ArrowUpRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-              </Link>
-
-              <div className="mt-auto flex flex-col gap-3 pt-8">
-                <ClientOnly>
-                  {!loading && user ? (
-                    <Link
-                      href="/dashboard"
-                      onClick={() => setMobileOpen(false)}
-                      className="flex items-center justify-center gap-2 h-12 rounded-full bg-gradient-to-r from-landing-cyan via-landing-blue to-landing-violet text-white font-semibold shadow-lg"
-                    >
-                      <LayoutDashboard className="h-4 w-4" />
-                      Dashboard
-                    </Link>
-                  ) : !loading ? (
-                    <>
-                      <LoginModal />
-                      <SignupSheet desscription={"Start Free"} className={"w-full font-semibold shadow-lg"} />
-                    </>
-                  ) : null}
-                </ClientOnly>
-              </div>
-            </nav>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <noscript><nav aria-label="Navigation without scripts" className="mx-auto mt-2 flex max-w-4xl flex-wrap justify-center gap-4 rounded-2xl bg-lp-card p-3 text-xs text-lp-fg">{NAVIGATION.map((item) => <a key={item.id} href={href(item.id)}>{item.label}</a>)}</nav></noscript>
     </header>
   )
 }

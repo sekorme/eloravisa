@@ -1,110 +1,35 @@
-"use client"
+import { ArrowRight, Check, Compass } from "lucide-react"
+import { CTA, FINAL_CTA } from "@/lib/landing/content"
+import { TrackedLink } from "./TrackedLink"
+import { Display, Eyebrow } from "./ui"
 
-import React, { useEffect, useRef, useState } from "react"
-import { useTheme } from "next-themes"
-import { gsap } from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { SignupSheet } from "@/components/auth/SignupSheet"
-import { Sparkles, ArrowRight, ShieldCheck, Globe, Eye } from "lucide-react"
-import { useMagnetic } from "@/hooks/useMagnetic"
-
-gsap.registerPlugin(ScrollTrigger)
-
-const TRUST_ROW = [
-  { icon: ShieldCheck, label: "Secure document handling" },
-  { icon: Globe, label: "Built for global applicants" },
-  { icon: Eye, label: "Self-guided and transparent" },
-]
-
+/** The full CTA is server visible and works before animation or JavaScript. */
 export function FinalCTASection() {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const { resolvedTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-  const learnMoreRef = useMagnetic<HTMLAnchorElement>(0.25)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-
-  useEffect(() => {
-    if (!mounted || !containerRef.current) return
-
-    const ctx = gsap.context(() => {
-      gsap.from(".cta-box", {
-        scrollTrigger: {
-          trigger: ".cta-box",
-          start: "top 85%",
-        },
-        y: 40,
-        opacity: 0,
-        scale: 0.95,
-        duration: 1,
-        ease: "power3.out"
-      })
-
-      gsap.from(".cta-elements", {
-        scrollTrigger: {
-          trigger: ".cta-box",
-          start: "top 75%",
-        },
-        y: 20,
-        opacity: 0,
-        stagger: 0.2,
-        duration: 0.8,
-        ease: "power2.out",
-        delay: 0.3
-      })
-    }, containerRef)
-
-    return () => ctx.revert()
-  }, [mounted])
-
   return (
-    <section ref={containerRef} className="relative py-24 md:py-32 overflow-hidden bg-slate-50/30 dark:bg-black/30">
-
-      <div className="container relative z-10 px-4 mx-auto">
-        <div className="cta-box max-w-5xl mx-auto rounded-[3rem] p-12 md:p-24 bg-gradient-to-br from-blue-600 to-indigo-700 dark:from-blue-700 dark:to-indigo-900 text-white shadow-[0_20px_50px_rgba(37,99,235,0.3)] relative overflow-hidden group">
-          {/* Animated light rays */}
-          <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[150%] bg-gradient-to-l from-white/10 to-transparent rotate-12 pointer-events-none transition-transform duration-1000 group-hover:translate-x-[-10%]"></div>
-          
-          <div className="relative z-10 text-center flex flex-col items-center">
-            <div className="cta-elements p-3 bg-white/10 rounded-2xl backdrop-blur-md mb-8 inline-block">
-                <Sparkles className="w-8 h-8 text-blue-200" />
-            </div>
-
-            <h2 className="cta-elements text-4xl md:text-7xl font-extrabold tracking-tight mb-8 leading-tight">
-              Ready to take control of <br className="hidden md:block" />
-              <span className="text-blue-200">your visa journey?</span>
-            </h2>
-            
-            <p className="cta-elements text-xl md:text-2xl text-blue-100 mb-12 max-w-2xl mx-auto font-medium opacity-90">
-              Prepare your documents, practise your interview and understand every step — before you submit your visa application yourself.
-            </p>
-
-            <div className="cta-elements flex flex-col sm:flex-row gap-6">
-                <SignupSheet
-                    desscription={"Create Free Account"}
-                    className="h-16 px-10 text-lg bg-white text-blue-600 rounded-2xl shadow-xl hover:scale-105 transition-all font-bold flex items-center gap-2 group/btn"
-                />
-                <a href="#how-it-works" ref={learnMoreRef} className="h-16 px-10 text-lg bg-transparent border-2 border-white/30 hover:border-white/60 text-white rounded-2xl backdrop-blur-md transition-all font-semibold flex items-center justify-center gap-2">
-                    Learn More <ArrowRight className="w-5 h-5" />
-                </a>
-            </div>
-
-            <div className="cta-elements mt-12 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-blue-200/80 text-sm">
-                {TRUST_ROW.map((item) => (
-                  <div key={item.label} className="flex items-center gap-2">
-                    <item.icon className="w-4 h-4 shrink-0" />
-                    <span>{item.label}</span>
-                  </div>
-                ))}
-            </div>
+    <section className="relative bg-lp-page px-3 pb-8 pt-12 sm:px-5 md:pb-12 md:pt-20" aria-labelledby="cta-heading">
+      <div className="relative mx-auto max-w-[1440px] overflow-hidden rounded-[2rem] bg-[#071426] px-5 py-20 text-center text-white sm:rounded-[2.5rem] sm:px-8 md:py-28">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_120%,rgba(124,58,237,0.5),transparent_65%),radial-gradient(ellipse_at_85%_100%,rgba(34,211,238,0.22),transparent_50%)]" />
+        <div aria-hidden="true" className="pointer-events-none absolute left-1/2 top-1/2 h-[530px] w-[380px] -translate-x-1/2 -translate-y-1/2 rotate-[16deg] rounded-[3rem] border border-white/[0.06]" />
+        <svg aria-hidden="true" className="pointer-events-none absolute inset-0 h-full w-full text-emerald-300/25" viewBox="0 0 1400 680" fill="none" preserveAspectRatio="xMidYMid slice">
+          <path d="M-70 630C250 690 345 340 690 530S1080 560 1400 110" stroke="currentColor" strokeWidth="1" />
+          <path d="M-70 650C250 710 345 360 690 550S1080 580 1400 130" stroke="currentColor" strokeWidth="1" opacity="0.3" />
+          <circle cx="1158" cy="362" r="5" fill="#22D3EE" stroke="white" strokeWidth="2" />
+          <circle cx="1158" cy="362" r="17" stroke="#22D3EE" opacity="0.3" />
+        </svg>
+        <div className="relative mx-auto flex max-w-3xl flex-col items-center">
+          <Eyebrow tone="dark"><Compass className="h-3.5 w-3.5 text-emerald-300" aria-hidden="true" /> Your next chapter</Eyebrow>
+          <Display as="h2" size="xl" className="mt-7"><span id="cta-heading">{FINAL_CTA.headline}</span></Display>
+          <p className="mt-6 max-w-xl text-base leading-7 text-slate-300 sm:text-lg sm:leading-8">{FINAL_CTA.supporting}</p>
+          <div className="mt-9 flex w-full flex-col justify-center gap-3 sm:w-auto sm:flex-row">
+            <TrackedLink href="/signup" eventParams={{ location: "final_cta", label: "start_preparing" }} magnetic className="group inline-flex min-h-14 items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-semibold text-[#071426] shadow-lg shadow-black/10 transition-transform motion-safe:hover:-translate-y-0.5 hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 focus-visible:ring-offset-4 focus-visible:ring-offset-[#071426] sm:px-7 sm:text-base">
+              {CTA.primary}<ArrowRight className="h-4 w-4 transition-transform motion-safe:group-hover:translate-x-1" aria-hidden="true" />
+            </TrackedLink>
+            <TrackedLink href="/#ai-tools" eventParams={{ location: "final_cta", label: "explore_tools" }} className="inline-flex min-h-14 items-center justify-center rounded-full border border-white/25 px-6 text-sm font-medium text-white transition-colors hover:border-white/60 hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 sm:px-7 sm:text-base">
+              {FINAL_CTA.secondary}
+            </TrackedLink>
           </div>
-
-          {/* Glowing blobs */}
-          <div className="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full filter blur-[80px] -translate-x-1/2 -translate-y-1/2"></div>
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-400/10 rounded-full filter blur-[100px] translate-x-1/2 translate-y-1/2"></div>
+          <p className="mt-6 flex items-center justify-center gap-2 text-xs text-slate-300 sm:text-sm"><Check className="h-3.5 w-3.5 text-emerald-300" aria-hidden="true" /> Free to start. No credit card required.</p>
+          <p className="mt-12 text-xs leading-6 text-slate-400">Greater preparation. Clearer next steps. Visa outcomes remain with the relevant authority.</p>
         </div>
       </div>
     </section>

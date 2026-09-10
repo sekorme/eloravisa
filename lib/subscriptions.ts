@@ -1,58 +1,24 @@
-export const SUBSCRIPTION_PLANS = {
-  FREE: {
-    id: 'free',
-    name: 'Basic Plan',
-    price: 0,
-    tokens: 10,
-    hasChatbot: false,
-    hasTelegram: false,
-    durationMonths: 1,
-  },
-  PRO: {
-    id: 'pro',
-    name: 'Pro Plan',
-    price: 20,
-    tokens: 100,
-    hasChatbot: true,
-    hasTelegram: false,
-    durationMonths: 1,
-  },
-  FULL: {
-    id: 'full',
-    name: 'Full Features',
-    price: 40,
-    tokens: 200,
-    hasChatbot: true,
-    hasTelegram: true,
-    durationMonths: 1,
-  },
-  TOPUP_50: {
-    id: 'topup_50',
-    name: 'Token Top-Up',
-    price: 8,
-    tokens: 50,
-    hasChatbot: false,
-    hasTelegram: false,
-    durationMonths: 0, // One-time purchase
-  },
-} as const;
+/**
+ * Subscription helpers.
+ *
+ * The plan/token *configuration* lives in `lib/billing/plans.ts` — pure data
+ * with no side effects — and is re-exported here so that existing imports
+ * (`import { SUBSCRIPTION_PLANS, TOKEN_COSTS, PlanId } from "@/lib/subscriptions"`)
+ * continue to resolve unchanged.
+ *
+ * This module additionally pulls in the Firebase *client* SDK for the token
+ * mutation helpers below. Prefer importing from `@/lib/billing/plans` directly
+ * when you only need configuration — server components and route handlers get a
+ * meaningfully smaller graph that way.
+ */
 
-export const TOKEN_COSTS = {
-  DOCUMENT_REVIEW: 5,
-  MOCK_INTERVIEW: 10,
-  DOCUMENT_DRAFT: 5,
-  INFORMATION_GENERATION: 5,
-  CONSULAR_SESSION: 10,
-} as const;
-
-export type PlanId = keyof typeof SUBSCRIPTION_PLANS;
-
-export interface UserSubscription {
-  planId: string;
-  tokens: number;
-  expiresAt: number; // timestamp
-  lastUpdated: number;
-}
+export {
+  SUBSCRIPTION_PLANS,
+  TOKEN_COSTS,
+  LIST_CURRENCY,
+  SETTLEMENT_CURRENCY,
+} from "./billing/plans";
+export type { PlanId, UserSubscription } from "./billing/plans";
 
 import { doc, getDoc, runTransaction } from "firebase/firestore";
 import { db } from "@/firebase/client";
@@ -85,9 +51,9 @@ export async function deductTokens(userId: string, amount: number) {
 export async function hasEnoughTokens(userId: string, amount: number) {
   const userRef = doc(db, "users", userId);
   const userDoc = await getDoc(userRef);
-  
+
   if (!userDoc.exists()) return false;
-  
+
   const userData = userDoc.data();
   return (userData.tokens || 0) >= amount;
 }

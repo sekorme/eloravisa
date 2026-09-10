@@ -34,6 +34,16 @@ const LIMITERS = {
               prefix: "ratelimit:gemini-session",
           })
         : null,
+    // Public, unauthenticated form on the marketing homepage, so this one is
+    // keyed per-IP rather than per-uid. Tight, because there's no legitimate
+    // reason to join a waitlist more than a handful of times.
+    classWaitlist: redis
+        ? new Ratelimit({
+              redis,
+              limiter: Ratelimit.slidingWindow(5, "10 m"),
+              prefix: "ratelimit:class-waitlist",
+          })
+        : null,
 } as const;
 
 export type RateLimitBucket = keyof typeof LIMITERS;

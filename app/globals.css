@@ -7,7 +7,7 @@
 @theme inline {
     --color-background: var(--background);
     --color-foreground: var(--foreground);
-    --font-sans: var(--font-sans);
+    --font-sans: var(--font-inter);
     --font-mono: var(--font-geist-mono);
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
@@ -51,6 +51,21 @@
     --color-landing-violet: var(--landing-violet);
     --color-landing-magenta: var(--landing-magenta);
 
+    /* Landing page redesign tokens (theme-aware surfaces + fixed brand accents). */
+    --color-lp-page: var(--lp-page);
+    --color-lp-card: var(--lp-card);
+    --color-lp-card-2: var(--lp-card-2);
+    --color-lp-fg: var(--lp-fg);
+    --color-lp-muted: var(--lp-muted);
+    --color-lp-line: var(--lp-line);
+    --color-lp-sky: var(--lp-sky);
+    --color-lp-sky-2: var(--lp-sky-2);
+    --color-lp-navy: var(--lp-navy);
+    --color-lp-navy-2: var(--lp-navy-2);
+    --color-lp-azure: var(--lp-azure);
+    --color-lp-azure-2: var(--lp-azure-2);
+    --font-display: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+
     --radius-sm: calc(var(--radius) - 4px);
     --radius-md: calc(var(--radius) - 2px);
     --radius-lg: var(--radius);
@@ -69,89 +84,162 @@
     }
 }
 
+/* ==========================================================================
+   Brand palette — white, light green, navy green, gold
+   --------------------------------------------------------------------------
+   These values are the app-wide counterpart of the homepage token system in
+   `features/elora-home/styles/elora-home.css`, so the marketing pages
+   (about, how-it-works, pricing, resources, ai-tools, visa-guidance) and the
+   shadcn components they are built from match the homepage instead of sitting
+   on the previous magenta/blue theme.
+
+   Contrast has been measured, not eyeballed:
+     #0A2720 on white .......... 15.9:1
+     #40584E on white ..........  7.7:1   (body copy)
+     #556B61 on white ..........  5.7:1   (muted, and on the green tints)
+     white on #1E7A58 ..........  5.3:1   (primary buttons)
+   Gold is an accent, never body text: #D4AF37 is 2.1:1 on white and is for
+   fills only. Use #8A6D0E where gold has to be read.
+   ========================================================================== */
+
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.68 0.32 329);
-    --primary-foreground: oklch(0.98 0.016 73.684);
-    --secondary: oklch(0.967 0.001 286.375);
-    --secondary-foreground: oklch(0.21 0.006 285.885);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
+    --background: #FFFFFF;
+    --foreground: #0A2720;
+    --card: #FFFFFF;
+    --card-foreground: #0A2720;
+    --popover: #FFFFFF;
+    --popover-foreground: #0A2720;
+    --primary: #1E7A58;
+    --primary-foreground: #FFFFFF;
+    --secondary: #F2F9F5;
+    --secondary-foreground: #0A2720;
+    --muted: #F2F9F5;
+    --muted-foreground: #556B61;
+    --accent: #DFF0E7;
+    --accent-foreground: #0A2720;
     --destructive: oklch(0.58 0.22 27);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
-    --chart-1: oklch(0.837 0.128 66.29);
-    --chart-2: oklch(0.705 0.213 47.604);
-    --chart-3: oklch(0.646 0.222 41.116);
-    --chart-4: oklch(0.553 0.195 38.402);
-    --chart-5: oklch(0.47 0.157 37.304);
+    --border: #DCE7E1;
+    --input: #DCE7E1;
+    --ring: #1E7A58;
+    --chart-1: #1E7A58;
+    --chart-2: #2E9B72;
+    --chart-3: #5DBF95;
+    --chart-4: #D4AF37;
+    --chart-5: #123A30;
     --radius: 0.875rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.646 0.222 41.116);
-    --sidebar-primary-foreground: oklch(0.98 0.016 73.684);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0);
+    --sidebar: #F2F9F5;
+    --sidebar-foreground: #0A2720;
+    --sidebar-primary: #1E7A58;
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: #DFF0E7;
+    --sidebar-accent-foreground: #0A2720;
+    --sidebar-border: #DCE7E1;
+    --sidebar-ring: #1E7A58;
 
     /* Fixed brand accents for landing sections; same value in light/dark. */
-    --landing-navy: #071426;
-    --landing-navy-deep: #0B1F3A;
-    --landing-cyan: #22D3EE;
-    --landing-blue: #2563EB;
-    --landing-violet: #7C3AED;
-    --landing-magenta: #EC16D7;
+    --landing-navy: #08201A;
+    --landing-navy-deep: #05130F;
+    --landing-cyan: #5DBF95;
+    --landing-blue: #1E7A58;
+    --landing-violet: #123A30;
+    --landing-magenta: #D4AF37;
+
+    /* Landing redesign: light surfaces */
+    --lp-page: #FFFFFF;
+    --lp-card: #FFFFFF;
+    --lp-card-2: #F2F9F5;
+    --lp-fg: #0A2720;
+    --lp-muted: #40584E;
+    --lp-line: rgba(10, 39, 32, 0.12);
+    --lp-sky: #DFF0E7;
+    --lp-sky-2: #F2F9F5;
+    --lp-navy: #08201A;
+    --lp-navy-2: #123A30;
+    --lp-azure: #1E7A58;
+    --lp-azure-2: #165C42;
+    --lp-stroke: rgba(30, 122, 88, 0.35);
 }
 
 .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.68 0.32 329);
-    --primary-foreground: oklch(0.98 0.016 73.684);
-    --secondary: oklch(0.274 0.006 286.033);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.371 0 0);
-    --accent-foreground: oklch(0.985 0 0);
+    --background: #05130F;
+    --foreground: #EAF4EF;
+    --card: #0A2720;
+    --card-foreground: #EAF4EF;
+    --popover: #0A2720;
+    --popover-foreground: #EAF4EF;
+    --primary: #2E9B72;
+    --primary-foreground: #FFFFFF;
+    --secondary: #123A30;
+    --secondary-foreground: #EAF4EF;
+    --muted: #0C2B24;
+    --muted-foreground: #A9C2B7;
+    --accent: #123A30;
+    --accent-foreground: #EAF4EF;
     --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.837 0.128 66.29);
-    --chart-2: oklch(0.705 0.213 47.604);
-    --chart-3: oklch(0.646 0.222 41.116);
-    --chart-4: oklch(0.553 0.195 38.402);
-    --chart-5: oklch(0.47 0.157 37.304);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.705 0.213 47.604);
-    --sidebar-primary-foreground: oklch(0.98 0.016 73.684);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+    --border: rgba(255, 255, 255, 0.12);
+    --input: rgba(255, 255, 255, 0.16);
+    --ring: #5DBF95;
+    --chart-1: #5DBF95;
+    --chart-2: #2E9B72;
+    --chart-3: #8FCDAF;
+    --chart-4: #D4AF37;
+    --chart-5: #1E7A58;
+    --sidebar: #0A2720;
+    --sidebar-foreground: #EAF4EF;
+    --sidebar-primary: #2E9B72;
+    --sidebar-primary-foreground: #FFFFFF;
+    --sidebar-accent: #123A30;
+    --sidebar-accent-foreground: #EAF4EF;
+    --sidebar-border: rgba(255, 255, 255, 0.12);
+    --sidebar-ring: #5DBF95;
+
+    /* Landing redesign: dark surfaces */
+    --lp-page: #05130F;
+    --lp-card: #0A2720;
+    --lp-card-2: #123A30;
+    --lp-fg: #EAF4EF;
+    --lp-muted: #A9C2B7;
+    --lp-line: rgba(255, 255, 255, 0.12);
+    --lp-sky: #0C2B24;
+    --lp-sky-2: #08201A;
+    --lp-navy: #08201A;
+    --lp-navy-2: #123A30;
+    --lp-azure: #5DBF95;
+    --lp-azure-2: #8FCDAF;
+    --lp-stroke: rgba(143, 205, 175, 0.35);
 }
 
 @layer base {
     * {
         @apply border-border outline-ring/50;
     }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
     body {
-        @apply bg-background text-foreground;
+        @apply bg-background text-foreground antialiased;
+        font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+        line-height: 1.6;
+        background-image:
+            radial-gradient(circle at top left, rgba(96, 165, 250, 0.12), transparent 26%),
+            radial-gradient(circle at 90% 10%, rgba(167, 139, 250, 0.12), transparent 20%),
+            linear-gradient(180deg, #f4f8ff 0%, #eef4ff 100%);
+        background-attachment: fixed;
+        min-height: 100vh;
+    }
+
+    .dark body {
+        background-image:
+            radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 26%),
+            radial-gradient(circle at 100% 0%, rgba(139, 92, 246, 0.16), transparent 22%),
+            linear-gradient(180deg, #050d1a 0%, #0b1220 100%);
+    }
+
+    ::selection {
+        background: rgba(37, 99, 235, 0.2);
+        color: inherit;
     }
 }
 
@@ -172,6 +260,34 @@
             display: none;
         }
         display: flex;
+    }
+
+    .lp-outline-text {
+        color: transparent;
+        -webkit-text-stroke: 1px rgba(11, 35, 67, 0.15);
+        text-shadow: 0 12px 30px rgba(59, 130, 246, 0.08);
+    }
+
+    .dark .lp-outline-text {
+        -webkit-text-stroke: 1px rgba(191, 219, 254, 0.22);
+        text-shadow: 0 12px 30px rgba(96, 165, 250, 0.12);
+    }
+
+    .lp-shadow {
+        box-shadow: 0 24px 60px -32px rgba(15, 23, 42, 0.24);
+    }
+
+    .ambient-orb {
+        position: absolute;
+        border-radius: 9999px;
+        filter: blur(42px);
+        opacity: 0.7;
+        pointer-events: none;
+        animation: float 12s ease-in-out infinite;
+    }
+
+    .ambient-orb-slow {
+        animation-duration: 18s;
     }
 
     .glass-panel {
@@ -213,6 +329,34 @@
     .custom-scrollbar::-webkit-scrollbar {
         width: 6px;
     }
+}
+
+@keyframes float {
+    0%,
+    100% {
+        transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+        transform: translate3d(0, -12px, 0) scale(1.04);
+    }
+}
+
+@keyframes pulse-soft {
+    0%,
+    100% {
+        opacity: 0.5;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.85;
+        transform: scale(1.04);
+    }
+}
+
+.animate-pulse-soft {
+    animation: pulse-soft 4s ease-in-out infinite;
+}
+
 
     .custom-scrollbar::-webkit-scrollbar-track {
         background: rgba(0, 0, 0, 0.02);
@@ -235,4 +379,173 @@
     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
         background: rgba(0, 245, 255, 0.3);
     }
+/* ---------------------------------------------------------------------------
+   Landing page redesign utilities
+   --------------------------------------------------------------------------- */
+@layer utilities {
+    /* Outlined "ghost" wordmark used behind the hero globe. */
+    .lp-outline-text {
+        color: transparent;
+        -webkit-text-stroke: 1.5px var(--lp-stroke);
+        text-stroke: 1.5px var(--lp-stroke);
+    }
+
+    /* Concave "ear" corners that let a tab flow into the surface next to it.
+       Place inside a `relative` tab; the ear takes the tab's colour (--ear). */
+    .lp-ear {
+        --ear-size: 1.75rem;
+        position: absolute;
+        bottom: 0;
+        width: var(--ear-size);
+        height: var(--ear-size);
+        pointer-events: none;
+    }
+    .lp-ear-l {
+        right: 100%;
+        background: radial-gradient(circle at 0 0, transparent calc(var(--ear-size) - 1px), var(--ear, var(--lp-card)) var(--ear-size));
+    }
+    .lp-ear-r {
+        left: 100%;
+        background: radial-gradient(circle at 100% 0, transparent calc(var(--ear-size) - 1px), var(--ear, var(--lp-card)) var(--ear-size));
+    }
+    /* Ears for a tab hanging from the top edge (curves open downwards). */
+    .lp-ear-top {
+        bottom: auto;
+        top: 0;
+    }
+    .lp-ear-top.lp-ear-l {
+        background: radial-gradient(circle at 0 100%, transparent calc(var(--ear-size) - 1px), var(--ear, var(--lp-card)) var(--ear-size));
+    }
+    .lp-ear-top.lp-ear-r {
+        background: radial-gradient(circle at 100% 100%, transparent calc(var(--ear-size) - 1px), var(--ear, var(--lp-card)) var(--ear-size));
+    }
+
+    .lp-grid-dots {
+        background-image: radial-gradient(circle, color-mix(in srgb, var(--lp-fg) 12%, transparent) 1px, transparent 1px);
+        background-size: 22px 22px;
+    }
+
+    .lp-shadow {
+        box-shadow: 0 24px 60px -24px rgba(11, 35, 67, 0.25), 0 1px 0 rgba(255,255,255,0.6) inset;
+    }
+    .dark .lp-shadow {
+        box-shadow: 0 24px 60px -24px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(255,255,255,0.05) inset;
+    }
+
+    @keyframes lp-float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+    .lp-float { animation: lp-float 6s ease-in-out infinite; }
+    .lp-float-slow { animation: lp-float 9s ease-in-out infinite; }
+    @media (prefers-reduced-motion: reduce) {
+        .lp-float, .lp-float-slow { animation: none; }
+    }
 }
+
+/* Shared marketing rhythm and keyboard / motion accessibility. */
+.landing-page .container { max-width: 1280px; }
+.landing-page section[id] { scroll-margin-top: 100px; }
+.landing-page p { text-wrap: pretty; }
+.landing-page .lp-shadow {
+    box-shadow: 0 16px 48px -28px rgb(20 43 69 / 22%), 0 1px 3px rgb(20 43 69 / 4%);
+}
+.dark .landing-page .lp-shadow { box-shadow: 0 16px 48px -24px rgb(0 0 0 / 45%); }
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ---------------------------------------------------------------------------
+   Landing page: hero gradient sweep, destination ribbon, readiness demo
+   --------------------------------------------------------------------------- */
+@layer utilities {
+    /* Blue → violet → cyan gradient clipped to the text. The background is
+       oversized so GSAP can slide `background-position` across it for the
+       hero's one-off sweep (see HeroSection's `.hero-sweep`). */
+    .lp-gradient-text {
+        background-image: linear-gradient(100deg, #2563eb 0%, #7c3aed 38%, #22d3ee 62%, #2563eb 100%);
+        background-size: 220% 100%;
+        background-position: 0% 0;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        /* Descenders get clipped by background-clip without a little padding. */
+        padding-bottom: 0.06em;
+    }
+    /* Fallback for anything that can't clip a background to text. */
+    @supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+        .lp-gradient-text {
+            background-image: none;
+            color: var(--lp-azure);
+        }
+    }
+
+    /* §8 destination ribbon. The track holds two identical copies of the list,
+       so translating it exactly -50% loops seamlessly. Paused on hover/focus
+       and stopped outright under reduced motion (see the component's controls). */
+    @keyframes lp-marquee {
+        from { transform: translate3d(0, 0, 0); }
+        to { transform: translate3d(-50%, 0, 0); }
+    }
+    .lp-marquee-track {
+        display: flex;
+        width: max-content;
+        animation: lp-marquee var(--marquee-duration, 60s) linear infinite;
+    }
+    .lp-marquee-track[data-paused="true"] { animation-play-state: paused; }
+    @media (prefers-reduced-motion: reduce) {
+        .lp-marquee-track { animation: none; }
+    }
+
+    /* Soft pulse for the "live" indicators; transform/opacity only. */
+    @keyframes lp-ping-soft {
+        0% { transform: scale(1); opacity: 0.55; }
+        70% { transform: scale(2.1); opacity: 0; }
+        100% { transform: scale(2.1); opacity: 0; }
+    }
+    .lp-ping-soft { animation: lp-ping-soft 2.4s cubic-bezier(0, 0, 0.2, 1) infinite; }
+    @media (prefers-reduced-motion: reduce) {
+        .lp-ping-soft { animation: none; }
+    }
+
+    /* Draws a checkmark / connector path on. Pair with pathLength-normalised
+       stroke-dasharray of 1. */
+    @keyframes lp-draw {
+        from { stroke-dashoffset: 1; }
+        to { stroke-dashoffset: 0; }
+    }
+    .lp-draw {
+        stroke-dasharray: 1;
+        stroke-dashoffset: 1;
+        animation: lp-draw 0.5s ease-out forwards;
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .lp-draw { animation: none; stroke-dashoffset: 0; }
+    }
+}
+
+/* The hero is visible in the HTML. Entrance effects only decorate that content. */
+.hero-light { background: radial-gradient(ellipse at 80% 35%, rgb(37 99 235 / 9%), transparent 50%), radial-gradient(ellipse at 60% 65%, rgb(124 58 237 / 5%), transparent 45%); }
+.hero-gradient { color: #5d45db; background: linear-gradient(105deg, #2563eb 15%, #7c3aed 70%, #2563eb); background-size: 180% 100%; background-clip: text; -webkit-text-fill-color: transparent; }
+.dark .hero-gradient { background-image: linear-gradient(105deg, #78adff, #c4a1ff, #78adff); }
+.hero-primary { transition: translate 180ms ease-out, background-color 180ms ease-out; }
+.landing-page :is(a, button, input, summary):focus-visible, .landing-nav :is(a, button):focus-visible { outline: 2px solid var(--lp-azure); outline-offset: 4px; }
+.landing-page :is(button, summary), .landing-nav button { cursor: pointer; }
+[data-motion="paused"] *, [data-motion="paused"] *::before, [data-motion="paused"] *::after { animation-play-state: paused !important; }
+@keyframes hero-title-in { from { transform: translateY(35%); } to { transform: translateY(0); } }
+@keyframes hero-appear { from { opacity: .5; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes hero-sweep { from { background-position: 100% 0; } to { background-position: 0 0; } }
+@media (prefers-reduced-motion: no-preference) {
+  .hero-title { animation: hero-title-in .8s cubic-bezier(.22,1,.36,1) both; }
+  .hero-gradient { animation: hero-title-in .9s cubic-bezier(.22,1,.36,1) both, hero-sweep 1.5s ease-out; }
+  .hero-enter { animation: hero-appear .7s ease-out; }
+  .hero-orb { animation: hero-appear 1s ease-out; }
+  .hero-preview { animation: hero-appear 1.3s ease-out; }
+}
+@media (max-width: 639px) { .motion-control { bottom: .75rem; left: .75rem; font-size: .625rem; padding-inline: .75rem; } }

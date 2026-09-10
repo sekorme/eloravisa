@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Nunito_Sans } from "next/font/google";
+import { Inter, Manrope, Geist_Mono, Fraunces } from "next/font/google";
 import "./globals.css";
 import {ThemeProvider} from "@/components/theme-provider";
 import { AuthProvider } from "@/context/AuthContext";
@@ -54,16 +54,35 @@ const images = [
 const randomIndex = Math.floor(Math.random() * images.length);
 const selected = images[randomIndex];
 
-const nunitoSans = Nunito_Sans({variable:'--font-sans'});
-
-const geistSans = Geist({
-    variable: "--font-geist-sans",
+const geistSans = Inter({
+    variable: "--font-inter",
     subsets: ["latin"],
 });
+
+const headingFont = Manrope({ variable: "--font-manrope", subsets: ["latin"], display: "swap" });
 
 const geistMono = Geist_Mono({
     variable: "--font-geist-mono",
     subsets: ["latin"],
+});
+
+/**
+ * Display serif for the marketing homepage (`features/elora-home`).
+ *
+ * Fraunces is a variable font with an optical-size axis, which is what lets one
+ * family carry both a 5.5rem engraved hero headline and a 2rem section title
+ * without the larger sizes looking bloated. Only the weights actually used are
+ * requested, and `display: "swap"` means a missing font never blocks text.
+ */
+const displaySerif = Fraunces({
+    variable: "--font-fraunces",
+    subsets: ["latin"],
+    // No `weight` key: next/font only accepts `axes` for a font loaded as a
+    // variable font, and specifying a fixed weight list opts out of that. The
+    // full weight range plus the optical-size axis is exactly what the display
+    // type needs.
+    axes: ["SOFT", "WONK", "opsz"],
+    display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -122,13 +141,18 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" className={nunitoSans.variable} suppressHydrationWarning>
+        <html lang="en" suppressHydrationWarning>
         <head>
             <Script
                 src="https://www.googletagmanager.com/gtag/js?id=G-M11K918X76"
                 strategy="afterInteractive"
             />
 
+            {/* Analytics + Ads config only. The Google Ads *conversion* event is
+                deliberately NOT fired here: firing it on every page load
+                reported every visitor as a conversion. It now fires once, from
+                `trackSignupConversion()` in lib/analytics.ts, when an account
+                has actually been created. */}
             <Script id="google-tags" strategy="afterInteractive">
                 {`
   window.dataLayer = window.dataLayer || [];
@@ -137,21 +161,12 @@ export default function RootLayout({
 
   gtag('config', 'G-M11K918X76'); // Google Analytics
   gtag('config', 'AW-17910098280'); // Google Ads
-
-  gtag('event', 'conversion', {
-      'send_to': 'AW-17910098280/4eIACJTZ8-0bEOjSmdxC',
-      'value': 1.0,
-      'currency': 'USD',
-      'transaction_id': ''
-  });
-
-
 `}
             </Script>
             <meta name="google-site-verification" content="WaPSANjh4xYxdDhEX_bIetVlh6Z5gUkcaesHbibqXtE" />
         </head>
         <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+            className={`${geistSans.variable} ${headingFont.variable} ${geistMono.variable} ${displaySerif.variable} antialiased`}
         >
         <ThemeProvider
             attribute="class"

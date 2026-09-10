@@ -49,7 +49,7 @@ export default function Disclaimer() {
       </div>
 
       <div className="grid gap-6">
-        <Card className="section-card border-l-4 border-l-blue-500 shadow-md">
+        <Card id="ai-guidance" className="section-card scroll-mt-28 border-l-4 border-l-blue-500 shadow-md">
           <CardContent className="p-6 space-y-3">
             <div className="flex items-center gap-3">
               <FileWarning className="w-6 h-6 text-blue-500" />

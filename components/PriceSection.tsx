@@ -1,15 +1,10 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
-import { useTheme } from "next-themes";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Check, X, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SUBSCRIPTION_PLANS, TOKEN_COSTS } from "@/lib/subscriptions";
-import { SignupSheet } from "@/components/auth/SignupSheet";
-
-gsap.registerPlugin(ScrollTrigger);
+import { TrackedLink } from "@/components/landing/TrackedLink";
+import { Display, Eyebrow, Reveal, RevealGroup, RevealItem, pillClass } from "@/components/landing/ui";
 
 type Feature = {
   name: string;
@@ -54,7 +49,7 @@ const plans: PlanDisplay[] = [
     price: SUBSCRIPTION_PLANS.PRO.price,
     tokens: SUBSCRIPTION_PLANS.PRO.tokens,
     cadence: "/mo",
-    description: "Most popular for active applicants",
+    description: "More room for active preparation",
     features: [
       { name: `${SUBSCRIPTION_PLANS.PRO.tokens} AI tokens per month`, included: true },
       { name: `Up to ${reviewsFromTokens(SUBSCRIPTION_PLANS.PRO.tokens)} document reviews`, included: true },
@@ -65,14 +60,14 @@ const plans: PlanDisplay[] = [
     ],
     cta: "Choose Pro",
     highlight: true,
-    badge: "Most Popular",
+    badge: "Recommended",
   },
   {
     name: SUBSCRIPTION_PLANS.FULL.name,
     price: SUBSCRIPTION_PLANS.FULL.price,
     tokens: SUBSCRIPTION_PLANS.FULL.tokens,
     cadence: "/mo",
-    description: "Everything you need for success",
+    description: "Expanded support for your preparation",
     features: [
       { name: `${SUBSCRIPTION_PLANS.FULL.tokens} AI tokens per month`, included: true },
       { name: `Up to ${reviewsFromTokens(SUBSCRIPTION_PLANS.FULL.tokens)} document reviews`, included: true },
@@ -81,137 +76,96 @@ const plans: PlanDisplay[] = [
       { name: "Private Telegram Group", included: SUBSCRIPTION_PLANS.FULL.hasTelegram },
       { name: "Secure Document Storage", included: true },
     ],
-    cta: "Get Full Access",
+    cta: "Get Full Preparation",
   },
 ];
 
 export default function PriceSection() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { resolvedTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-
-  useEffect(() => {
-    if (!mounted || !containerRef.current) return;
-
-    const ctx = gsap.context(() => {
-      gsap.from(".price-header", {
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top bottom",
-          toggleActions: "play none none none"
-        },
-        y: 30,
-        opacity: 0,
-        duration: 0.8,
-        ease: "power3.out",
-        clearProps: "all"
-      });
-
-      gsap.from(".price-card", {
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: "top bottom",
-          toggleActions: "play none none none"
-        },
-        y: 60,
-        opacity: 0,
-        duration: 1,
-        stagger: 0.15,
-        ease: "power2.out",
-        clearProps: "all"
-      });
-    }, containerRef);
-
-    return () => ctx.revert();
-  }, [mounted]);
-
   return (
-    <section id="pricing" ref={containerRef} className="relative py-24 md:py-32 overflow-hidden bg-slate-50/50 dark:bg-[#030308]/50">
-
-      <div className="container relative z-10 px-4 mx-auto">
-        <div className="price-header text-center mb-16 md:mb-24">
-          <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight mb-6">
-            <span className="bg-gradient-to-r from-blue-600 to-indigo-500 bg-clip-text text-transparent">
-              Simple, Transparent{" "}
-            </span>
-            <span className="text-foreground">Pricing</span>
-          </h2>
-          <p className="max-w-2xl mx-auto text-muted-foreground text-xl">
-            Choose the plan that's right for your ambition. Prices in USD, billed monthly.
-          </p>
+    <section id="pricing" className="relative scroll-mt-20 bg-lp-page py-16 md:py-24" aria-labelledby="pricing-heading">
+      <div className="container relative mx-auto px-4 md:px-6">
+        <div className="mx-auto mb-12 max-w-3xl text-center md:mb-16">
+          <Reveal>
+            <Eyebrow>Pricing</Eyebrow>
+          </Reveal>
+          <Reveal delay={0.08}>
+            <Display as="h2" size="lg" className="mt-5 text-lp-fg">
+              <span id="pricing-heading">
+                Start free. <span className="text-lp-azure">Upgrade when you need more support.</span>
+              </span>
+            </Display>
+          </Reveal>
+          <Reveal delay={0.16}>
+            <p className="mx-auto mt-5 max-w-xl text-sm leading-relaxed text-lp-muted md:text-base">
+              Every plan includes a monthly allowance of AI credits. Prices in USD, billed monthly, and you can change
+              plan at any time. Your credits are shared across tools; the maximums below are alternatives, not combined allowances.
+            </p>
+          </Reveal>
         </div>
 
-        <div className="price-grid grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
-          {plans.map((plan, idx) => (
-            <div
-              key={idx}
-              className={cn(
-                "price-card relative p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 border transition-all duration-500 flex flex-col group",
-                plan.highlight
-                  ? "border-blue-500/50 shadow-[0_20px_50px_rgba(59,130,246,0.15)] scale-105 z-10 dark:bg-slate-900/80"
-                  : "border-slate-200 dark:border-slate-800 hover:border-blue-500/30 shadow-xl hover:shadow-2xl"
-              )}
-            >
-              {plan.badge && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-blue-600 text-white text-xs font-bold rounded-full shadow-lg flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" /> {plan.badge}
-                </div>
-              )}
-
-              <div className="mb-8">
-                <h3 className="text-2xl font-bold mb-2 group-hover:text-blue-500 transition-colors">{plan.name}</h3>
-                <p className="text-muted-foreground text-sm">{plan.description}</p>
-              </div>
-
-              <div className="mb-8 flex items-baseline gap-1">
-                <span className="text-5xl font-extrabold">${plan.price}</span>
-                <span className="text-muted-foreground">{plan.cadence} USD</span>
-              </div>
-
-              <div className="space-y-4 mb-10 flex-grow">
-                {plan.features.map((feature, fIdx) => (
-                  <div key={fIdx} className={cn("flex items-start gap-3 text-sm", !feature.included && "opacity-40")}>
-                    {feature.included ? (
-                      <div className="mt-0.5 p-0.5 rounded-full bg-blue-500/10 text-blue-500">
-                        <Check className="w-4 h-4" />
-                      </div>
-                    ) : (
-                      <div className="mt-0.5 p-0.5 rounded-full bg-slate-500/10 text-slate-500">
-                        <X className="w-4 h-4" />
-                      </div>
-                    )}
-                    <span className={cn(feature.included ? "text-foreground/90 font-medium" : "text-muted-foreground line-through")}>
-                      {feature.name}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              <SignupSheet
-                desscription={plan.cta}
+        <RevealGroup className="mx-auto grid max-w-6xl grid-cols-1 items-stretch gap-5 md:grid-cols-3">
+          {plans.map((plan) => (
+            <RevealItem key={plan.name} className="h-full">
+              <div
                 className={cn(
-                  "w-full py-4 px-6 rounded-2xl font-bold transition-all duration-300 h-auto",
+                  "relative flex h-full flex-col rounded-[2rem] border p-7 transition-transform duration-500 md:p-8",
                   plan.highlight
-                    ? "bg-blue-600 text-white shadow-lg hover:bg-blue-700 hover:shadow-blue-500/25"
-                    : "bg-slate-100 dark:bg-slate-800 text-foreground hover:bg-blue-500 hover:text-white"
+                    ? "border-lp-navy bg-lp-navy text-white shadow-[0_30px_60px_-30px_rgba(12,38,71,0.7)] md:-translate-y-3"
+                    : "border-lp-line bg-lp-card text-lp-fg lp-shadow"
                 )}
-              />
+              >
+                {plan.badge && (
+                  <div className="absolute -top-3.5 left-7 flex items-center gap-1 rounded-full bg-lp-azure px-3 py-1 font-display text-[9px] font-semibold uppercase tracking-[0.18em] text-white shadow-lg">
+                    <Sparkles className="h-3 w-3" aria-hidden="true" /> {plan.badge}
+                  </div>
+                )}
 
-              {plan.highlight && (
-                <div className="absolute inset-0 rounded-[2.5rem] bg-gradient-to-b from-blue-500/5 to-transparent pointer-events-none"></div>
-              )}
-            </div>
+                <div className="mb-6">
+                  <h3 className="font-display text-sm font-semibold uppercase tracking-wide md:text-base">{plan.name}</h3>
+                  <p className={cn("mt-1 text-sm", plan.highlight ? "text-white/60" : "text-lp-muted")}>{plan.description}</p>
+                </div>
+
+                <div className="mb-7 flex items-baseline gap-1.5">
+                  <span className="font-display text-5xl font-medium">${plan.price}</span>
+                  <span className={cn("text-sm", plan.highlight ? "text-white/60" : "text-lp-muted")}>{plan.cadence} USD</span>
+                </div>
+
+                <ul className="mb-8 flex-1 space-y-3">
+                  {plan.features.map((feature) => (
+                    <li key={feature.name} className={cn("flex items-start gap-3 text-sm", !feature.included && "opacity-45")}>
+                      <span
+                        className={cn(
+                          "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full",
+                          feature.included
+                            ? plan.highlight
+                              ? "bg-white text-lp-navy"
+                              : "bg-lp-azure text-white"
+                            : plan.highlight
+                              ? "bg-white/10 text-white"
+                              : "bg-lp-line text-lp-muted"
+                        )}
+                      >
+                        {feature.included ? <Check className="h-3 w-3" aria-hidden="true" /> : <X className="h-3 w-3" aria-hidden="true" />}
+                      </span>
+                      <span className={cn(feature.included ? "font-medium" : "line-through")}>{feature.name}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <TrackedLink href="/signup" event="pricing_plan_select" eventParams={{ location: "pricing", label: plan.name, value: plan.price }} className={pillClass(plan.highlight ? "white" : "navy", "md", "w-full")}>{plan.cta}</TrackedLink>
+              </div>
+            </RevealItem>
           ))}
-        </div>
+        </RevealGroup>
 
-        <p className="mt-12 text-center text-sm text-muted-foreground">
-          All prices in USD. No hidden agent or processing fees.
-        </p>
+        <Reveal className="mt-10 space-y-3 text-center">
+          <p className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-muted">
+            All prices in USD · No hidden agent or processing fees
+          </p>
+          <p className="mx-auto max-w-xl text-xs leading-relaxed text-lp-muted">
+            Elora Visa supports your preparation but does not guarantee a visa decision.
+          </p>
+        </Reveal>
       </div>
     </section>
   );

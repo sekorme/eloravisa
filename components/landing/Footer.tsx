@@ -1,122 +1,121 @@
-"use client"
-
-import React, { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
-import { useTheme } from "next-themes"
 import { Send } from "lucide-react"
-import { gsap } from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
+import { FOOTER_ATTRIBUTION, FOOTER_COLUMNS, FOOTER_DISCLAIMER } from "@/lib/landing/content"
+import { FooterSubscribe } from "./FooterSubscribe"
+import { Reveal } from "./ui"
 
-gsap.registerPlugin(ScrollTrigger)
-
+/**
+ * §21 Footer. Link groups come from `lib/landing/content.ts` — add links there,
+ * not here, and only for routes that actually exist.
+ *
+ * Telegram is the only social channel with a real, verified URL, so it's the
+ * only one listed. Adding empty Facebook/Instagram/X icons would send visitors
+ * nowhere.
+ */
 export function Footer() {
-  const footerRef = useRef<HTMLElement>(null)
-  const { resolvedTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
-
-
-  useEffect(() => {
-    if (!mounted || !footerRef.current) return
-
-    const ctx = gsap.context(() => {
-      gsap.from(".footer-content", {
-        scrollTrigger: {
-          trigger: footerRef.current,
-          start: "top 90%",
-        },
-        y: 30,
-        opacity: 0,
-        duration: 0.8,
-        stagger: 0.1,
-        ease: "power2.out"
-      })
-    }, footerRef)
-
-    return () => ctx.revert()
-  }, [mounted])
-
   return (
-    <footer ref={footerRef} className="relative bg-slate-50 dark:bg-[#020205] border-t border-slate-200 dark:border-slate-800 overflow-hidden">
+    <footer className="relative overflow-hidden border-t border-lp-line bg-lp-page">
+      <div className="container relative mx-auto px-4 pb-10 pt-16 md:px-6 md:pt-24">
+        <Reveal>
+          <div className="grid grid-cols-2 gap-10 sm:grid-cols-3 lg:grid-cols-6 lg:gap-8">
+            {/* Brand + subscribe */}
+            <div className="col-span-2 sm:col-span-3 lg:col-span-2">
+              <Link href="/" className="group mb-6 flex items-center gap-3">
+                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-lp-card p-2 lp-shadow transition-transform group-hover:scale-105">
+                  <Image
+                    src="/eloravisa.PNG"
+                    alt="Elora Visa logo"
+                    width={32}
+                    height={32}
+                    className="h-full w-full object-contain"
+                  />
+                </span>
+                <span className="font-display text-sm font-semibold uppercase tracking-[0.18em] text-lp-fg">
+                  Elora Visa
+                </span>
+              </Link>
+              <p className="mb-7 max-w-sm text-sm leading-relaxed text-lp-muted">
+                An intelligent companion for preparing a stronger, better-organized visa application — with clear
+                guidance, AI preparation tools, and no agent fees.
+              </p>
 
-      <div className="container relative z-10 px-4 mx-auto py-16 md:py-24">
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-12 lg:gap-16">
-          <div className="col-span-1 md:col-span-2 footer-content">
-            <Link href="/" className="flex items-center gap-3 mb-6 group">
-              <div className="w-10 h-10 bg-white dark:bg-slate-900 rounded-xl shadow-lg flex items-center justify-center p-2 group-hover:scale-110 transition-transform">
-                <Image src="/eloravisa.PNG" alt="Elora Visa Logo" width={32} height={32} className="w-full h-full object-contain" />
+              <div className="mb-7 max-w-sm">
+                <FooterSubscribe />
               </div>
-              <span className="text-2xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">Elora Visa</span>
-            </Link>
-            <p className="text-muted-foreground text-base leading-relaxed max-w-sm mb-8">
-              Empowering applicants to navigate the visa process with confidence. No agents, just expert guidance and AI-powered tools for a transparent journey.
-            </p>
-            {/* Facebook, Instagram and LinkedIn are hidden until real profile URLs are configured. */}
-            <div className="flex gap-5">
-              {[
-                { icon: Send, href: "https://t.me/+wWazCHK2wEMzMzdk", color: "hover:text-blue-400", label: "Telegram" }
-              ].map((social, idx) => (
-                <Link 
-                  key={idx} 
-                  href={social.href} 
-                  className={`p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-400 ${social.color} transition-all hover:-translate-y-1 shadow-sm hover:shadow-md`}
-                >
-                  <social.icon className="w-5 h-5" />
-                  <span className="sr-only">{social.label}</span>
-                </Link>
-              ))}
+
+              <Link
+                href="https://t.me/+wWazCHK2wEMzMzdk"
+                className="inline-flex h-11 items-center gap-2 rounded-full border border-lp-line bg-lp-card px-4 text-sm font-semibold text-lp-fg transition-all hover:-translate-y-0.5 hover:border-lp-azure/40 lp-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-azure"
+              >
+                <Send className="h-4 w-4 text-lp-azure" aria-hidden="true" />
+                Join us on Telegram
+              </Link>
             </div>
-          </div>
 
-          <div className="footer-content">
-            <h3 className="font-bold mb-6 text-sm uppercase tracking-widest text-foreground/80">Product</h3>
-            <ul className="space-y-4 text-sm text-muted-foreground">
-              <li><Link href="#ai-tools" className="hover:text-blue-500 transition-colors flex items-center gap-2">Features</Link></li>
-              <li><Link href="#how-it-works" className="hover:text-blue-500 transition-colors flex items-center gap-2">How it Works</Link></li>
-              <li><Link href="#pricing" className="hover:text-blue-500 transition-colors flex items-center gap-2">Pricing</Link></li>
-              <li><Link href="#success-stories" className="hover:text-blue-500 transition-colors flex items-center gap-2">Success Stories</Link></li>
-            </ul>
+            {/* Link columns */}
+            {FOOTER_COLUMNS.map((column) => (
+              <nav key={column.heading} aria-label={column.heading}>
+                <h2 className="mb-5 font-display text-[10px] font-medium uppercase tracking-[0.2em] text-lp-fg">
+                  {column.heading}
+                </h2>
+                <ul className="space-y-3 text-sm text-lp-muted">
+                  {column.links.map((link) => (
+                    <li key={`${column.heading}-${link.label}`}>
+                      <Link
+                        href={link.href}
+                        className="rounded-sm transition-colors hover:text-lp-azure focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-azure"
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            ))}
           </div>
+        </Reveal>
 
-          <div className="footer-content">
-            <h3 className="font-bold mb-6 text-sm uppercase tracking-widest text-foreground/80">Legal</h3>
-            <ul className="space-y-4 text-sm text-muted-foreground">
-              <li><Link href="/legal/privacy-policy" className="hover:text-blue-500 transition-colors">Privacy Policy</Link></li>
-              <li><Link href="/legal/terms-of-service" className="hover:text-blue-500 transition-colors">Terms of Service</Link></li>
-              <li><Link href="/legal/cookie-policy" className="hover:text-blue-500 transition-colors">Cookie Policy</Link></li>
-              <li><Link href="/legal/disclaimer" className="hover:text-blue-500 transition-colors">Disclaimer</Link></li>
-            </ul>
-          </div>
-
-          <div className="footer-content">
-            <h3 className="font-bold mb-6 text-sm uppercase tracking-widest text-foreground/80">Contact</h3>
-            <ul className="space-y-4 text-sm text-muted-foreground">
-              <li className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-tighter">Email Us</span>
-                <a href="mailto:info@eloravisa.com" className="hover:text-blue-500 transition-colors font-medium text-foreground/80">
-                  info@eloravisa.com
-                </a>
-              </li>
-              <li className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase font-bold text-slate-400 tracking-tighter">Call Us</span>
-                <a href="tel:+233553143196" className="hover:text-blue-500 transition-colors font-medium text-foreground/80">
-                  +233 55 314 3196
-                </a>
-              </li>
-            </ul>
-          </div>
+        {/* Contact */}
+        <div className="mt-14 flex flex-wrap gap-x-10 gap-y-4 border-t border-lp-line pt-8 text-sm">
+          <span className="flex flex-col gap-1">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-lp-muted">Email us</span>
+            <a
+              href="mailto:info@eloravisa.com"
+              className="rounded-sm font-medium text-lp-fg transition-colors hover:text-lp-azure focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-azure"
+            >
+              info@eloravisa.com
+            </a>
+          </span>
+          <span className="flex flex-col gap-1">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-lp-muted">Call us</span>
+            <a
+              href="tel:+233553143196"
+              className="rounded-sm font-medium text-lp-fg transition-colors hover:text-lp-azure focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-azure"
+            >
+              +233 55 314 3196
+            </a>
+          </span>
         </div>
 
-        <div className="mt-20 pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6 text-xs text-muted-foreground footer-content">
+        {/* Independence disclaimer — required, and deliberately not hidden in
+            small print behind a toggle. */}
+        <div className="mt-10 rounded-2xl border border-lp-line bg-lp-card/60 p-5">
+          <p className="text-xs leading-relaxed text-lp-muted">{FOOTER_DISCLAIMER}</p>
+        </div>
+
+        <div className="mt-8 flex flex-col items-center justify-between gap-3 border-t border-lp-line pt-8 text-xs text-lp-muted md:flex-row">
           <p className="font-medium">© {new Date().getFullYear()} Elora Visa. All rights reserved.</p>
-          <p className="flex items-center gap-1.5 font-medium">
-            Made with <span className="text-red-500 animate-pulse">❤️</span> for global citizens.
-          </p>
+          <p className="font-medium tracking-wide text-lp-muted/70">{FOOTER_ATTRIBUTION}</p>
         </div>
+      </div>
+
+      {/* Ghost wordmark */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none -mb-[4vw] flex select-none justify-center overflow-hidden whitespace-nowrap font-display text-[18vw] font-light uppercase leading-none tracking-[0.14em] lp-outline-text md:text-[13vw]"
+      >
+        ELORA VISA
       </div>
     </footer>
   )

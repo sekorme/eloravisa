@@ -1,5 +1,5 @@
-import Link from "next/link"
-import { Tag, LineChart, Wallet, BarChart3, ArrowRight } from "lucide-react"
+import { Tag, LineChart, Wallet, BarChart3, Percent } from "lucide-react"
+import { Display, PillLink, Reveal, TabCard } from "./ui"
 
 const POINTS = [
   { icon: Tag, label: "Unique promo code" },
@@ -10,44 +10,57 @@ const POINTS = [
 
 export function AffiliatePreview() {
   return (
-    <section className="relative py-20 md:py-28 bg-background overflow-hidden">
-      <div className="container px-4 mx-auto">
-        <div className="max-w-4xl mx-auto rounded-[2rem] border border-border bg-gradient-to-br from-landing-cyan/5 via-landing-blue/5 to-landing-violet/5 p-8 md:p-14 text-center">
-          <div className="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-widest bg-landing-cyan/10 text-landing-blue dark:text-landing-cyan border-landing-cyan/30 mb-6">
-            Affiliate Program
-          </div>
-          <h2 className="text-3xl md:text-5xl font-black tracking-tight mb-4">
-            Earn by helping others discover smarter visa preparation
-          </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto mb-10">
-            Share your unique promo code and earn 10% commission on every successful referral payment.
-          </p>
-
-          <div className="flex flex-wrap justify-center gap-3 mb-10">
-            {POINTS.map((p) => (
-              <div key={p.label} className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/60 dark:bg-white/5 border border-border">
-                <p.icon className="w-4 h-4 text-landing-blue dark:text-landing-cyan" />
-                <span className="text-sm font-medium">{p.label}</span>
+    <section className="relative bg-lp-page py-16 md:py-24" aria-labelledby="affiliate-heading">
+      <div className="container mx-auto px-4 md:px-6">
+        <Reveal scale y={40} amount={0.2} className="mx-auto max-w-5xl">
+          <TabCard
+            tab={
+              <span className="flex items-center gap-2 font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-fg/80">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-lp-azure text-white">
+                  <Percent className="h-3.5 w-3.5" aria-hidden="true" />
+                </span>
+                Affiliate program
+              </span>
+            }
+            bodyClassName="lp-shadow relative overflow-hidden p-8 md:p-14"
+          >
+            <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-lp-sky blur-3xl dark:bg-lp-azure/20" aria-hidden="true" />
+            <div className="relative grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:items-center">
+              <div>
+                <Display as="h2" size="md" className="text-lp-fg">
+                  <span id="affiliate-heading">Earn by sharing Elora Visa</span>
+                </Display>
+                <p className="mt-5 max-w-xl text-sm leading-relaxed text-lp-muted md:text-base">
+                  Help others discover smarter visa preparation. Share your unique promo code and earn{" "}
+                  <strong className="font-semibold text-lp-fg">10% commission</strong> on every successful referral payment.
+                </p>
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                  <PillLink href="/affiliate" variant="azure">
+                    Become an affiliate
+                  </PillLink>
+                  <PillLink href="/affiliate/signin" variant="outline" arrow={false}>
+                    Affiliate sign in
+                  </PillLink>
+                </div>
               </div>
-            ))}
-          </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
-              href="/affiliate"
-              className="inline-flex items-center gap-2 h-12 px-8 rounded-full bg-gradient-to-r from-landing-cyan via-landing-blue to-landing-violet text-white font-semibold shadow-lg hover:shadow-xl transition-all w-full sm:w-auto justify-center"
-            >
-              Become an Affiliate
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-            <Link
-              href="/affiliate/signin"
-              className="inline-flex items-center justify-center h-12 px-8 rounded-full border-2 font-medium hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors w-full sm:w-auto"
-            >
-              Affiliate Sign In
-            </Link>
-          </div>
-        </div>
+              <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+                {POINTS.map((p, i) => (
+                  <li
+                    key={p.label}
+                    className="flex items-center gap-3 rounded-2xl border border-lp-line bg-lp-card-2 px-4 py-3"
+                  >
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-lp-navy text-white">
+                      <p.icon className="h-4 w-4" aria-hidden="true" />
+                    </span>
+                    <span className="text-sm font-semibold text-lp-fg">{p.label}</span>
+                    <span className="ml-auto font-display text-[10px] text-lp-muted/60">0{i + 1}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </TabCard>
+        </Reveal>
       </div>
     </section>
   )

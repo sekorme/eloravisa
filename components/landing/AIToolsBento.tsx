@@ -1,141 +1,89 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
-import { gsap } from "gsap"
-import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { FileText, Mic, ListChecks, PenSquare, MessageCircleQuestion, FolderLock, Sparkles, ShieldCheck, Globe } from "lucide-react"
+import type { ComponentType } from "react"
+import Link from "next/link"
+import { AlertCircle, Check, CheckCheck, FileText, ListChecks, Mic, PenLine, ShieldCheck, Sparkles } from "lucide-react"
+import { PREPARATION_TOOLS, type ToolId } from "@/lib/landing/tool-content"
 import { AIToolCard } from "./AIToolCard"
-import { DocumentReviewDemo } from "./DocumentReviewDemo"
-import { MockInterviewDemo } from "./MockInterviewDemo"
-import { ChecklistDemo } from "./ChecklistDemo"
+import { Display, Eyebrow } from "./ui"
+import styles from "./ToolShowcase.module.css"
 
-gsap.registerPlugin(ScrollTrigger)
+const ICONS = { "document-review": FileText, "mock-interview": Mic, "sop-assistant": PenLine, "smart-checklist": ListChecks }
+const WAVE_HEIGHTS = [12, 22, 34, 20, 44, 30, 54, 40, 24, 46, 62, 34, 50, 26, 40, 56, 34, 20, 42, 28, 16, 28, 12]
+
+function DocumentPreview() {
+  return (
+    <div className={styles.documentPreview}>
+      <div className={styles.paper}>
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-700"><FileText className="h-4 w-4 text-emerald-700" aria-hidden="true" /> Financial statement</div>
+        <span className={styles.paperLabel}>SAMPLE DOCUMENT</span>
+        <div className={styles.paperLines} aria-hidden="true"><i /><i /><i /><i /><i /></div>
+        <div className={styles.scan} aria-hidden="true" />
+        <span className={styles.detected}><CheckCheck className="h-3.5 w-3.5" aria-hidden="true" /> Key sections identified</span>
+      </div>
+      <div className={styles.reviewNotes}>
+        <span className={styles.previewOverline}><Sparkles className="h-3.5 w-3.5 text-emerald-700" aria-hidden="true" /> Sample recommendations</span>
+        <div className={styles.reviewNote}><Check className="h-4 w-4 shrink-0 text-emerald-700" aria-hidden="true" /><div><strong>Names are consistent</strong><span>Across the sample documents</span></div></div>
+        <div className={styles.reviewNote}><AlertCircle className="h-4 w-4 shrink-0 text-amber-700" aria-hidden="true" /><div><strong>Check the statement period</strong><span>Include the required date range</span></div></div>
+        <Link href="/legal/privacy-policy" className="mt-2 inline-flex min-h-11 items-center gap-1.5 text-xs text-slate-600 underline decoration-slate-300 underline-offset-4 focus-visible:outline-2 focus-visible:outline-emerald-700"><ShieldCheck className="h-3.5 w-3.5" aria-hidden="true" /> How your data is handled</Link>
+      </div>
+    </div>
+  )
+}
+
+function InterviewPreview() {
+  return (
+    <div className={styles.interviewPreview}>
+      <div className="flex w-full items-center justify-between gap-2 text-[11px] text-slate-300"><span>VOICE PRACTICE · SAMPLE</span><span className="flex items-center gap-1.5 text-emerald-200"><i className="h-1.5 w-1.5 rounded-full bg-emerald-300" /> Ready to practise</span></div>
+      <div className={styles.miniOrb} aria-hidden="true"><Mic className="h-6 w-6 text-white" /></div>
+      <div className={styles.miniWave} aria-hidden="true">{WAVE_HEIGHTS.map((height, index) => <i key={index} style={{ height, animationDelay: `${index * -0.08}s` }} />)}</div>
+      <p className="text-center text-sm font-medium text-white">A calm space to find your words.</p>
+      <span className="text-[11px] text-slate-400">Simulated waveform · no audio</span>
+    </div>
+  )
+}
+
+function SOPPreview() {
+  return (
+    <div className={styles.sopPreview}>
+      <div className="flex flex-wrap gap-1.5 text-[11px] font-medium text-emerald-800">{["Your background", "Study plans", "Career goals"].map(label => <span key={label} className="rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1">{label}</span>)}</div>
+      <div className={styles.sopPaper}>
+        <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3"><span className="text-xs font-semibold text-slate-700">Statement of purpose</span><PenLine className="h-3.5 w-3.5 text-emerald-700" aria-hidden="true" /></div>
+        <p className="mt-3 font-serif text-[15px] leading-7 text-slate-600">My interest in this course grew from <mark className={styles.sopHighlight}>my experience and long-term goals.</mark></p>
+        <p className="mt-3 flex items-start gap-2 rounded-lg bg-emerald-50 p-2 text-[11px] leading-5 text-emerald-900"><Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" /> Add a specific example in your own words.</p>
+      </div>
+    </div>
+  )
+}
+
+function ChecklistPreview() {
+  return (
+    <div className={styles.checklistPreview}>
+      <div className={styles.checklistRing}>
+        <svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="50" fill="none" stroke="#dbeafe" strokeWidth="6" /><circle className={styles.progressArc} cx="60" cy="60" r="50" fill="none" stroke="#2563eb" strokeWidth="6" strokeLinecap="round" strokeDasharray="314.16" strokeDashoffset="78.54" transform="rotate(-90 60 60)" /></svg>
+        <div><strong>3 of 4</strong><span>sample items ready</span></div>
+      </div>
+      <ul className="min-w-0 flex-1 space-y-3 text-xs text-slate-600">
+        {["Identity documents", "Academic records", "Travel plans", "Financial evidence"].map((label, index) => <li key={label} className="flex items-center gap-2.5"><span className={index < 3 ? styles.checked : styles.missing}>{index < 3 ? <Check className="h-3 w-3" aria-hidden="true" /> : <AlertCircle className="h-3 w-3" aria-hidden="true" />}</span><span>{label}{index === 3 && <span className="mt-0.5 block text-[10px] font-medium text-amber-800">One item needs attention</span>}</span></li>)}
+      </ul>
+    </div>
+  )
+}
+
+const PREVIEWS: Record<ToolId, ComponentType> = { "document-review": DocumentPreview, "mock-interview": InterviewPreview, "sop-assistant": SOPPreview, "smart-checklist": ChecklistPreview }
 
 export function AIToolsBento() {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => setMounted(true), [])
-
-  useEffect(() => {
-    if (!mounted) return
-    const ctx = gsap.context(() => {
-      gsap.from(".ai-tool-card", {
-        scrollTrigger: { trigger: containerRef.current, start: "top bottom", toggleActions: "play none none none" },
-        y: 50,
-        opacity: 0,
-        duration: 0.7,
-        stagger: 0.12,
-        ease: "power3.out",
-        clearProps: "all",
-      })
-    }, containerRef)
-    return () => ctx.revert()
-  }, [mounted])
-
   return (
-    <section id="ai-tools" ref={containerRef} className="relative py-24 md:py-32 overflow-hidden bg-[#f8fafc] dark:bg-[#050510]">
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-landing-blue/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-landing-violet/10 rounded-full blur-[120px] pointer-events-none" />
-
-      <div className="container relative px-4 mx-auto z-10">
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center px-4 py-2 rounded-full bg-landing-blue/5 border border-landing-blue/10 text-landing-blue dark:text-landing-cyan text-sm font-medium mb-6">
-            <Sparkles className="w-4 h-4 mr-2" />
-            Cutting-edge technology
-          </div>
-          <h2 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight mb-6">
-            <span className="bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-400 bg-clip-text text-transparent">
-              Powerful{" "}
-            </span>
-            <span className="bg-gradient-to-r from-landing-cyan via-landing-blue to-landing-violet bg-clip-text text-transparent">
-              AI tools for better preparation
-            </span>
-          </h2>
-          <p className="text-slate-600 dark:text-slate-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-            Prepare your documents, practise your interview and understand your next steps from one secure platform.
-          </p>
+    <section id="ai-tools" className="relative scroll-mt-24 bg-lp-page px-4 py-20 md:px-6 md:py-28" aria-labelledby="tools-heading">
+      <div className="mx-auto max-w-7xl">
+        <div className="mb-12 flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+          <div className="max-w-3xl"><Eyebrow><Sparkles className="h-3 w-3 text-lp-azure" aria-hidden="true" /> Your preparation toolkit</Eyebrow><Display as="h2" size="lg" className="mt-5 text-lp-fg"><span id="tools-heading">Everything you need to prepare <span className="text-lp-azure">in one place.</span></span></Display></div>
+          <p className="max-w-xs text-sm leading-7 text-lp-muted">Useful tools for the details that matter. Built around your plans, at your pace.</p>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-          <div className="ai-tool-card">
-            <AIToolCard
-              icon={FileText}
-              title="AI Document Review"
-              description="Review your documents for missing information, inconsistencies and areas that may require clearer explanations before submission."
-              cta="Review a Document"
-              href="/dashboard"
-              demo={<DocumentReviewDemo />}
-            />
-          </div>
-
-          <div className="ai-tool-card">
-            <AIToolCard
-              icon={Mic}
-              title="AI Visa Mock Interview"
-              description="Practise realistic visa interview questions and receive structured feedback on clarity, completeness and confidence."
-              cta="Start a Mock Interview"
-              href="/dashboard"
-              demo={<MockInterviewDemo />}
-            />
-          </div>
-
-          <div className="ai-tool-card">
-            <AIToolCard
-              icon={ListChecks}
-              title="Personalized Visa Checklist"
-              description="Turn visa requirements into a clear and manageable preparation plan."
-              cta="Create My Checklist"
-              href="/dashboard"
-              demo={<ChecklistDemo />}
-            />
-          </div>
-
-          <div className="ai-tool-card">
-            <AIToolCard
-              icon={PenSquare}
-              title="AI SOP and Statement Assistance"
-              description="Create a structured starting point for your statement or SOP, then edit it to reflect your real circumstances and voice."
-              cta="Prepare My Statement"
-              href="/dashboard"
-            />
-          </div>
-
-          <div className="ai-tool-card">
-            <AIToolCard
-              icon={MessageCircleQuestion}
-              title="AI Visa Guidance"
-              description="Ask questions and receive educational guidance based on your selected destination and visa objective."
-              cta="Ask Elora AI"
-              href="/dashboard"
-            />
-          </div>
-
-          <div className="ai-tool-card">
-            <AIToolCard
-              icon={FolderLock}
-              title="Secure Document Storage"
-              description="Keep your preparation documents organized and accessible from your Elora Visa dashboard."
-              cta="Organize My Documents"
-              href="/dashboard"
-            />
-          </div>
+        <div className={styles.bento}>
+          {PREPARATION_TOOLS.map((tool, index) => { const Preview = PREVIEWS[tool.id]; return <AIToolCard key={tool.id} id={tool.id} icon={ICONS[tool.id]} title={tool.title} eyebrow={tool.eyebrow} description={tool.description} cta={tool.cta} href={tool.href} dark={tool.id === "mock-interview"} className={index === 0 || index === 3 ? styles.wideCard : undefined} demo={<Preview />} /> })}
         </div>
-
-        <div className="mt-20 flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 grayscale hover:grayscale-0 transition-all duration-700">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5" />
-            <span className="font-semibold text-sm">Secure data</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Globe className="w-5 h-5" />
-            <span className="font-semibold text-sm">Built for global applicants</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5" />
-            <span className="font-semibold text-sm">AI powered</span>
-          </div>
-        </div>
+        <p className="mt-6 text-center text-xs leading-6 text-lp-muted">All interfaces use sample content. Actual feedback depends on your information and the tools available on your plan.</p>
       </div>
     </section>
   )

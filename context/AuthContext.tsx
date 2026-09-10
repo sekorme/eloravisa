@@ -129,9 +129,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }, [user, loading, pathname, router]);
 
+    // Only routes that render account-specific data need to wait for Firebase
+    // to resolve. Gating *every* route (as this previously did) meant public
+    // marketing pages — including the homepage — served a full-screen spinner
+    // as their server-rendered HTML: the hero could never be the LCP element,
+    // the page was blank without JS, and crawlers saw a loading state instead
+    // of content. Public pages now render immediately and simply re-render if
+    // a signed-in user turns up.
+    const isAuthGatedRoute =
+        pathname.startsWith("/dashboard") ||
+        pathname.startsWith("/onboarding") ||
+        pathname.startsWith("/affiliate/dashboard")
+
     return (
         <AuthContext.Provider value={{ user, loading }}>
-            {loading ? <LoadingSpinner /> : children}
+            {loading && isAuthGatedRoute ? <LoadingSpinner /> : children}
         </AuthContext.Provider>
     )
 }

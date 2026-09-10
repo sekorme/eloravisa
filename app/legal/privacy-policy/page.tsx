@@ -120,7 +120,7 @@ export default function PrivacyPolicy() {
           </Card>
         </section>
 
-        <section className="policy-section">
+        <section id="ai-processing" className="policy-section scroll-mt-28">
           <Card className="border-l-4 border-l-purple-500 shadow-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-xl">
@@ -136,7 +136,7 @@ export default function PrivacyPolicy() {
           </Card>
         </section>
 
-        <section className="policy-section space-y-4">
+        <section id="contact" className="policy-section scroll-mt-28 space-y-4">
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
             6. Contact Us
           </h2>

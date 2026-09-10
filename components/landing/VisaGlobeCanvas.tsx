@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { Canvas, useFrame } from "@react-three/fiber"
 import { QuadraticBezierLine } from "@react-three/drei"
 import * as THREE from "three"
-import { motion } from "motion/react"
 import { prefersReducedMotion } from "@/lib/motion"
 import { HeroGlobeFallback } from "./HeroGlobeFallback"
 
@@ -23,11 +22,11 @@ function pointOnSphere(radius: number, latDeg: number, lonDeg: number) {
 // Generic route pairs for visual variety — not a claim about specific
 // supported destinations (see homepage copy for actual supported scope).
 const ROUTES: { from: [number, number]; to: [number, number]; color: string }[] = [
-  { from: [40, -74], to: [51, 0], color: "#22D3EE" },
-  { from: [51, 0], to: [25, 55], color: "#2563EB" },
-  { from: [25, 55], to: [1, 103], color: "#7C3AED" },
-  { from: [6, 3], to: [51, 0], color: "#EC16D7" },
-  { from: [43, -79], to: [52, 13], color: "#22D3EE" },
+  { from: [40, -74], to: [51, 0], color: "#7dd3fc" },
+  { from: [51, 0], to: [25, 55], color: "#93c5fd" },
+  { from: [25, 55], to: [1, 103], color: "#c4b5fd" },
+  { from: [6, 3], to: [51, 0], color: "#f9a8d4" },
+  { from: [43, -79], to: [52, 13], color: "#7dd3fc" },
 ]
 
 function arcPoints(route: (typeof ROUTES)[number]) {
@@ -37,9 +36,19 @@ function arcPoints(route: (typeof ROUTES)[number]) {
   return { start, end, mid }
 }
 
+/** Solid planet body so the dot-grid reads as a globe on light backgrounds. */
+function PlanetBody() {
+  return (
+    <mesh>
+      <sphereGeometry args={[RADIUS - 0.02, 48, 48]} />
+      <meshStandardMaterial color="#123561" roughness={0.45} metalness={0.1} />
+    </mesh>
+  )
+}
+
 function DotSphere() {
   const positions = useMemo(() => {
-    const count = 700
+    const count = 900
     const arr = new Float32Array(count * 3)
     for (let i = 0; i < count; i++) {
       const y = 1 - (i / (count - 1)) * 2
@@ -57,7 +66,7 @@ function DotSphere() {
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
-      <pointsMaterial size={0.02} color="#5eead4" transparent opacity={0.5} sizeAttenuation />
+      <pointsMaterial size={0.026} color="#e0ecff" transparent opacity={0.95} sizeAttenuation />
     </points>
   )
 }
@@ -74,9 +83,9 @@ function Routes() {
             end={end}
             mid={mid}
             color={route.color}
-            lineWidth={1.2}
+            lineWidth={1.4}
             transparent
-            opacity={0.7}
+            opacity={0.9}
           />
         )
       })}
@@ -94,8 +103,8 @@ function RouteMarkers() {
     <>
       {markers.map((p, i) => (
         <mesh key={i} position={p}>
-          <sphereGeometry args={[0.022, 8, 8]} />
-          <meshBasicMaterial color="#22D3EE" />
+          <sphereGeometry args={[0.024, 8, 8]} />
+          <meshBasicMaterial color="#ffffff" />
         </mesh>
       ))}
     </>
@@ -120,7 +129,7 @@ function RouteParticles() {
     if (!group) return
     group.children.forEach((mesh, i) => {
       const p = particles[i]
-      p.t = (p.t + delta * p.speed) % 1
+      p.t = (p.t + Math.min(delta, 0.05) * p.speed) % 1
       const a = p.start.clone().lerp(p.mid, p.t)
       const b = p.mid.clone().lerp(p.end, p.t)
       mesh.position.copy(a.lerp(b, p.t))
@@ -131,8 +140,8 @@ function RouteParticles() {
     <group ref={groupRef}>
       {particles.map((p, i) => (
         <mesh key={i}>
-          <sphereGeometry args={[0.017, 6, 6]} />
-          <meshBasicMaterial color={p.color} />
+          <sphereGeometry args={[0.02, 6, 6]} />
+          <meshBasicMaterial color="#ffffff" />
         </mesh>
       ))}
     </group>
@@ -141,10 +150,18 @@ function RouteParticles() {
 
 function Atmosphere() {
   return (
-    <mesh scale={1.18}>
-      <sphereGeometry args={[RADIUS, 32, 32]} />
-      <meshBasicMaterial color="#2563EB" transparent opacity={0.08} side={THREE.BackSide} depthWrite={false} />
-    </mesh>
+    <group>
+      {/* Kept inside the camera frustum (half-height ≈ 1.69 at z=0) so its silhouette isn't clipped by the canvas edge. */}
+      <mesh scale={1.04}>
+        <sphereGeometry args={[RADIUS, 48, 48]} />
+        <meshBasicMaterial color="#93c5fd" transparent opacity={0.2} side={THREE.BackSide} depthWrite={false} />
+      </mesh>
+      {/* Rim highlight so the sphere reads as lit glass rather than a flat disc */}
+      <mesh scale={1.01}>
+        <sphereGeometry args={[RADIUS, 48, 48]} />
+        <meshBasicMaterial color="#bfdbfe" transparent opacity={0.12} blending={THREE.AdditiveBlending} depthWrite={false} />
+      </mesh>
+    </group>
   )
 }
 
@@ -165,48 +182,21 @@ function GlobeGroup({ interactive }: { interactive: boolean }) {
   useFrame((_, delta) => {
     const group = groupRef.current
     if (!group) return
-    group.rotation.y += delta * 0.09
+    group.rotation.y += Math.min(delta, 0.05) * 0.045
     if (interactive) {
-      group.rotation.x += (pointer.current.y * 0.15 - group.rotation.x) * 0.03
+      group.rotation.x += (pointer.current.y * 0.08 - group.rotation.x) * 0.03
     }
   })
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} rotation={[0.25, 0, -0.1]}>
       <Atmosphere />
+      <PlanetBody />
       <DotSphere />
       <Routes />
       <RouteMarkers />
       <RouteParticles />
     </group>
-  )
-}
-
-function FloatingPassportCard() {
-  return (
-    <motion.div
-      aria-hidden="true"
-      className="absolute bottom-4 left-1/2 -translate-x-1/2 md:left-auto md:right-2 md:translate-x-0 w-40 rounded-xl border border-white/15 bg-white/10 backdrop-blur-md p-3 shadow-2xl"
-      animate={{ y: [0, -10, 0] }}
-      transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-    >
-      <div className="h-1.5 w-10 rounded-full bg-gradient-to-r from-landing-cyan to-landing-magenta mb-2" />
-      <p className="text-[10px] font-semibold uppercase tracking-widest text-white/90">Preparation status</p>
-      <p className="text-[9px] text-white/50 mt-1">Documents · Interview · Checklist</p>
-    </motion.div>
-  )
-}
-
-function RouteLabels() {
-  return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 hidden md:block">
-      <span className="absolute top-[18%] left-[8%] text-[10px] font-medium uppercase tracking-widest text-landing-cyan/80">
-        Study routes
-      </span>
-      <span className="absolute bottom-[22%] right-[6%] text-[10px] font-medium uppercase tracking-widest text-landing-magenta/80">
-        Work &amp; visit routes
-      </span>
-    </div>
   )
 }
 
@@ -223,27 +213,34 @@ function detectWebGL() {
   }
 }
 
-export function VisaGlobeCanvas() {
-  const [capability, setCapability] = useState<"pending" | "canvas" | "fallback">("pending")
+/**
+ * Transparent, square 3D globe. Sized by its parent (use `aspect-square`).
+ * Falls back to a static SVG on mobile, reduced-motion, or without WebGL.
+ */
+function detectCapability(): "canvas" | "fallback" {
+  if (typeof window === "undefined") return "fallback"
+  const isMobile = window.matchMedia("(max-width: 767px)").matches
+  return !isMobile && !prefersReducedMotion() && detectWebGL() ? "canvas" : "fallback"
+}
 
-  useEffect(() => {
-    const isMobile = window.matchMedia("(max-width: 767px)").matches
-    const reduced = prefersReducedMotion()
-    setCapability(!isMobile && !reduced && detectWebGL() ? "canvas" : "fallback")
-  }, [])
+export function VisaGlobeCanvas({ active = true }: { active?: boolean }) {
+  // Loaded with `ssr: false`, so the initializer runs in the browser.
+  const [capability] = useState(detectCapability)
 
   if (capability !== "canvas") {
     return <HeroGlobeFallback />
   }
 
   return (
-    <div className="relative w-full h-full min-h-[320px]" aria-hidden="true">
-      <Canvas dpr={[1, 1.5]} camera={{ position: [0, 0, 4.4], fov: 42 }} gl={{ alpha: true, antialias: true }}>
-        <ambientLight intensity={0.7} />
+    <div className="relative h-full w-full" aria-hidden="true">
+      <div className="absolute -inset-[10%] bg-[radial-gradient(circle_at_50%_50%,rgba(96,165,250,0.45),rgba(30,108,240,0.12)_45%,transparent_68%)]" />
+      <Canvas frameloop={active ? "always" : "never"} dpr={[1, 1.5]} camera={{ position: [0, 0, 5.5], fov: 42 }} gl={{ alpha: true, antialias: true }} fallback={<HeroGlobeFallback />}>
+        <ambientLight intensity={1.4} />
+        <directionalLight position={[-3, 3, 4]} intensity={2} color="#ffffff" />
+        <directionalLight position={[4, -2, -3]} intensity={0.8} color="#a78bfa" />
+        <hemisphereLight args={["#dbeafe", "#0b2343", 0.8]} />
         <GlobeGroup interactive={detectInteractive()} />
       </Canvas>
-      <FloatingPassportCard />
-      <RouteLabels />
     </div>
   )
 }

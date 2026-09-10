@@ -1,9 +1,9 @@
 "use client";
 
-import React from "react";
+import Image from "next/image";
+import { Quote } from "lucide-react";
 import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
-import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
-import { cn } from "@/lib/utils";
+import { Display, Eyebrow, Reveal, TabCard } from "./ui";
 
 const founderStory = {
   quote:
@@ -46,33 +46,53 @@ const testimonials = [
 
 export function Testimonial() {
   return (
-    <section id="success-stories" className="relative py-20 md:py-32 overflow-hidden">
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="max-w-2xl mx-auto text-center mb-16 md:mb-20">
-          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-4">Why we built Elora Visa</p>
-          <p className="text-lg md:text-xl text-foreground/90 font-medium leading-relaxed mb-4">
-            &ldquo;{founderStory.quote}&rdquo;
-          </p>
-          <p className="text-sm text-muted-foreground">
-            <span className="font-semibold text-foreground">{founderStory.name}</span> &middot; {founderStory.designation}
-          </p>
+    <section id="success-stories" className="relative scroll-mt-20 overflow-hidden bg-lp-page py-16 md:py-24" aria-labelledby="stories-heading">
+      <div className="lp-grid-dots pointer-events-none absolute inset-0 opacity-50 [mask-image:radial-gradient(50%_50%_at_50%_50%,black,transparent)]" aria-hidden="true" />
+
+      <div className="container relative mx-auto px-4 md:px-6">
+        <Reveal className="mx-auto mb-14 max-w-3xl md:mb-20">
+          <TabCard
+            tab={
+              <span className="flex items-center gap-2 font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-fg/80">
+                <Quote className="h-3.5 w-3.5 text-lp-azure" aria-hidden="true" />
+                Why we built Elora Visa
+              </span>
+            }
+            bodyClassName="lp-shadow p-6 md:p-8"
+          >
+            <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+              <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full border-2 border-lp-line">
+                <Image src={founderStory.src} alt={founderStory.name} fill sizes="64px" className="object-cover" />
+              </div>
+              <div>
+                <p className="text-base font-medium leading-relaxed text-lp-fg md:text-lg">
+                  &ldquo;{founderStory.quote}&rdquo;
+                </p>
+                <p className="mt-3 text-sm text-lp-muted">
+                  <span className="font-semibold text-lp-fg">{founderStory.name}</span> &middot; {founderStory.designation}
+                </p>
+              </div>
+            </div>
+          </TabCard>
+        </Reveal>
+
+        <div className="mx-auto mb-10 max-w-3xl text-center">
+          <Reveal>
+            <Eyebrow>Success stories</Eyebrow>
+          </Reveal>
+          <Reveal delay={0.08}>
+            <Display as="h2" size="lg" className="mt-5 text-lp-fg">
+              <span id="stories-heading">Real people. Better-prepared applications.</span>
+            </Display>
+          </Reveal>
         </div>
 
-        <h2 className="bg-gradient-to-r from-[#00b7fa] to-[#01cfea] bg-clip-text text-transparent text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-center mb-12">
-          Real People. Better-Prepared Applications.
-        </h2>
-        <AnimatedTestimonials testimonials={testimonials} autoplay={true} />
+        <Reveal amount={0.15}>
+          <div className="mx-auto max-w-5xl rounded-[2rem] border border-lp-line bg-lp-card lp-shadow">
+            <AnimatedTestimonials testimonials={testimonials} autoplay={true} />
+          </div>
+        </Reveal>
       </div>
-      <AnimatedGridPattern
-        numSquares={30}
-        maxOpacity={0.1}
-        duration={3}
-        repeatDelay={1}
-        className={cn(
-          "[mask-image:radial-gradient(500px_circle_at_center,white,transparent)]",
-          "inset-x-0 inset-y-[-30%] h-[200%] skew-y-12"
-        )}
-      />
     </section>
   );
 }

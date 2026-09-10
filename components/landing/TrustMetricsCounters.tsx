@@ -1,6 +1,7 @@
 "use client"
 
 import { NumberTicker } from "@/components/ui/number-ticker"
+import { RevealGroup, RevealItem } from "./ui"
 
 export function TrustMetricsCounters({
   metrics,
@@ -8,19 +9,22 @@ export function TrustMetricsCounters({
   metrics: { value: number; label: string }[]
 }) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 max-w-3xl mx-auto text-center">
-      {metrics.map((metric) => (
-        <div key={metric.label}>
-          <div className="text-3xl md:text-4xl font-extrabold">
-            <NumberTicker
-              value={metric.value}
-              className="text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-landing-cyan to-landing-magenta bg-clip-text text-transparent"
+    <RevealGroup className="mx-auto grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-3">
+      {metrics.map((metric, i) => (
+        <RevealItem key={metric.label}>
+          <div className="relative overflow-hidden rounded-[1.5rem] border border-lp-line bg-lp-card p-6 text-center lp-shadow">
+            <span
+              aria-hidden="true"
+              className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-lp-azure/10 blur-2xl"
             />
-            <span className="bg-gradient-to-r from-landing-cyan to-landing-magenta bg-clip-text text-transparent">+</span>
+            <div className="font-display text-4xl font-medium text-lp-fg md:text-5xl">
+              <NumberTicker value={metric.value} delay={i * 0.1} className="font-display text-4xl font-medium text-lp-fg md:text-5xl" />
+              <span className="text-lp-azure">+</span>
+            </div>
+            <p className="mt-2 text-xs font-semibold uppercase tracking-widest text-lp-muted">{metric.label}</p>
           </div>
-          <p className="text-xs md:text-sm text-muted-foreground mt-2 font-medium">{metric.label}</p>
-        </div>
+        </RevealItem>
       ))}
-    </div>
+    </RevealGroup>
   )
 }

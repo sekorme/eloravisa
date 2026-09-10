@@ -1,58 +1,39 @@
 "use client"
 
 import Link from "next/link"
-import { ReactNode } from "react"
-import { ArrowRight, type LucideIcon } from "lucide-react"
-import { useTilt } from "@/hooks/useTilt"
+import { useRef, type PointerEvent, type ReactNode } from "react"
+import { useInView } from "motion/react"
+import { ArrowUpRight, type LucideIcon } from "lucide-react"
+import { trackEvent } from "@/lib/analytics"
 import { cn } from "@/lib/utils"
+import { useLandingMotion } from "./MotionPreferences"
+import styles from "./ToolShowcase.module.css"
 
-export function AIToolCard({
-  icon: Icon,
-  title,
-  description,
-  cta,
-  href,
-  demo,
-  className,
-}: {
-  icon: LucideIcon
-  title: string
-  description: string
-  cta: string
-  href: string
-  demo?: ReactNode
-  className?: string
+export function AIToolCard({ id, icon: Icon, title, eyebrow, description, cta, href, demo, className, dark = false }: {
+  id: string; icon: LucideIcon; title: string; eyebrow?: string; description: string; cta: string; href: string; demo?: ReactNode; className?: string; dark?: boolean
 }) {
-  const tiltRef = useTilt<HTMLDivElement>({ max: 5, scale: 1.015 })
+  const ref = useRef<HTMLElement>(null)
+  const inView = useInView(ref, { amount: 0.15 })
+  const { enabled } = useLandingMotion()
+
+  function illuminate(event: PointerEvent<HTMLElement>) {
+    if (!enabled || event.pointerType !== "mouse") return
+    const card = event.currentTarget
+    const bounds = card.getBoundingClientRect()
+    card.style.setProperty("--pointer-x", `${event.clientX - bounds.left}px`)
+    card.style.setProperty("--pointer-y", `${event.clientY - bounds.top}px`)
+  }
 
   return (
-    <div
-      ref={tiltRef}
-      className={cn(
-        "group relative flex flex-col rounded-[1.75rem] p-6 md:p-7 overflow-hidden",
-        "bg-white/50 dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200/60 dark:border-white/10",
-        "hover:shadow-2xl hover:shadow-landing-blue/10 transition-shadow duration-500",
-        className
-      )}
-    >
-      <div className="flex items-center gap-3 mb-4">
-        <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-gradient-to-br from-landing-cyan/20 via-landing-blue/20 to-landing-violet/20 text-landing-blue dark:text-landing-cyan shrink-0">
-          <Icon className="w-5 h-5" />
-        </div>
-        <h3 className="text-lg font-bold text-slate-900 dark:text-white">{title}</h3>
+    <article ref={ref} onPointerMove={illuminate} className={cn(styles.card, dark && styles.darkCard, className)} data-visible={inView && enabled} aria-labelledby={`${id}-title`}>
+      <div className={styles.cardLight} aria-hidden="true" />
+      <div className="relative">
+        <div className={styles.cardEyebrow}><Icon className="h-4 w-4" aria-hidden="true" />{eyebrow ?? title}</div>
+        <h3 id={`${id}-title`} className={styles.cardTitle}>{title}</h3>
+        <p className={styles.cardDescription}>{description}</p>
       </div>
-
-      <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-5">{description}</p>
-
-      {demo && <div className="mb-5 flex-1">{demo}</div>}
-
-      <Link
-        href={href}
-        className="mt-auto inline-flex items-center gap-1.5 text-sm font-semibold text-landing-blue dark:text-landing-cyan group-hover:gap-2.5 transition-all"
-      >
-        {cta}
-        <ArrowRight className="w-3.5 h-3.5" />
-      </Link>
-    </div>
+      {demo && <div className={styles.demo}><span className={styles.sampleLabel}>Product preview · sample content</span>{demo}</div>}
+      <Link href={href} onClick={() => trackEvent("tool_card_interaction", { location: "ai_tools", label: id })} className={styles.cardLink}>{cta}<ArrowUpRight className="h-4 w-4 shrink-0" aria-hidden="true" /></Link>
+    </article>
   )
 }

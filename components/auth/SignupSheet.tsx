@@ -36,6 +36,7 @@ import { toast } from "sonner"
 import confetti from "canvas-confetti"
 import { SUBSCRIPTION_PLANS } from "@/lib/subscriptions"
 import {registrationEmail} from "@/lib/registrationEmail";
+import { trackEvent, trackSignupConversion } from "@/lib/analytics";
 
 function celebrateSignup() {
     confetti({
@@ -77,6 +78,8 @@ export function SignupSheet({className, desscription}: {className?: string, dess
     const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault()
         setIsLoading(true)
+        // Intent only — no form values are ever sent to analytics.
+        trackEvent("account_creation_started", { location: "signup_sheet" })
 
         try {
             // 1. Create Firebase Auth User
@@ -108,6 +111,8 @@ export function SignupSheet({className, desscription}: {className?: string, dess
                 });
 
                 toast.success("Account created successfully")
+                trackEvent("account_creation_completed", { location: "signup_sheet" })
+                trackSignupConversion()
                 celebrateSignup()
                 await registrationEmail({email, name:fullName})
                 // 3. Redirect to onboarding

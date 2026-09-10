@@ -1,0 +1,4415 @@
+/* ==========================================================================
+   Elora Home — design token system + primitive classes
+   --------------------------------------------------------------------------
+   Art direction: "Departure". A cinematic, editorial dark experience built on
+   deep midnight navy, lit by electric blue and violet, warmed by amber for
+   human guidance, resolved by emerald for verified states, and grounded by
+   warm off-white "passport paper" surfaces.
+
+   ISOLATION CONTRACT
+   Every token and class here is prefixed `--eh-` / `.eh-` and scoped under
+   `[data-elora-home]`. This file must never redefine a global token from
+   app/globals.css, and no legacy landing style may leak in. The homepage owns
+   its own palette regardless of the app-wide light/dark toggle, because it is
+   a fixed-brand marketing surface, not a themable product surface.
+
+   To restyle the page, change tokens here — not the scenes.
+   ========================================================================== */
+
+[data-elora-home] {
+    /* ---------------------------------------------------------------- color */
+    /* Navy green — the foundation. Carries structure, headings and every dark
+       surface. Deep enough to read as near-black, green enough to never read
+       as corporate navy blue. */
+    --eh-ng-950: #05130F;
+    --eh-ng-900: #08201A;
+    --eh-ng-850: #0A2720;
+    --eh-ng-800: #0C2B24;
+    --eh-ng-700: #123A30;
+    --eh-ng-600: #1A4C3F;
+    --eh-ng-500: #246152;
+
+    /* Light green — surfaces, tints and the verified state. */
+    --eh-green-50:  #F2F9F5;
+    --eh-green-100: #DFF0E7;
+    --eh-green-200: #BFE2D1;
+    --eh-green-300: #8FCDAF;
+    --eh-green-400: #5DBF95;
+    --eh-green-500: #2E9B72;
+    --eh-green-600: #1E7A58;
+    --eh-green-700: #165C42;
+
+    /* Gold — the accent. Used sparingly: attention states, the recommended
+       plan, the origin marker, hairline flourishes.
+
+       Two gold values exist for a reason. `gold-400` is the true metallic and
+       is for FILLS ONLY — at 2.6:1 on white it is not readable as text.
+       `gold-600` is the darkened version used whenever gold must be *read*. */
+    --eh-gold-100: #FAF3DE;
+    --eh-gold-200: #F0E2B0;
+    --eh-gold-300: #E4CE85;
+    --eh-gold-400: #D4AF37;  /* fills, never text on white */
+    --eh-gold-500: #B8942A;
+    --eh-gold-600: #8A6D0E;  /* text-safe on white */
+
+    /* Warm paper — anything that should read as a physical document. */
+    --eh-paper-50: #FBF9F4;
+    --eh-paper-100: #F4F1EA;
+    --eh-paper-200: #E7E2D6;
+    --eh-paper-300: #D4CDBC;
+    --eh-ink: #0A2720;
+
+    /* ----------------------------------------------- surface-relative tokens */
+    /* These are the ONLY colour values scenes should use for text, lines and
+       fills. They are redefined wholesale inside `.eh-dark`, which is what lets
+       one stylesheet serve a white page with dark interludes without a single
+       duplicated rule. */
+    --eh-bg: #FFFFFF;
+    --eh-bg-tint: var(--eh-green-50);
+    --eh-bg-deep: var(--eh-ng-900);
+
+    --eh-fg: #0A2720;
+    --eh-fg-muted: #40584E;
+    /* Measured, not eyeballed. `subtle` carries real text — board lettering,
+       captions, statuses — so it has to clear 4.5:1 against every light
+       surface it can land on, including the green tint (#F2F9F5) and the
+       green-100 panels. #6B8077 looked right and measured 3.95:1 on the tint;
+       this passes on all three. */
+    --eh-fg-subtle: #556B61;
+
+    --eh-line: rgb(10 39 32 / 0.12);
+    --eh-line-strong: rgb(10 39 32 / 0.24);
+    --eh-surface: rgb(10 39 32 / 0.025);
+    --eh-surface-2: rgb(10 39 32 / 0.05);
+    --eh-surface-3: rgb(10 39 32 / 0.08);
+
+    /* Panels — cards, consoles, floating chips. */
+    --eh-panel: #F6FBF8;
+    --eh-panel-strong: var(--eh-green-100);
+    --eh-panel-deep: var(--eh-ng-900);
+
+    /* Semantic aliases — scenes use these, not the raw ramps. */
+    --eh-accent: var(--eh-green-600);
+    --eh-accent-soft: var(--eh-green-700);
+    --eh-accent-alt: var(--eh-ng-600);
+    --eh-guide: var(--eh-gold-600);
+    --eh-guide-fill: var(--eh-gold-400);
+    --eh-verified: var(--eh-green-600);
+
+    /* ----------------------------------------------------------- typography */
+    --eh-font-display: var(--font-fraunces), "Iowan Old Style", Georgia, serif;
+    --eh-font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+    --eh-font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+
+    /* Fluid type scale. clamp() keeps the cinematic scale on desktop without
+       forcing a horizontal scrollbar or unreadable text on a 320px phone. */
+    --eh-text-xs: 0.75rem;
+    --eh-text-sm: 0.8125rem;
+    --eh-text-base: clamp(0.9375rem, 0.9rem + 0.2vw, 1.0625rem);
+    --eh-text-lg: clamp(1.0625rem, 1rem + 0.35vw, 1.25rem);
+    --eh-text-xl: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+    --eh-text-2xl: clamp(1.5rem, 1.25rem + 1.1vw, 2rem);
+    --eh-text-3xl: clamp(1.875rem, 1.4rem + 2vw, 2.75rem);
+    --eh-text-4xl: clamp(2.25rem, 1.5rem + 3.2vw, 4rem);
+    /* Sized so the hero's second line — "made brilliantly clear." — fits on
+       ONE line at every width where the two-column hero applies. At the old
+       5.5rem/4.8vw it overflowed the copy column by a hair, and `text-wrap:
+       balance` resolved that by stranding "made" alone on its own line. The
+       deliberate two-line break in the headline is the typography; letting the
+       browser add a third undoes it. */
+    --eh-text-5xl: clamp(2.5rem, 1.2rem + 4vw, 4.75rem);
+
+    --eh-tracking-board: 0.24em; /* departure-board lettering */
+    --eh-tracking-eyebrow: 0.16em;
+    --eh-leading-display: 1.02;
+    --eh-leading-body: 1.65;
+
+    /* -------------------------------------------------------------- spacing */
+    --eh-space-1: 0.25rem;
+    --eh-space-2: 0.5rem;
+    --eh-space-3: 0.75rem;
+    --eh-space-4: 1rem;
+    --eh-space-6: 1.5rem;
+    --eh-space-8: 2rem;
+    --eh-space-12: 3rem;
+    --eh-space-16: 4rem;
+    --eh-space-24: 6rem;
+    --eh-scene-y: clamp(4.5rem, 3rem + 8vw, 9rem);
+    --eh-gutter: clamp(1.25rem, 0.75rem + 2.5vw, 3rem);
+    --eh-measure: 62ch;
+
+    /* --------------------------------------------------------------- border */
+    --eh-radius-sm: 6px;
+    --eh-radius-md: 10px;
+    --eh-radius-lg: 16px;
+    --eh-radius-xl: 24px;
+    --eh-radius-2xl: 32px;
+    --eh-radius-pill: 999px;
+
+    /* -------------------------------------------------------------- shadows */
+    /* Tinted with the navy green rather than pure black, so shadows sit in the
+       same colour family as everything else instead of muddying the greens. */
+    --eh-shadow-sm: 0 1px 2px rgb(8 32 26 / 0.06);
+    --eh-shadow-md: 0 8px 24px -8px rgb(8 32 26 / 0.14);
+    --eh-shadow-lg: 0 24px 64px -16px rgb(8 32 26 / 0.18);
+    --eh-shadow-doc: 0 18px 40px -12px rgb(8 32 26 / 0.22), 0 2px 6px rgb(8 32 26 / 0.10);
+    --eh-glow-blue: 0 12px 32px -10px rgb(18 58 48 / 0.45);
+    --eh-glow-violet: 0 12px 32px -10px rgb(30 122 88 / 0.35);
+    --eh-glow-amber: 0 10px 28px -10px rgb(212 175 55 / 0.55);
+
+    /* ----------------------------------------------------------------- blur */
+    --eh-blur-sm: 6px;
+    --eh-blur-md: 14px;
+    --eh-blur-lg: 28px;
+    --eh-blur-nav: 18px;
+
+    /* --------------------------------------------------------------- motion */
+    --eh-dur-1: 140ms;
+    --eh-dur-2: 240ms;
+    --eh-dur-3: 420ms;
+    --eh-dur-4: 680ms;
+    --eh-dur-5: 1100ms;
+    --eh-dur-6: 1800ms;
+
+    --eh-ease-entrance: cubic-bezier(0.22, 1, 0.36, 1);
+    --eh-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --eh-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+    --eh-ease-exit: cubic-bezier(0.55, 0, 1, 0.45);
+    --eh-ease-glide: cubic-bezier(0.33, 0.02, 0, 1);
+
+    /* -------------------------------------------------------------- z-index */
+    --eh-z-behind: -1;
+    --eh-z-base: 0;
+    --eh-z-raised: 10;
+    --eh-z-sticky: 100;
+    --eh-z-nav: 200;
+    --eh-z-overlay: 300;
+    --eh-z-modal: 400;
+
+    /* ------------------------------------------------------------ behaviour */
+    background-color: var(--eh-bg);
+    color: var(--eh-fg);
+    font-family: var(--eh-font-sans);
+    color-scheme: light;
+}
+
+/* ==========================================================================
+   Dark scope
+   --------------------------------------------------------------------------
+   The page is white. Two scenes deliberately go dark — the interview booth and
+   the footer — because the contrast is the point: the booth should feel like
+   stepping inside, and the footer should feel like the page has landed.
+
+   Rather than duplicating rules, `.eh-dark` simply redefines the same
+   surface-relative tokens. Every card, border, chip and body style inside it
+   inverts automatically, and no component needs to know which mode it is in.
+   ========================================================================== */
+
+[data-elora-home] .eh-dark {
+    --eh-bg: var(--eh-ng-900);
+    --eh-bg-tint: var(--eh-ng-850);
+
+    --eh-fg: #EAF4EF;
+    --eh-fg-muted: #A9C2B7;
+    --eh-fg-subtle: #7D9A8E;
+
+    --eh-line: rgb(255 255 255 / 0.14);
+    --eh-line-strong: rgb(255 255 255 / 0.26);
+    --eh-surface: rgb(255 255 255 / 0.05);
+    --eh-surface-2: rgb(255 255 255 / 0.08);
+    --eh-surface-3: rgb(255 255 255 / 0.12);
+
+    --eh-panel: rgb(10 39 32 / 0.72);
+    --eh-panel-strong: rgb(18 58 48 / 0.7);
+    --eh-panel-deep: var(--eh-ng-950);
+
+    /* On navy green, the readable accents flip to the light end of each ramp. */
+    --eh-accent: var(--eh-green-300);
+    --eh-accent-soft: var(--eh-green-400);
+    --eh-accent-alt: var(--eh-green-200);
+    --eh-guide: var(--eh-gold-300);
+    --eh-guide-fill: var(--eh-gold-400);
+    --eh-verified: var(--eh-green-400);
+
+    --eh-shadow-lg: 0 24px 64px -16px rgb(2 8 6 / 0.7);
+    --eh-shadow-doc: 0 18px 40px -12px rgb(2 8 6 / 0.6), 0 2px 6px rgb(2 8 6 / 0.4);
+
+    background-color: var(--eh-bg);
+    color: var(--eh-fg);
+    color-scheme: dark;
+}
+
+/* Guarantees the "no horizontal overflow" requirement even if a decorative
+   layer overshoots its container on a narrow viewport.
+
+   This lives on the inner <main>, NOT on the root: `overflow: clip` clips
+   fixed-position descendants, which would eat the fixed navigation bar. `clip`
+   rather than `hidden` because `hidden` would turn this into a scroll
+   container and break `position: sticky` in the pinned scenes. */
+[data-elora-home] .eh-main {
+    overflow-x: clip;
+}
+
+/* ==========================================================================
+   Typography primitives
+   ========================================================================== */
+
+[data-elora-home] .eh-display {
+    font-family: var(--eh-font-display);
+    font-weight: 400;
+    line-height: var(--eh-leading-display);
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    /* Fraunces is a variable font with an optical-size axis; at display sizes
+       the high-contrast cut is what makes the headline feel engraved. */
+    font-variation-settings: "opsz" 120, "SOFT" 0, "WONK" 0;
+}
+
+[data-elora-home] .eh-body {
+    font-size: var(--eh-text-lg);
+    line-height: var(--eh-leading-body);
+    color: var(--eh-fg-muted);
+    max-width: var(--eh-measure);
+}
+
+/* Departure-board lettering: monospaced, wide-tracked, small. Used for
+   eyebrows, coordinates, gate/stage numbers, timestamps. */
+[data-elora-home] .eh-board {
+    font-family: var(--eh-font-mono);
+    font-size: var(--eh-text-xs);
+    letter-spacing: var(--eh-tracking-board);
+    text-transform: uppercase;
+    color: var(--eh-fg-subtle);
+    font-variant-numeric: tabular-nums;
+}
+
+[data-elora-home] .eh-eyebrow {
+    font-family: var(--eh-font-mono);
+    font-size: var(--eh-text-xs);
+    letter-spacing: var(--eh-tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--eh-accent-soft);
+}
+
+/* Restrained gradient accent — only ever on a fragment of a headline, never a
+   whole block of text (gradient text can't be selected-highlighted legibly). */
+[data-elora-home] .eh-grad {
+    background: linear-gradient(
+        100deg,
+        var(--eh-green-200) 0%,
+        var(--eh-green-400) 35%,
+        var(--eh-ng-500) 80%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    /* Fallback if background-clip:text is unsupported. */
+    -webkit-text-fill-color: transparent;
+}
+
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+    [data-elora-home] .eh-grad {
+        color: var(--eh-green-200);
+        -webkit-text-fill-color: currentColor;
+    }
+}
+
+/* ==========================================================================
+   Layout primitives
+   ========================================================================== */
+
+[data-elora-home] .eh-shell {
+    width: 100%;
+    max-width: 84rem;
+    margin-inline: auto;
+    padding-inline: var(--eh-gutter);
+}
+
+[data-elora-home] .eh-scene {
+    position: relative;
+    padding-block: var(--eh-scene-y);
+}
+
+/* ==========================================================================
+   Motifs — passport security guilloché, coordinate grid, flight paths
+   --------------------------------------------------------------------------
+   All motifs are pure CSS/SVG data-URI so they cost no extra request, scale to
+   any DPI, and can be recoloured through tokens.
+   ========================================================================== */
+
+/* Fine engraved line pattern, as on a passport data page. Deliberately low
+   contrast: it should register as texture, not as stripes. */
+[data-elora-home] .eh-guilloche {
+    /* The engraving has to invert with the surface it sits on, so it gets its
+       own token rather than a hardcoded white. */
+    --eh-motif-a: rgb(10 39 32 / 0.055);
+    --eh-motif-b: rgb(10 39 32 / 0.04);
+    background-image:
+        repeating-linear-gradient(
+            115deg,
+            var(--eh-motif-a) 0 1px,
+            transparent 1px 7px
+        ),
+        repeating-linear-gradient(
+            -115deg,
+            var(--eh-motif-b) 0 1px,
+            transparent 1px 9px
+        );
+}
+
+[data-elora-home] .eh-dark .eh-guilloche,
+[data-elora-home] .eh-guilloche.eh-dark {
+    --eh-motif-a: rgb(255 255 255 / 0.035);
+    --eh-motif-b: rgb(255 255 255 / 0.025);
+}
+
+/* Map coordinate grid. */
+[data-elora-home] .eh-coordgrid {
+    background-image:
+        linear-gradient(to right, var(--eh-surface) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--eh-surface) 1px, transparent 1px);
+    background-size: 64px 64px;
+    /* Fade the grid out toward the edges so it never terminates in a hard line. */
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 40%, #000 30%, transparent 78%);
+}
+
+/* Atmospheric light source. Static gradient — deliberately NOT animated, since
+   continuously animating a large blurred layer is the single most expensive
+   thing you can do on a mid-range phone. */
+[data-elora-home] .eh-aurora {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(60% 45% at 18% 12%, rgb(46 155 114 / 0.14), transparent 70%),
+        radial-gradient(50% 40% at 82% 8%, rgb(212 175 55 / 0.13), transparent 72%),
+        radial-gradient(70% 55% at 50% 100%, rgb(223 240 231 / 0.75), transparent 62%);
+}
+
+/* Hairline rule that fades at both ends — used to separate scenes without a
+   hard border. */
+[data-elora-home] .eh-rule {
+    height: 1px;
+    border: 0;
+    background: linear-gradient(
+        to right,
+        transparent,
+        var(--eh-line-strong) 22%,
+        var(--eh-line-strong) 78%,
+        transparent
+    );
+}
+
+/* Paper surface — for anything that should read as a physical document. */
+[data-elora-home] .eh-paper {
+    background: linear-gradient(160deg, var(--eh-paper-50), var(--eh-paper-100) 62%, var(--eh-paper-200));
+    color: var(--eh-ink);
+    box-shadow: var(--eh-shadow-doc);
+    border-radius: var(--eh-radius-md);
+}
+
+/* ==========================================================================
+   Surfaces
+   ========================================================================== */
+
+[data-elora-home] .eh-card {
+    position: relative;
+    background: var(--eh-surface);
+    border: 1px solid var(--eh-line);
+    border-radius: var(--eh-radius-lg);
+    /* Single cheap transition; hover work stays on compositor properties. */
+    transition:
+        border-color var(--eh-dur-2) var(--eh-ease-out),
+        background-color var(--eh-dur-2) var(--eh-ease-out),
+        transform var(--eh-dur-2) var(--eh-ease-out);
+}
+
+@media (hover: hover) {
+    [data-elora-home] .eh-card:hover {
+        background: var(--eh-surface-2);
+        border-color: var(--eh-line-strong);
+        transform: translate3d(0, -2px, 0);
+    }
+}
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+
+[data-elora-home] .eh-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--eh-space-2);
+    /* 44px minimum touch target, enforced rather than hoped for. */
+    min-height: 44px;
+    padding-inline: var(--eh-space-6);
+    border-radius: var(--eh-radius-pill);
+    font-size: var(--eh-text-base);
+    font-weight: 560;
+    line-height: 1;
+    text-align: center;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    transition:
+        transform var(--eh-dur-2) var(--eh-ease-out),
+        background-color var(--eh-dur-2) var(--eh-ease-out),
+        border-color var(--eh-dur-2) var(--eh-ease-out),
+        color var(--eh-dur-2) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-btn-primary {
+    background: linear-gradient(96deg, var(--eh-green-600), var(--eh-ng-600));
+    color: #fff;
+    border: 1px solid transparent;
+    box-shadow: var(--eh-glow-blue);
+}
+
+[data-elora-home] .eh-btn-secondary {
+    background: var(--eh-surface-2);
+    color: var(--eh-fg);
+    border: 1px solid var(--eh-line-strong);
+    backdrop-filter: blur(var(--eh-blur-sm));
+}
+
+[data-elora-home] .eh-btn-ghost {
+    background: transparent;
+    color: var(--eh-fg-muted);
+    border: 1px solid transparent;
+    padding-inline: var(--eh-space-3);
+}
+
+@media (hover: hover) {
+    [data-elora-home] .eh-btn-primary:hover { transform: translate3d(0, -1px, 0); }
+    [data-elora-home] .eh-btn-secondary:hover {
+        background: var(--eh-surface-3);
+        transform: translate3d(0, -1px, 0);
+    }
+    [data-elora-home] .eh-btn-ghost:hover { color: var(--eh-fg); background: var(--eh-surface-2); }
+}
+
+[data-elora-home] .eh-btn:active { transform: translate3d(0, 0, 0) scale(0.985); }
+
+/* One-shot sheen. Runs on entrance only (class applied by the component, then
+   removed) — a permanently looping sheen reads as a broken loading state. */
+[data-elora-home] .eh-btn-sheen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(
+        100deg,
+        transparent 30%,
+        rgb(255 255 255 / 0.38) 50%,
+        transparent 70%
+    );
+    transform: translateX(-120%);
+    animation: eh-sheen 1100ms var(--eh-ease-out) 1 both;
+    pointer-events: none;
+}
+
+@keyframes eh-sheen {
+    to { transform: translateX(120%); }
+}
+
+/* ==========================================================================
+   Focus — one visible, high-contrast ring everywhere. Never removed.
+   ========================================================================== */
+
+[data-elora-home] :focus-visible {
+    outline: 2px solid var(--eh-green-400);
+    outline-offset: 3px;
+    border-radius: var(--eh-radius-sm);
+}
+
+/* Skip link: off-screen until focused. */
+[data-elora-home] .eh-skip {
+    position: absolute;
+    left: var(--eh-space-4);
+    top: var(--eh-space-4);
+    z-index: var(--eh-z-modal);
+    transform: translateY(-200%);
+    transition: transform var(--eh-dur-2) var(--eh-ease-out);
+    background: var(--eh-ng-700);
+    color: var(--eh-fg);
+    padding: var(--eh-space-3) var(--eh-space-4);
+    border-radius: var(--eh-radius-md);
+    border: 1px solid var(--eh-line-strong);
+}
+
+[data-elora-home] .eh-skip:focus-visible { transform: translateY(0); }
+
+/* Visually hidden but available to assistive tech. */
+[data-elora-home] .eh-sr {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ==========================================================================
+   Ambient keyframes
+   --------------------------------------------------------------------------
+   Kept few and cheap. Each is transform/opacity only so it stays off the main
+   thread, and each is disabled wholesale under reduced motion below.
+   ========================================================================== */
+
+@keyframes eh-pulse-ring {
+    0%   { transform: scale(0.82); opacity: 0.9; }
+    70%  { transform: scale(1.5);  opacity: 0; }
+    100% { transform: scale(1.5);  opacity: 0; }
+}
+
+@keyframes eh-dash {
+    to { stroke-dashoffset: 0; }
+}
+
+@keyframes eh-blink {
+    0%, 45%  { opacity: 1; }
+    55%, 100% { opacity: 0.25; }
+}
+
+[data-elora-home] .eh-live-dot {
+    animation: eh-blink 1.6s steps(1, end) infinite;
+}
+
+/* ==========================================================================
+   Reduced motion
+   --------------------------------------------------------------------------
+   The reduced-motion experience is not a degraded one: long spatial movement
+   is replaced by short cross-fades and immediate final states. Everything
+   still arrives; it simply doesn't travel.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    [data-elora-home],
+    [data-elora-home] * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    /* Re-enable a short, comfortable fade so state changes remain legible
+       rather than snapping. */
+    [data-elora-home] .eh-rm-fade {
+        /* `!important` is a property-level flag, so it may only appear once, at
+           the very end of the declaration — not after each comma-separated
+           value. It still overrides the blanket 0.01ms rule above. */
+        transition:
+            opacity 180ms linear,
+            color 180ms linear,
+            background-color 180ms linear,
+            border-color 180ms linear !important;
+    }
+
+    [data-elora-home] .eh-btn-sheen::after { display: none; }
+    [data-elora-home] .eh-live-dot { animation: none; opacity: 1; }
+}
+
+/* ==========================================================================
+   Entrance gate
+   --------------------------------------------------------------------------
+   The hidden start state is applied ONLY when the inline gate script in
+   `motion/AnimationGate.tsx` has stamped `data-eh-anim="ready"` on <html>.
+
+   That script runs synchronously before first paint and refuses to run under
+   `prefers-reduced-motion`. Consequences, all deliberate:
+
+     JS on + motion OK  -> elements start hidden, GSAP reveals them.
+     JS off / failed    -> selector never matches, content is visible. Always.
+     reduced motion     -> selector never matches, content is visible. Always.
+
+   This is why no scene ever hardcodes `opacity: 0`.
+   ========================================================================== */
+
+html[data-eh-anim="ready"] [data-elora-home] .eh-reveal {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0);
+    /* Hint the compositor for the one property pair we animate, and no more —
+       a blanket `will-change` on many elements costs more memory than it saves. */
+    will-change: opacity, transform;
+}
+
+/* Variant: horizontal entrance, for rail items and document fans. */
+html[data-eh-anim="ready"] [data-elora-home] .eh-reveal-x {
+    opacity: 0;
+    transform: translate3d(-16px, 0, 0);
+    will-change: opacity, transform;
+}
+
+/* Variant: scale-in for markers and rings. */
+html[data-eh-anim="ready"] [data-elora-home] .eh-reveal-pop {
+    opacity: 0;
+    transform: scale(0.9);
+    will-change: opacity, transform;
+}
+
+/* Masked line reveal for display headlines. Each line sits inside an
+   overflow-hidden span so it rises out of a hard edge rather than fading in a
+   soft blur — a typographic reveal, not a generic fade. */
+[data-elora-home] .eh-line-mask {
+    display: block;
+    overflow: hidden;
+    /* Descenders (g, y, p) would otherwise be clipped by the mask. */
+    padding-bottom: 0.12em;
+    margin-bottom: -0.12em;
+}
+
+html[data-eh-anim="ready"] [data-elora-home] .eh-line-inner {
+    display: block;
+    transform: translate3d(0, 110%, 0);
+    will-change: transform;
+}
+
+/* ==========================================================================
+   Navigation
+   --------------------------------------------------------------------------
+   Transparent over the hero, condensing into a compact blurred surface once
+   scrolled. The whole transition is CSS driven off one `data-condensed`
+   attribute, so the scroll listener only ever flips a boolean.
+   ========================================================================== */
+
+[data-elora-home] .eh-nav {
+    position: fixed;
+    inset-inline: 0;
+    top: 0;
+    transition:
+        background-color var(--eh-dur-3) var(--eh-ease-out),
+        border-color var(--eh-dur-3) var(--eh-ease-out),
+        backdrop-filter var(--eh-dur-3) var(--eh-ease-out),
+        box-shadow var(--eh-dur-3) var(--eh-ease-out);
+    background-color: transparent;
+    border-bottom: 1px solid transparent;
+}
+
+[data-elora-home] .eh-nav[data-condensed="true"] {
+    background-color: rgb(255 255 255 / 0.82);
+    backdrop-filter: blur(var(--eh-blur-nav)) saturate(1.6);
+    -webkit-backdrop-filter: blur(var(--eh-blur-nav)) saturate(1.6);
+    border-bottom-color: var(--eh-line);
+    box-shadow: 0 8px 32px -18px rgb(8 32 26 / 0.35);
+}
+
+[data-elora-home] .eh-nav-inner {
+    display: flex;
+    align-items: center;
+    gap: var(--eh-space-6);
+    width: 100%;
+    max-width: 84rem;
+    margin-inline: auto;
+    padding-inline: var(--eh-gutter);
+    /* The subtle repositioning: the bar tightens vertically as it condenses. */
+    padding-block: 1.25rem;
+    transition: padding-block var(--eh-dur-3) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-nav[data-condensed="true"] .eh-nav-inner {
+    padding-block: 0.625rem;
+}
+
+[data-elora-home] .eh-nav-brand {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    margin-inline-end: auto;
+}
+
+[data-elora-home] .eh-nav-links {
+    display: none;
+    align-items: center;
+    gap: 0.25rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+[data-elora-home] .eh-nav-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-inline: 0.875rem;
+    border-radius: var(--eh-radius-pill);
+    font-size: var(--eh-text-sm);
+    color: var(--eh-fg-muted);
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+        color var(--eh-dur-2) var(--eh-ease-out),
+        background-color var(--eh-dur-2) var(--eh-ease-out);
+}
+
+@media (hover: hover) {
+    [data-elora-home] .eh-nav-link:hover {
+        color: var(--eh-fg);
+        background: var(--eh-surface-2);
+    }
+}
+
+[data-elora-home] .eh-nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+[data-elora-home] .eh-nav-signin { display: none; }
+[data-elora-home] .eh-nav-cta { display: none; }
+
+/* Burger — two bars, because three is a cliché and two reads as "menu" just
+   as reliably at this size. */
+[data-elora-home] .eh-nav-burger {
+    display: inline-grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--eh-radius-md);
+    border: 1px solid var(--eh-line-strong);
+    background: var(--eh-surface-2);
+    color: var(--eh-fg);
+    cursor: pointer;
+}
+
+[data-elora-home] .eh-burger-bars {
+    display: grid;
+    gap: 5px;
+    width: 18px;
+}
+
+[data-elora-home] .eh-burger-bars span {
+    display: block;
+    height: 1.5px;
+    background: currentColor;
+    border-radius: 2px;
+}
+
+[data-elora-home] .eh-burger-bars span:last-child { width: 12px; margin-left: auto; }
+
+@media (min-width: 900px) {
+    [data-elora-home] .eh-nav-links { display: flex; }
+    [data-elora-home] .eh-nav-signin { display: inline-flex; }
+    [data-elora-home] .eh-nav-cta { display: inline-flex; }
+    [data-elora-home] .eh-nav-burger { display: none; }
+}
+
+/* ==========================================================================
+   Mobile drawer
+   ========================================================================== */
+
+[data-elora-home] .eh-drawer {
+    position: fixed;
+    inset: 0;
+    z-index: var(--eh-z-modal);
+    background: rgb(255 255 255 / 0.96);
+    backdrop-filter: blur(var(--eh-blur-lg));
+    -webkit-backdrop-filter: blur(var(--eh-blur-lg));
+}
+
+[data-elora-home] .eh-drawer-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    /* Respects the iOS home indicator and notch. */
+    padding: max(1rem, env(safe-area-inset-top)) var(--eh-gutter)
+             max(1.5rem, env(safe-area-inset-bottom));
+    max-width: 34rem;
+    margin-inline: auto;
+}
+
+[data-elora-home] .eh-drawer-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-block: 0.5rem 2rem;
+}
+
+[data-elora-home] .eh-drawer-close {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: var(--eh-radius-md);
+    border: 1px solid var(--eh-line-strong);
+    background: var(--eh-surface-2);
+    color: var(--eh-fg);
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+[data-elora-home] .eh-drawer-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.25rem;
+    flex: 1;
+    align-content: start;
+}
+
+[data-elora-home] .eh-drawer-links a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 60px;
+    padding-inline: 0.25rem;
+    border-bottom: 1px solid var(--eh-line);
+    font-family: var(--eh-font-display);
+    font-size: 1.5rem;
+    color: var(--eh-fg);
+    text-decoration: none;
+}
+
+[data-elora-home] .eh-drawer-links a svg { color: var(--eh-fg-subtle); }
+
+[data-elora-home] .eh-drawer-actions {
+    display: grid;
+    gap: 0.625rem;
+    padding-top: 1.5rem;
+}
+
+[data-elora-home] .eh-drawer-actions .eh-btn { width: 100%; }
+
+/* ==========================================================================
+   Scene 1 — Hero
+   ========================================================================== */
+
+[data-elora-home] .eh-hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    /* `svh` not `vh`: on mobile Safari/Chrome `100vh` is the *largest* viewport,
+       so a `100vh` hero is cut off by the URL bar on load and reflows when it
+       hides. `svh` uses the smallest stable viewport — no cut-off, no reflow. */
+    min-height: 100svh;
+    padding-block: clamp(6.5rem, 5rem + 8vw, 9rem) clamp(3rem, 2rem + 4vw, 5rem);
+    isolation: isolate;
+}
+
+/* ------------------------------------------------- photographic backdrop -- */
+
+[data-elora-home] .eh-hero-media {
+    position: absolute;
+    inset: 0;
+    z-index: -3;
+    overflow: hidden;
+    pointer-events: none;
+    transform-origin: 68% 45%;
+}
+
+[data-elora-home] .eh-hero-media-img,
+[data-elora-home] .eh-hero-media-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* A light grade only. An earlier version also lifted brightness, which
+       combined with the scrims to bleach the footage almost white — the media
+       has to stay legible as an image, not become a texture. */
+    filter: saturate(0.94) contrast(1.02);
+}
+
+/* The video only becomes visible once it is genuinely playing, so a failed or
+   refused autoplay leaves the still in place with nothing to notice. */
+[data-elora-home] .eh-hero-media-video {
+    opacity: 0;
+    transition: opacity 1200ms var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-hero-media-video[data-ready="true"] { opacity: 1; }
+
+/* ---- scrims -------------------------------------------------------------
+   These are load-bearing for legibility, not decoration. The horizontal wash
+   keeps the reading column at effectively solid white and only releases toward
+   the right, where the composition lives. If you soften these, re-check the
+   headline against the lightest region of the photograph. */
+
+/* Covers the reading column at effectively solid white, then clears
+   completely by two thirds across so the right-hand third of the frame is the
+   photograph itself, unmasked. The earlier version never dropped below 24%
+   white anywhere, which is what buried the footage. */
+[data-elora-home] .eh-hero-scrim-x {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        100deg,
+        rgb(255 255 255 / 0.97) 0%,
+        rgb(255 255 255 / 0.93) 26%,
+        rgb(255 255 255 / 0.62) 44%,
+        rgb(255 255 255 / 0.18) 62%,
+        rgb(255 255 255 / 0) 78%
+    );
+}
+
+/* Just enough at the top to keep the transparent navigation legible over the
+   image, and a fade at the very bottom so the scene resolves into the white
+   page instead of ending on a hard edge. The middle is left clear. */
+[data-elora-home] .eh-hero-scrim-y {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        rgb(255 255 255 / 0.55) 0%,
+        rgb(255 255 255 / 0.08) 15%,
+        rgb(255 255 255 / 0) 55%,
+        rgb(255 255 255 / 0.45) 88%,
+        rgb(255 255 255 / 0.94) 100%
+    );
+}
+
+/* On narrow screens the copy runs full width, so the protection has to be
+   vertical: solid behind the headline at the top, clearing over the lower half
+   where the composition sits and there is no text to protect. */
+@media (max-width: 899px) {
+    [data-elora-home] .eh-hero-scrim-x {
+        background: linear-gradient(
+            to bottom,
+            rgb(255 255 255 / 0.95) 0%,
+            rgb(255 255 255 / 0.92) 38%,
+            rgb(255 255 255 / 0.55) 62%,
+            rgb(255 255 255 / 0.3) 100%
+        );
+    }
+
+    [data-elora-home] .eh-hero-scrim-y {
+        background: linear-gradient(
+            to bottom,
+            rgb(255 255 255 / 0.35) 0%,
+            rgb(255 255 255 / 0) 30%,
+            rgb(255 255 255 / 0) 72%,
+            rgb(255 255 255 / 0.9) 100%
+        );
+    }
+}
+
+[data-elora-home] .eh-hero-glow {
+    position: absolute;
+    inset: -10% -5% 0 -5%;
+    z-index: -2;
+    background:
+        radial-gradient(46% 42% at 72% 34%, rgb(46 155 114 / 0.16), transparent 68%),
+        radial-gradient(38% 34% at 88% 62%, rgb(212 175 55 / 0.15), transparent 70%),
+        radial-gradient(52% 40% at 12% 8%, rgb(22 92 66 / 0.14), transparent 72%);
+    transform-origin: 70% 40%;
+    pointer-events: none;
+}
+
+[data-elora-home] .eh-hero-grid {
+    position: absolute;
+    inset: 0;
+    z-index: -3;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+[data-elora-home] .eh-hero-inner {
+    display: grid;
+    gap: clamp(2.5rem, 1rem + 6vw, 4rem);
+    align-items: center;
+    width: 100%;
+}
+
+/* ------------------------------------------------------------------ copy -- */
+
+[data-elora-home] .eh-hero-title {
+    margin-top: 1.25rem;
+}
+
+[data-elora-home] .eh-hero-lede {
+    margin-top: 1.75rem;
+    max-width: 34rem;
+}
+
+[data-elora-home] .eh-hero-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2.25rem;
+}
+
+[data-elora-home] .eh-hero-reassurance {
+    margin-top: 1.125rem;
+    font-size: var(--eh-text-sm);
+    color: var(--eh-fg-subtle);
+}
+
+/* ----------------------------------------------------------------- stage -- */
+
+[data-elora-home] .eh-hero-stage {
+    position: relative;
+    /* A fixed aspect ratio reserves the space before anything inside paints,
+       which is what keeps CLS at zero for this composition. */
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    max-width: 40rem;
+    margin-inline: auto;
+    /* Establishes the 3D context the passport rotates within. */
+    perspective: 1400px;
+    /* Parallax inputs, overwritten per-frame by usePointerParallax. Declaring
+       them here means the calc()s below are valid before any pointer moves. */
+    --eh-px: 0;
+    --eh-py: 0;
+}
+
+[data-elora-home] .eh-hero-layer {
+    position: absolute;
+    inset: 0;
+    transition: transform 60ms linear;
+    will-change: transform;
+}
+
+/* Parallax depth: the further back the layer, the less it travels. This is
+   what produces real depth rather than a uniform slide. */
+[data-elora-home] .eh-hero-layer--far {
+    transform: translate3d(calc(var(--eh-px) * 6px), calc(var(--eh-py) * 5px), 0);
+}
+[data-elora-home] .eh-hero-layer--mid {
+    transform: translate3d(calc(var(--eh-px) * -14px), calc(var(--eh-py) * -10px), 0);
+}
+[data-elora-home] .eh-hero-layer--near {
+    transform: translate3d(calc(var(--eh-px) * -26px), calc(var(--eh-py) * -18px), 0);
+}
+
+/* -------------------------------------------------------------- passport -- */
+
+[data-elora-home] .eh-hero-passport {
+    position: absolute;
+    right: 4%;
+    bottom: -6%;
+    width: min(62%, 300px);
+    transform-style: preserve-3d;
+    filter: drop-shadow(0 40px 60px rgb(2 5 14 / 0.75));
+}
+
+[data-elora-home] .eh-hero-passport svg { width: 100%; height: auto; }
+
+/* ------------------------------------------------------------- documents -- */
+
+[data-elora-home] .eh-hero-docs {
+    position: absolute;
+    left: 0;
+    bottom: 12%;
+    width: 58%;
+}
+
+[data-elora-home] .eh-hero-doc {
+    position: absolute;
+    left: 0;
+    width: 72%;
+    padding: 0.75rem 0.875rem;
+    transform-origin: 20% 90%;
+}
+
+[data-elora-home] .eh-hero-doc[data-doc="0"] { bottom: 0;     left: 2%;  rotate: -7deg;   z-index: 3; }
+[data-elora-home] .eh-hero-doc[data-doc="1"] { bottom: 22%;   left: 12%; rotate: -2.5deg; z-index: 2; }
+[data-elora-home] .eh-hero-doc[data-doc="2"] { bottom: 44%;   left: 22%; rotate: 3.5deg;  z-index: 1; }
+
+[data-elora-home] .eh-hero-doc-title {
+    display: block;
+    font-family: var(--eh-font-mono);
+    font-size: 0.5625rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #556B61;
+}
+
+[data-elora-home] .eh-hero-doc-rules {
+    display: grid;
+    gap: 4px;
+    margin-top: 8px;
+}
+
+/* Redacted rules rather than legible text: nothing here can be mistaken for a
+   real person's financial data. */
+[data-elora-home] .eh-hero-doc-rules i {
+    display: block;
+    height: 3px;
+    border-radius: 2px;
+    background: #C9C2B0;
+}
+
+/* ------------------------------------------------------------- readiness -- */
+
+[data-elora-home] .eh-hero-readiness {
+    position: absolute;
+    top: 2%;
+    right: 0;
+    padding: 0.875rem;
+    border-radius: var(--eh-radius-lg);
+    background: var(--eh-panel);
+    border: 1px solid var(--eh-line);
+    backdrop-filter: blur(var(--eh-blur-md));
+    -webkit-backdrop-filter: blur(var(--eh-blur-md));
+    box-shadow: var(--eh-shadow-lg);
+}
+
+/* --------------------------------------------------------------- signals -- */
+
+[data-elora-home] .eh-hero-signals {
+    position: absolute;
+    left: 0;
+    top: 8%;
+    display: grid;
+    gap: 0.375rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    width: min(58%, 15rem);
+}
+
+[data-elora-home] .eh-hero-signal {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4375rem 0.625rem;
+    border-radius: var(--eh-radius-pill);
+    background: var(--eh-panel);
+    border: 1px solid var(--eh-line);
+    backdrop-filter: blur(var(--eh-blur-sm));
+    -webkit-backdrop-filter: blur(var(--eh-blur-sm));
+    font-size: 0.75rem;
+}
+
+[data-elora-home] .eh-hero-signal-icon {
+    display: grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+[data-elora-home] .eh-hero-signal[data-state="verified"] .eh-hero-signal-icon {
+    background: rgb(46 155 114 / 0.18);
+    color: var(--eh-green-500);
+}
+[data-elora-home] .eh-hero-signal[data-state="attention"] .eh-hero-signal-icon {
+    background: rgb(212 175 55 / 0.18);
+    color: var(--eh-gold-400);
+}
+[data-elora-home] .eh-hero-signal[data-state="pending"] .eh-hero-signal-icon {
+    background: var(--eh-surface-3);
+    color: var(--eh-fg-subtle);
+}
+
+[data-elora-home] .eh-hero-signal-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+[data-elora-home] .eh-hero-signal-label {
+    color: var(--eh-fg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* The state is always spelled out, so it never depends on colour alone. */
+[data-elora-home] .eh-hero-signal-state {
+    margin-left: auto;
+    font-family: var(--eh-font-mono);
+    font-size: 0.5625rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--eh-fg-subtle);
+    white-space: nowrap;
+}
+
+[data-elora-home] .eh-hero-sample {
+    position: absolute;
+    left: 0;
+    bottom: -1.5rem;
+}
+
+/* --------------------------------------------------------------- cue ----- */
+
+[data-elora-home] .eh-hero-cue {
+    position: absolute;
+    left: 50%;
+    bottom: 1.5rem;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding-inline: 1rem;
+    border-radius: var(--eh-radius-pill);
+    font-family: var(--eh-font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--eh-fg-subtle);
+    text-decoration: none;
+    transition: color var(--eh-dur-2) var(--eh-ease-out);
+}
+
+@media (hover: hover) {
+    [data-elora-home] .eh-hero-cue:hover { color: var(--eh-fg); }
+}
+
+/* ==========================================================================
+   Hero — pre-paint hidden states
+   --------------------------------------------------------------------------
+   GSAP `fromTo` sets its start state when the timeline runs, which is after
+   hydration. Without these rules the hero would paint fully visible, then snap
+   to the hidden start state, then animate — a flash on every load.
+
+   Declaring the same start state in CSS behind the gate means the first painted
+   frame is already the "before" frame. And because the gate refuses to fire
+   under reduced motion or without JS, these never apply in those cases.
+   ========================================================================== */
+
+/* NOTE: `.eh-hero-media` is deliberately absent from this list.
+
+   The hero photograph is the page's Largest Contentful Paint element. An
+   element at `opacity: 0` is not "contentful", so hiding it until a JS-driven
+   animation runs would push LCP out by however long hydration takes — turning
+   the single best thing about this hero into its worst performance metric.
+
+   It therefore paints immediately and its entrance animates TRANSFORM ONLY,
+   which does not affect LCP eligibility. */
+html[data-eh-anim="ready"] [data-elora-home] .eh-hero-glow,
+html[data-eh-anim="ready"] [data-elora-home] .eh-hero-passport,
+html[data-eh-anim="ready"] [data-elora-home] .eh-hero-doc,
+html[data-eh-anim="ready"] [data-elora-home] .eh-hero-support,
+html[data-eh-anim="ready"] [data-elora-home] .eh-hero-cta,
+html[data-eh-anim="ready"] [data-elora-home] .eh-hero-readiness,
+html[data-eh-anim="ready"] [data-elora-home] .eh-hero-signal,
+html[data-eh-anim="ready"] [data-elora-home] .eh-hero-cue {
+    opacity: 0;
+}
+
+/* Scene 6's flight arcs. Left un-hidden: the destinations globe is far below
+   the fold and has no entrance timeline of its own, so hiding these would
+   simply mean they never appear. */
+
+/* ==========================================================================
+   Hero — responsive
+   ========================================================================== */
+
+/* Small phones: the composition is decorative next to the message, so it
+   shrinks and the copy keeps priority. */
+@media (max-width: 560px) {
+    [data-elora-home] .eh-hero-stage { max-width: 26rem; }
+    [data-elora-home] .eh-hero-signals { width: min(66%, 13rem); }
+    [data-elora-home] .eh-hero-signal-state { display: none; }
+    /* Restore the state word as an icon-adjacent label so information is not
+       lost — see the `::after` fallbacks below. */
+    [data-elora-home] .eh-hero-signal::after {
+        content: attr(data-state);
+        margin-left: auto;
+        font-family: var(--eh-font-mono);
+        font-size: 0.5rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--eh-fg-subtle);
+    }
+    [data-elora-home] .eh-hero-doc[data-doc="2"] { display: none; }
+}
+
+@media (min-width: 900px) {
+    [data-elora-home] .eh-hero-inner {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.02fr);
+        gap: clamp(2rem, 1rem + 3vw, 3.5rem);
+    }
+    [data-elora-home] .eh-hero-stage { max-width: none; }
+}
+
+/* Short landscape windows: a 100svh hero would leave no room to read, so it
+   releases its minimum height and sits at its natural size. */
+@media (max-height: 620px) and (min-width: 900px) {
+    [data-elora-home] .eh-hero { min-height: 0; }
+    [data-elora-home] .eh-hero-cue { display: none; }
+
+    /* The backdrop is a landscape photograph (979×653) in a tall portrait
+       frame, so `cover` crops it to a narrow vertical slice — by default the
+       middle, which lands on the subject's shoulder and reads as a blur.
+       Biasing upward keeps the reading room itself in frame, which is the part
+       that carries the meaning. */
+    [data-elora-home] .eh-hero-media-img,
+    [data-elora-home] .eh-hero-media-video {
+        object-position: 50% 22%;
+    }
+}
+
+/* ==========================================================================
+   Scene 2 — Journey (pinned transformation)
+   ========================================================================== */
+
+[data-elora-home] .eh-journey {
+    position: relative;
+    padding-block: var(--eh-scene-y) 0;
+}
+
+[data-elora-home] .eh-journey-head { max-width: 46rem; }
+
+/* The track's height is the scroll budget for the whole scene: four stages,
+   roughly one viewport of scrolling each. Long enough to feel deliberate,
+   short enough that a visitor who doesn't care escapes quickly. */
+[data-elora-home] .eh-journey-track {
+    position: relative;
+    height: 400svh;
+    margin-top: var(--eh-space-12);
+}
+
+[data-elora-home] .eh-journey-sticky {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    display: flex;
+    align-items: center;
+}
+
+[data-elora-home] .eh-journey-grid {
+    display: grid;
+    gap: clamp(1.5rem, 1rem + 3vw, 3rem);
+    width: 100%;
+    align-items: center;
+}
+
+/* ------------------------------------------------------------------ rail -- */
+
+[data-elora-home] .eh-journey-rail {
+    display: flex;
+    gap: 1.25rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    counter-reset: stage;
+}
+
+[data-elora-home] .eh-journey-rail li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--eh-font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--eh-fg-subtle);
+    transition: color var(--eh-dur-3) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-journey-rail li[data-active="true"] { color: var(--eh-fg); }
+[data-elora-home] .eh-journey-rail li[data-done="true"] { color: var(--eh-green-500); }
+
+[data-elora-home] .eh-journey-rail-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.45;
+    transition:
+        opacity var(--eh-dur-3) var(--eh-ease-out),
+        box-shadow var(--eh-dur-3) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-journey-rail li[data-active="true"] .eh-journey-rail-dot {
+    opacity: 1;
+    box-shadow: 0 0 0 4px rgb(30 122 88 / 0.18);
+}
+
+[data-elora-home] .eh-journey-rail-label { display: none; }
+
+/* ------------------------------------------------------------- narrative -- */
+
+[data-elora-home] .eh-journey-index {
+    font-family: var(--eh-font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: var(--eh-tracking-board);
+    color: var(--eh-accent-soft);
+}
+
+[data-elora-home] .eh-journey-title {
+    margin-top: 0.75rem;
+    font-size: var(--eh-text-3xl);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+}
+
+[data-elora-home] .eh-journey-body {
+    margin-top: 1rem;
+    font-size: var(--eh-text-lg);
+    line-height: var(--eh-leading-body);
+    color: var(--eh-fg-muted);
+    max-width: 34rem;
+}
+
+/* The copy cross-fades on stage change. Keyed off the whole block rather than
+   per-word, so it reads as one calm swap. */
+[data-elora-home] .eh-journey-copy {
+    animation: eh-copy-in var(--eh-dur-4) var(--eh-ease-entrance);
+}
+
+@keyframes eh-copy-in {
+    from { opacity: 0; transform: translate3d(0, 10px, 0); }
+    to   { opacity: 1; transform: none; }
+}
+
+/* ------------------------------------------------------------- workspace -- */
+
+[data-elora-home] .eh-workspace {
+    position: relative;
+    width: 100%;
+}
+
+[data-elora-home] .eh-workspace-frame {
+    position: relative;
+    /* Fixed ratio: the cards are absolutely positioned inside it, so the box
+       must not depend on their content. Also keeps CLS at zero. */
+    aspect-ratio: 4 / 3.4;
+    width: 100%;
+    border-radius: var(--eh-radius-xl);
+    background: linear-gradient(168deg, var(--eh-ng-700), var(--eh-ng-900) 70%);
+    border: 1px solid var(--eh-line);
+    box-shadow: var(--eh-shadow-lg);
+    overflow: hidden;
+}
+
+[data-elora-home] .eh-workspace-chrome {
+    position: absolute;
+    inset: 0 0 auto 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--eh-line);
+    background: var(--eh-surface);
+}
+
+[data-elora-home] .eh-workspace-chrome i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--eh-line-strong);
+}
+
+[data-elora-home] .eh-workspace-chrome em {
+    margin-left: 0.5rem;
+    font-family: var(--eh-font-mono);
+    font-size: 0.5625rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-style: normal;
+    color: var(--eh-fg-subtle);
+}
+
+/* --- stage 1: the four inputs ------------------------------------------- */
+
+[data-elora-home] .eh-workspace-inputs {
+    position: absolute;
+    left: 6%;
+    right: 6%;
+    top: 18%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+    transition:
+        opacity var(--eh-dur-4) var(--eh-ease-out),
+        transform var(--eh-dur-4) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-workspace-inputs span {
+    padding: 0.625rem 0.75rem;
+    border-radius: var(--eh-radius-md);
+    border: 1px dashed var(--eh-line-strong);
+    background: var(--eh-surface);
+    font-family: var(--eh-font-mono);
+    font-size: 0.5625rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--eh-fg-subtle);
+}
+
+[data-elora-home] .eh-journey-grid[data-stage="0"] .eh-workspace-inputs {
+    opacity: 1;
+    transform: none;
+}
+
+/* --- the five persistent cards ------------------------------------------ */
+
+[data-elora-home] .eh-workspace-cards {
+    position: absolute;
+    inset: 14% 6% 6% 6%;
+    /* Moved as a group so stage 1's scattered cards sit BELOW the four input
+       chips instead of on top of them. Transitioned with the same curve as the
+       cards themselves so the group settles as one object. */
+    transform: translateY(0);
+    transition: transform var(--eh-dur-5) var(--eh-ease-entrance);
+}
+
+[data-elora-home] .eh-journey-grid[data-stage="0"] .eh-workspace-cards {
+    transform: translateY(34%);
+}
+
+[data-elora-home] .eh-wcard {
+    position: absolute;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.625rem;
+    border-radius: var(--eh-radius-md);
+    background: var(--eh-panel);
+    border: 1px solid var(--eh-line);
+    font-size: 0.75rem;
+    color: var(--eh-fg);
+    /* ONE transition drives every stage change. This is what makes the four
+       stages read as a morph of the same objects instead of four screens. */
+    transition:
+        transform var(--eh-dur-5) var(--eh-ease-entrance),
+        opacity var(--eh-dur-4) var(--eh-ease-out),
+        border-color var(--eh-dur-4) var(--eh-ease-out),
+        background-color var(--eh-dur-4) var(--eh-ease-out);
+    will-change: transform;
+}
+
+[data-elora-home] .eh-wcard-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+[data-elora-home] .eh-wcard-tick {
+    display: grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    border-radius: 5px;
+    background: var(--eh-surface-2);
+    color: var(--eh-fg-subtle);
+    opacity: 0;
+    transition: opacity var(--eh-dur-3) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-wcard-badge {
+    margin-left: auto;
+    font-family: var(--eh-font-mono);
+    font-size: 0.5rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--eh-fg-subtle);
+    opacity: 0;
+    transition: opacity var(--eh-dur-3) var(--eh-ease-out);
+}
+
+/* STAGE 1 — scattered. Requirements arrive unsorted and at angles, which is
+   what the applicant's research actually looks like. */
+[data-elora-home] .eh-journey-grid[data-stage="0"] .eh-wcard { opacity: 0.34; }
+[data-elora-home] .eh-journey-grid[data-stage="0"] .eh-wcard[data-card="0"] { transform: translate3d(4%,  8%, 0) rotate(-6deg)  scale(0.86); }
+[data-elora-home] .eh-journey-grid[data-stage="0"] .eh-wcard[data-card="1"] { transform: translate3d(42%, 30%, 0) rotate(5deg)  scale(0.86); }
+[data-elora-home] .eh-journey-grid[data-stage="0"] .eh-wcard[data-card="2"] { transform: translate3d(8%,  120%, 0) rotate(-3deg) scale(0.86); }
+[data-elora-home] .eh-journey-grid[data-stage="0"] .eh-wcard[data-card="3"] { transform: translate3d(38%, 205%, 0) rotate(7deg)  scale(0.86); }
+[data-elora-home] .eh-journey-grid[data-stage="0"] .eh-wcard[data-card="4"] { transform: translate3d(2%,  290%, 0) rotate(-4deg) scale(0.86); }
+
+/* STAGE 2 — aligned into a personalised checklist. Same nodes, now ordered. */
+[data-elora-home] .eh-journey-grid[data-stage="1"] .eh-wcard { opacity: 1; }
+[data-elora-home] .eh-journey-grid[data-stage="1"] .eh-wcard-tick { opacity: 1; }
+[data-elora-home] .eh-journey-grid[data-stage="1"] .eh-wcard[data-card="0"] { transform: translate3d(0, 0%, 0); }
+[data-elora-home] .eh-journey-grid[data-stage="1"] .eh-wcard[data-card="1"] { transform: translate3d(0, 118%, 0); }
+[data-elora-home] .eh-journey-grid[data-stage="1"] .eh-wcard[data-card="2"] { transform: translate3d(0, 236%, 0); }
+[data-elora-home] .eh-journey-grid[data-stage="1"] .eh-wcard[data-card="3"] { transform: translate3d(0, 354%, 0); }
+[data-elora-home] .eh-journey-grid[data-stage="1"] .eh-wcard[data-card="4"] { transform: translate3d(0, 472%, 0); }
+
+/* STAGE 3 — analysed. Positions hold; findings surface. Holding position is
+   the point: the visitor sees the *same* list gain information. */
+[data-elora-home] .eh-journey-grid[data-stage="2"] .eh-wcard { opacity: 1; }
+[data-elora-home] .eh-journey-grid[data-stage="2"] .eh-wcard-tick { opacity: 1; }
+[data-elora-home] .eh-journey-grid[data-stage="2"] .eh-wcard-badge { opacity: 1; }
+[data-elora-home] .eh-journey-grid[data-stage="2"] .eh-wcard[data-card="0"] { transform: translate3d(0, 0%, 0); }
+[data-elora-home] .eh-journey-grid[data-stage="2"] .eh-wcard[data-card="1"] { transform: translate3d(0, 118%, 0); }
+[data-elora-home] .eh-journey-grid[data-stage="2"] .eh-wcard[data-card="2"] { transform: translate3d(0, 236%, 0); }
+[data-elora-home] .eh-journey-grid[data-stage="2"] .eh-wcard[data-card="3"] { transform: translate3d(0, 354%, 0); }
+[data-elora-home] .eh-journey-grid[data-stage="2"] .eh-wcard[data-card="4"] { transform: translate3d(0, 472%, 0); }
+
+[data-elora-home] .eh-journey-grid[data-stage="2"] .eh-wcard[data-flag="conflict"],
+[data-elora-home] .eh-journey-grid[data-stage="2"] .eh-wcard[data-flag="weak"] {
+    border-color: rgb(212 175 55 / 0.55);
+    background: rgb(38 26 8 / 0.9);
+}
+
+[data-elora-home] .eh-journey-grid[data-stage="2"] .eh-wcard[data-flag="conflict"] .eh-wcard-badge,
+[data-elora-home] .eh-journey-grid[data-stage="2"] .eh-wcard[data-flag="weak"] .eh-wcard-badge {
+    color: var(--eh-gold-400);
+}
+
+/* STAGE 4 — compressed into a portfolio, making room for the result. */
+[data-elora-home] .eh-journey-grid[data-stage="3"] .eh-wcard {
+    opacity: 0.5;
+    transform-origin: 50% 100%;
+}
+[data-elora-home] .eh-journey-grid[data-stage="3"] .eh-wcard[data-card="0"] { transform: translate3d(0, 300%, 0) scale(0.9); }
+[data-elora-home] .eh-journey-grid[data-stage="3"] .eh-wcard[data-card="1"] { transform: translate3d(0, 316%, 0) scale(0.9); }
+[data-elora-home] .eh-journey-grid[data-stage="3"] .eh-wcard[data-card="2"] { transform: translate3d(0, 332%, 0) scale(0.9); }
+[data-elora-home] .eh-journey-grid[data-stage="3"] .eh-wcard[data-card="3"] { transform: translate3d(0, 348%, 0) scale(0.9); }
+[data-elora-home] .eh-journey-grid[data-stage="3"] .eh-wcard[data-card="4"] { transform: translate3d(0, 364%, 0) scale(0.9); }
+
+/* --- stage 3: scanning beam --------------------------------------------- */
+
+[data-elora-home] .eh-workspace-scan {
+    position: absolute;
+    inset: 14% 0 0 0;
+    opacity: 0;
+    background: linear-gradient(
+        to bottom,
+        transparent,
+        rgb(93 191 149 / 0.16) 45%,
+        rgb(93 191 149 / 0.42) 50%,
+        rgb(93 191 149 / 0.16) 55%,
+        transparent
+    );
+    transition: opacity var(--eh-dur-3) var(--eh-ease-out);
+    pointer-events: none;
+}
+
+[data-elora-home] .eh-journey-grid[data-stage="2"] .eh-workspace-scan {
+    opacity: 1;
+    animation: eh-scan 2.6s var(--eh-ease-in-out) infinite;
+}
+
+@keyframes eh-scan {
+    0%   { transform: translate3d(0, -100%, 0); }
+    100% { transform: translate3d(0, 100%, 0); }
+}
+
+/* --- stage 4: the result ------------------------------------------------- */
+
+[data-elora-home] .eh-workspace-result {
+    position: absolute;
+    left: 6%;
+    right: 6%;
+    top: 20%;
+    display: grid;
+    justify-items: center;
+    gap: 0.375rem;
+    opacity: 0;
+    transform: scale(0.94);
+    transition:
+        opacity var(--eh-dur-4) var(--eh-ease-out),
+        transform var(--eh-dur-4) var(--eh-ease-entrance);
+}
+
+[data-elora-home] .eh-journey-grid[data-stage="3"] .eh-workspace-result {
+    opacity: 1;
+    transform: none;
+}
+
+[data-elora-home] .eh-workspace-score {
+    font-family: var(--eh-font-display);
+    color: var(--eh-fg);
+    line-height: 1;
+}
+[data-elora-home] .eh-workspace-score b { font-size: 3rem; font-weight: 500; }
+[data-elora-home] .eh-workspace-score i {
+    font-family: var(--eh-font-mono);
+    font-style: normal;
+    font-size: 1rem;
+    color: var(--eh-fg-subtle);
+}
+
+[data-elora-home] .eh-workspace-result-label {
+    font-family: var(--eh-font-mono);
+    font-size: 0.5625rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--eh-fg-subtle);
+}
+
+[data-elora-home] .eh-workspace-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin-top: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--eh-radius-pill);
+    background: rgb(46 155 114 / 0.14);
+    border: 1px solid rgb(46 155 114 / 0.35);
+    color: var(--eh-green-500);
+    font-size: 0.6875rem;
+}
+
+/* ------------------------------------------------- static fallback list -- */
+
+/* Shown only when the sticky scene can't advance. */
+[data-elora-home] .eh-journey-static { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+    [data-elora-home] .eh-journey-track { display: none; }
+
+    [data-elora-home] .eh-journey-static {
+        display: grid;
+        gap: 2.5rem;
+        list-style: none;
+        margin: var(--eh-space-12) 0 0;
+        padding: 0;
+        padding-bottom: var(--eh-scene-y);
+    }
+    [data-elora-home] .eh-journey-static li {
+        display: grid;
+        gap: 0.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--eh-line);
+    }
+    [data-elora-home] .eh-journey-static h3 { font-size: var(--eh-text-2xl); }
+    [data-elora-home] .eh-journey-static p {
+        color: var(--eh-fg-muted);
+        line-height: var(--eh-leading-body);
+        max-width: var(--eh-measure);
+    }
+}
+
+/* ------------------------------------------------------------ responsive -- */
+
+@media (min-width: 900px) {
+    [data-elora-home] .eh-journey-grid {
+        grid-template-columns: auto minmax(0, 1fr) minmax(0, 1.05fr);
+        gap: clamp(2rem, 1rem + 3vw, 4rem);
+    }
+
+    /* The rail becomes vertical alongside the copy on desktop. */
+    [data-elora-home] .eh-journey-rail {
+        flex-direction: column;
+        align-items: start;
+        gap: 1.5rem;
+    }
+    [data-elora-home] .eh-journey-rail-label { display: inline; }
+    [data-elora-home] .eh-journey-rail li { gap: 0.75rem; }
+}
+
+/* Below 900px the workspace sits above the copy so the visual leads, and the
+   frame shortens so both fit one viewport without scrolling inside a scroll. */
+@media (max-width: 899px) {
+    /* Copy BEFORE the workspace. With the workspace first, the sticky
+       viewport's content ran taller than 100svh and pushed the narrative — the
+       entire point of the scene — off the bottom of the screen. */
+    [data-elora-home] .eh-journey-grid {
+        grid-template-areas: "rail" "copy" "workspace";
+        gap: 1.25rem;
+    }
+    [data-elora-home] .eh-journey-rail { grid-area: rail; }
+    [data-elora-home] .eh-workspace { grid-area: workspace; }
+    [data-elora-home] .eh-journey-copy { grid-area: copy; }
+
+    /* Height-bound rather than ratio-bound, so the frame can never grow to the
+       point where it evicts the copy above it. */
+    [data-elora-home] .eh-workspace-frame {
+        aspect-ratio: auto;
+        height: min(34svh, 290px);
+    }
+    [data-elora-home] .eh-journey-title { font-size: var(--eh-text-2xl); }
+    [data-elora-home] .eh-journey-body { font-size: var(--eh-text-base); }
+    [data-elora-home] .eh-journey-track { height: 340svh; }
+}
+
+/* ==========================================================================
+   Scene 3 — Document intelligence
+   ========================================================================== */
+
+[data-elora-home] .eh-docs-head { max-width: 46rem; }
+
+[data-elora-home] .eh-docs-grid {
+    display: grid;
+    gap: clamp(2rem, 1rem + 4vw, 3.5rem);
+    margin-top: var(--eh-space-12);
+    align-items: center;
+}
+
+/* ------------------------------------------------------------ the stack -- */
+
+[data-elora-home] .eh-docs-stack {
+    position: relative;
+    /* Reserves space up front — the documents inside are absolutely
+       positioned, so without this the section would collapse and reflow. */
+    aspect-ratio: 5 / 4;
+    width: 100%;
+    perspective: 1200px;
+    /* Scroll progress, 0 → 1, written by the scene. Every transform below
+       interpolates off it, so one number drives the whole fan. */
+    --eh-fan: 0;
+}
+
+[data-elora-home] .eh-doc {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 46%;
+    min-height: 58%;
+    padding: 0.875rem 1rem 2.25rem;
+    border-radius: var(--eh-radius-md);
+    background: linear-gradient(160deg, var(--eh-paper-50), var(--eh-paper-100) 62%, var(--eh-paper-200));
+    color: var(--eh-ink);
+    box-shadow: var(--eh-shadow-doc);
+    /* The fan: each document's index (--eh-i, centred on 0) is multiplied by
+       the scroll progress. At progress 0 every card sits in one stack; at 1
+       they spread and rotate into a fan. Same nodes throughout. */
+    transform:
+        translate(-50%, -50%)
+        translateX(calc(var(--eh-i) * var(--eh-fan) * 62%))
+        translateY(calc(var(--eh-i) * var(--eh-fan) * -6%))
+        rotate(calc(var(--eh-i) * var(--eh-fan) * 7deg));
+    transition: box-shadow var(--eh-dur-3) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-doc[data-tone="navy"] {
+    background: linear-gradient(160deg, var(--eh-ng-600), var(--eh-ng-800) 70%);
+    color: var(--eh-paper-100);
+}
+
+[data-elora-home] .eh-doc-head {
+    display: grid;
+    gap: 2px;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgb(0 0 0 / 0.10);
+}
+
+[data-elora-home] .eh-doc[data-tone="navy"] .eh-doc-head {
+    border-bottom-color: var(--eh-line-strong);
+}
+
+[data-elora-home] .eh-doc-title {
+    font-family: var(--eh-font-display);
+    font-size: 0.9375rem;
+    line-height: 1.2;
+}
+
+[data-elora-home] .eh-doc-meta {
+    font-family: var(--eh-font-mono);
+    font-size: 0.5rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    opacity: 0.55;
+}
+
+[data-elora-home] .eh-doc-body {
+    display: grid;
+    gap: 5px;
+    margin-top: 0.75rem;
+}
+
+/* Redacted rules, never legible text — see data/documents.ts. */
+[data-elora-home] .eh-doc-body i {
+    display: block;
+    height: 3px;
+    border-radius: 2px;
+    background: currentColor;
+    opacity: 0.16;
+}
+
+[data-elora-home] .eh-doc-flag {
+    position: absolute;
+    left: 1rem;
+    bottom: 0.875rem;
+    padding: 0.1875rem 0.5rem;
+    border-radius: var(--eh-radius-pill);
+    font-family: var(--eh-font-mono);
+    font-size: 0.5rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    /* Fades in with the fan, so findings arrive after the documents settle. */
+    opacity: calc(var(--eh-fan) * 1.4 - 0.4);
+}
+
+[data-elora-home] .eh-doc-flag[data-kind="clean"] {
+    background: rgb(46 155 114 / 0.16);
+    color: #165C42;
+}
+[data-elora-home] .eh-doc-flag[data-kind="conflict"],
+[data-elora-home] .eh-doc-flag[data-kind="gap"],
+[data-elora-home] .eh-doc-flag[data-kind="evidence"] {
+    background: rgb(212 175 55 / 0.22);
+    color: #7A5F0B;
+}
+
+[data-elora-home] .eh-doc[data-tone="navy"] .eh-doc-flag[data-kind="clean"] {
+    background: rgb(46 155 114 / 0.2);
+    color: var(--eh-green-500);
+}
+
+/* Flagged documents lift slightly once the fan opens. */
+[data-elora-home] .eh-doc[data-flagged="true"] {
+    box-shadow:
+        var(--eh-shadow-doc),
+        0 0 0 calc(var(--eh-fan) * 1.5px) rgb(212 175 55 / 0.5);
+}
+
+/* --- scanning light ------------------------------------------------------ */
+
+[data-elora-home] .eh-doc-scan {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 26%;
+    pointer-events: none;
+    background: linear-gradient(
+        to right,
+        transparent,
+        rgb(93 191 149 / 0.10) 40%,
+        rgb(93 191 149 / 0.30) 50%,
+        rgb(93 191 149 / 0.10) 60%,
+        transparent
+    );
+    /* Position is a pure function of scroll progress — the reader drives the
+       scan. Nothing loops on its own. */
+    left: calc(var(--eh-fan) * 100% - 13%);
+    opacity: calc(1 - abs(var(--eh-fan) * 2 - 1));
+    mix-blend-mode: screen;
+}
+
+/* --------------------------------------------------------- findings panel */
+
+[data-elora-home] .eh-docs-panel {
+    padding: 1.5rem;
+    border-radius: var(--eh-radius-xl);
+    background: var(--eh-panel);
+    border: 1px solid var(--eh-line);
+}
+
+[data-elora-home] .eh-findings {
+    display: grid;
+    gap: 1rem;
+    list-style: none;
+    margin: 1.25rem 0 0;
+    padding: 0;
+}
+
+[data-elora-home] .eh-findings li {
+    padding: 0.875rem 1rem;
+    border-radius: var(--eh-radius-md);
+    background: var(--eh-surface);
+    border: 1px solid var(--eh-line);
+    border-left: 2px solid rgb(212 175 55 / 0.7);
+    opacity: 0.25;
+    transform: translate3d(0, 6px, 0);
+    transition:
+        opacity var(--eh-dur-4) var(--eh-ease-out),
+        transform var(--eh-dur-4) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-findings li[data-shown="true"] {
+    opacity: 1;
+    transform: none;
+}
+
+[data-elora-home] .eh-finding-kind {
+    font-family: var(--eh-font-mono);
+    font-size: 0.5rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--eh-gold-400);
+}
+
+[data-elora-home] .eh-finding-doc {
+    margin-top: 0.25rem;
+    font-family: var(--eh-font-display);
+    font-size: 1rem;
+    color: var(--eh-fg);
+}
+
+[data-elora-home] .eh-finding-detail {
+    margin-top: 0.25rem;
+    font-size: var(--eh-text-sm);
+    line-height: 1.6;
+    color: var(--eh-fg-muted);
+}
+
+/* -------------------------------------------------------------- outcomes */
+
+[data-elora-home] .eh-docs-outcomes {
+    display: grid;
+    gap: 1rem;
+    margin-top: var(--eh-space-12);
+}
+
+[data-elora-home] .eh-outcome { padding: 1.25rem; }
+
+[data-elora-home] .eh-outcome-icon {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: var(--eh-radius-md);
+    background: rgb(30 122 88 / 0.14);
+    color: var(--eh-green-400);
+}
+
+[data-elora-home] .eh-outcome-title {
+    margin-top: 0.875rem;
+    font-family: var(--eh-font-display);
+    font-size: 1.0625rem;
+    color: var(--eh-fg);
+}
+
+[data-elora-home] .eh-outcome-body {
+    margin-top: 0.375rem;
+    font-size: var(--eh-text-sm);
+    line-height: 1.6;
+    color: var(--eh-fg-muted);
+}
+
+@media (min-width: 780px) {
+    [data-elora-home] .eh-docs-outcomes { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1080px) {
+    [data-elora-home] .eh-docs-grid { grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.85fr); }
+    [data-elora-home] .eh-docs-outcomes { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* On narrow screens the fan would overflow, so the documents stay closer
+   together and the two outermost drop out of the composition entirely. */
+@media (max-width: 700px) {
+    [data-elora-home] .eh-doc { width: 62%; }
+    [data-elora-home] .eh-doc:first-child,
+    [data-elora-home] .eh-doc:last-child { display: none; }
+}
+
+/* ==========================================================================
+   Scene 4 — AI interview
+   --------------------------------------------------------------------------
+   The one scene that goes darker than the page floor. The drop in luminance is
+   the point: it should feel like stepping into a booth.
+   ========================================================================== */
+
+/* One of only two dark scenes. `.eh-dark` is applied in the component, which
+   flips every surface token beneath it — see the Dark scope block above. */
+[data-elora-home] .eh-interview {
+    position: relative;
+    background:
+        radial-gradient(70% 55% at 50% 0%, rgb(18 58 48 / 0.85), transparent 72%),
+        var(--eh-ng-900);
+}
+
+[data-elora-home] .eh-interview-head { max-width: 46rem; }
+
+[data-elora-home] .eh-interview-stage {
+    display: grid;
+    gap: 1.25rem;
+    margin-top: var(--eh-space-12);
+    align-items: start;
+}
+
+/* ---------------------------------------------------------------- console */
+
+[data-elora-home] .eh-console {
+    padding: clamp(1.25rem, 1rem + 1.5vw, 2rem);
+    border-radius: var(--eh-radius-xl);
+    background: linear-gradient(168deg, rgb(16 26 58 / 0.9), var(--eh-panel-deep));
+    border: 1px solid var(--eh-line-strong);
+    box-shadow: var(--eh-shadow-lg);
+}
+
+[data-elora-home] .eh-console-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+[data-elora-home] .eh-console-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3125rem 0.75rem;
+    border-radius: var(--eh-radius-pill);
+    border: 1px solid var(--eh-line-strong);
+    background: var(--eh-surface);
+    font-family: var(--eh-font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--eh-fg-muted);
+    transition: color var(--eh-dur-3) var(--eh-ease-out),
+                border-color var(--eh-dur-3) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-console-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+/* Each session state gets its own colour AND its own word — the label text
+   already says "Listening", so colour is reinforcement, never the signal. */
+[data-elora-home] .eh-console-state[data-state="connecting"] { color: var(--eh-fg-subtle); }
+[data-elora-home] .eh-console-state[data-state="listening"]  { color: var(--eh-green-500); border-color: rgb(46 155 114 / 0.4); }
+[data-elora-home] .eh-console-state[data-state="thinking"]   { color: var(--eh-ng-500); border-color: rgb(26 76 63 / 0.4); }
+[data-elora-home] .eh-console-state[data-state="speaking"]   { color: var(--eh-green-400);   border-color: rgb(30 122 88 / 0.4); }
+
+[data-elora-home] .eh-console-state[data-state="listening"] .eh-console-dot {
+    animation: eh-blink 1.4s steps(1, end) infinite;
+}
+
+/* --------------------------------------------------------------- waveform */
+
+[data-elora-home] .eh-wave {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    height: 92px;
+    margin-block: 1.5rem;
+}
+
+[data-elora-home] .eh-wave span {
+    display: block;
+    width: 3px;
+    border-radius: 2px;
+    background: linear-gradient(to top, var(--eh-green-700), var(--eh-green-400));
+    /* Idle: a flat line. The bar only has height when the session is live. */
+    height: 3px;
+    opacity: 0.35;
+    transition:
+        height var(--eh-dur-3) var(--eh-ease-out),
+        opacity var(--eh-dur-3) var(--eh-ease-out),
+        background var(--eh-dur-3) var(--eh-ease-out);
+}
+
+/* Listening: full, animated response — the applicant is speaking. */
+[data-elora-home] .eh-wave[data-state="listening"] span {
+    height: calc(var(--eh-h) * 82px);
+    opacity: 1;
+    background: linear-gradient(to top, #165C42, var(--eh-green-500));
+    animation: eh-wave-live 900ms var(--eh-ease-in-out) infinite alternate;
+    animation-delay: calc(var(--eh-b) * -37ms);
+}
+
+/* Thinking: low, slow, violet — processing, not listening. */
+[data-elora-home] .eh-wave[data-state="thinking"] span {
+    height: calc(var(--eh-h) * 26px);
+    opacity: 0.8;
+    background: linear-gradient(to top, var(--eh-ng-700), var(--eh-ng-500));
+    animation: eh-wave-think 1800ms var(--eh-ease-in-out) infinite alternate;
+    animation-delay: calc(var(--eh-b) * -46ms);
+}
+
+/* Speaking: a travelling pulse — the interviewer has the floor. */
+[data-elora-home] .eh-wave[data-state="speaking"] span {
+    height: calc(var(--eh-h) * 54px);
+    opacity: 1;
+    animation: eh-wave-speak 1400ms var(--eh-ease-in-out) infinite;
+    animation-delay: calc(var(--eh-b) * -28ms);
+}
+
+[data-elora-home] .eh-wave[data-state="connecting"] span {
+    height: 5px;
+    opacity: 0.45;
+    animation: eh-blink 1s steps(1, end) infinite;
+    animation-delay: calc(var(--eh-b) * -50ms);
+}
+
+@keyframes eh-wave-live  { from { transform: scaleY(0.42); } to { transform: scaleY(1); } }
+@keyframes eh-wave-think { from { transform: scaleY(0.7);  } to { transform: scaleY(1); } }
+@keyframes eh-wave-speak {
+    0%, 100% { transform: scaleY(0.35); }
+    50%      { transform: scaleY(1); }
+}
+
+[data-elora-home] .eh-console-caption {
+    text-align: center;
+    font-size: var(--eh-text-sm);
+    color: var(--eh-fg-muted);
+    min-height: 1.4em;
+}
+
+/* --------------------------------------------------------------- question */
+
+[data-elora-home] .eh-console-question {
+    margin-top: 1.5rem;
+    padding: 1.25rem;
+    border-radius: var(--eh-radius-lg);
+    background: var(--eh-surface);
+    border: 1px solid var(--eh-line);
+}
+
+[data-elora-home] .eh-console-category {
+    font-family: var(--eh-font-mono);
+    font-size: 0.5625rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--eh-accent-soft);
+}
+
+[data-elora-home] .eh-console-prompt {
+    margin-top: 0.5rem;
+    font-family: var(--eh-font-display);
+    font-size: var(--eh-text-xl);
+    line-height: 1.25;
+    color: var(--eh-fg);
+}
+
+[data-elora-home] .eh-console-timeline {
+    position: relative;
+    height: 3px;
+    margin-top: 1.25rem;
+    border-radius: 2px;
+    background: var(--eh-surface-3);
+    overflow: hidden;
+}
+
+[data-elora-home] .eh-console-timeline-bar {
+    height: 100%;
+    border-radius: 2px;
+    background: linear-gradient(to right, var(--eh-green-600), var(--eh-ng-500));
+    transition: width var(--eh-dur-4) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-console-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+}
+
+/* --------------------------------------------------------------- feedback */
+
+[data-elora-home] .eh-feedback {
+    padding: clamp(1.25rem, 1rem + 1.5vw, 1.75rem);
+    border-radius: var(--eh-radius-xl);
+    background: var(--eh-panel);
+    border: 1px solid var(--eh-line);
+    opacity: 0.4;
+    transform: translate3d(0, 10px, 0);
+    transition:
+        opacity var(--eh-dur-5) var(--eh-ease-out),
+        transform var(--eh-dur-5) var(--eh-ease-entrance);
+}
+
+[data-elora-home] .eh-feedback[data-shown="true"] {
+    opacity: 1;
+    transform: none;
+}
+
+[data-elora-home] .eh-feedback-meters {
+    display: grid;
+    gap: 0.875rem;
+    margin-top: 1.25rem;
+}
+
+[data-elora-home] .eh-meter-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    font-size: var(--eh-text-sm);
+    color: var(--eh-fg-muted);
+}
+
+[data-elora-home] .eh-meter-top b {
+    font-family: var(--eh-font-mono);
+    font-size: 0.75rem;
+    color: var(--eh-fg);
+    font-variant-numeric: tabular-nums;
+}
+
+[data-elora-home] .eh-meter-track {
+    height: 5px;
+    margin-top: 0.375rem;
+    border-radius: 3px;
+    background: var(--eh-surface-3);
+    overflow: hidden;
+}
+
+[data-elora-home] .eh-meter-track span {
+    display: block;
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(to right, var(--eh-green-600), var(--eh-ng-500));
+    transition: width var(--eh-dur-6) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-feedback-title {
+    margin-top: 1.5rem;
+    font-family: var(--eh-font-display);
+    font-size: 1.0625rem;
+    color: var(--eh-fg);
+}
+
+[data-elora-home] .eh-feedback-list {
+    display: grid;
+    gap: 0.625rem;
+    list-style: none;
+    margin: 0.75rem 0 0;
+    padding: 0;
+}
+
+[data-elora-home] .eh-feedback-list li {
+    display: flex;
+    align-items: start;
+    gap: 0.5rem;
+    font-size: var(--eh-text-sm);
+    line-height: 1.55;
+    color: var(--eh-fg-muted);
+}
+
+[data-elora-home] .eh-feedback-list svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: var(--eh-green-500);
+}
+
+@media (min-width: 1020px) {
+    [data-elora-home] .eh-interview-stage {
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+        gap: 1.5rem;
+    }
+}
+
+/* ==========================================================================
+   Scene 5 — Roadmap
+   ========================================================================== */
+
+[data-elora-home] .eh-roadmap-head { max-width: 46rem; }
+
+[data-elora-home] .eh-roadmap-track {
+    position: relative;
+    margin-top: var(--eh-space-12);
+    padding-left: 2.75rem;
+    --eh-progress: 0;
+}
+
+[data-elora-home] .eh-roadmap-rail {
+    position: absolute;
+    left: 0.9375rem;
+    top: 0.75rem;
+    bottom: 0.75rem;
+    width: 2px;
+    border-radius: 2px;
+    background: var(--eh-surface-3);
+    overflow: hidden;
+}
+
+/* The travelling light. Height is a direct function of scroll progress, so it
+   is always an honest indicator of position rather than a loop. */
+[data-elora-home] .eh-roadmap-line {
+    display: block;
+    width: 100%;
+    height: calc(var(--eh-progress) * 100%);
+    background: linear-gradient(
+        to bottom,
+        var(--eh-green-600),
+        var(--eh-ng-500) 60%,
+        var(--eh-gold-400)
+    );
+    box-shadow: 0 0 14px rgb(30 122 88 / 0.7);
+}
+
+[data-elora-home] .eh-roadmap-list {
+    display: grid;
+    gap: 1.5rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+[data-elora-home] .eh-roadmap-item {
+    position: relative;
+    opacity: 0.42;
+    transform: translate3d(6px, 0, 0);
+    transition:
+        opacity var(--eh-dur-4) var(--eh-ease-out),
+        transform var(--eh-dur-4) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-roadmap-item[data-lit="true"] {
+    opacity: 1;
+    transform: none;
+}
+
+[data-elora-home] .eh-roadmap-node {
+    position: absolute;
+    left: -2.75rem;
+    top: 0;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--eh-ng-800);
+    border: 1px solid var(--eh-line-strong);
+    color: var(--eh-fg-subtle);
+    transition:
+        border-color var(--eh-dur-4) var(--eh-ease-out),
+        color var(--eh-dur-4) var(--eh-ease-out),
+        box-shadow var(--eh-dur-4) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-roadmap-item[data-lit="true"][data-state="done"] .eh-roadmap-node {
+    border-color: rgb(46 155 114 / 0.6);
+    color: var(--eh-green-500);
+    box-shadow: 0 0 0 4px rgb(46 155 114 / 0.12);
+}
+
+[data-elora-home] .eh-roadmap-item[data-lit="true"][data-state="active"] .eh-roadmap-node {
+    border-color: rgb(212 175 55 / 0.65);
+    color: var(--eh-gold-400);
+    box-shadow: 0 0 0 4px rgb(212 175 55 / 0.14);
+}
+
+[data-elora-home] .eh-roadmap-item[data-lit="true"][data-state="upcoming"] .eh-roadmap-node {
+    border-color: var(--eh-line-strong);
+    color: var(--eh-fg-muted);
+}
+
+[data-elora-home] .eh-roadmap-titlerow {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+[data-elora-home] .eh-roadmap-titlerow h3 {
+    font-family: var(--eh-font-display);
+    font-size: var(--eh-text-xl);
+    color: var(--eh-fg);
+    line-height: 1.2;
+}
+
+[data-elora-home] .eh-roadmap-status {
+    font-family: var(--eh-font-mono);
+    font-size: 0.5625rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 0.1875rem 0.5rem;
+    border-radius: var(--eh-radius-pill);
+    background: var(--eh-surface-2);
+    color: var(--eh-fg-subtle);
+}
+
+[data-elora-home] .eh-roadmap-item[data-state="done"] .eh-roadmap-status {
+    background: rgb(46 155 114 / 0.14);
+    color: var(--eh-green-500);
+}
+[data-elora-home] .eh-roadmap-item[data-state="active"] .eh-roadmap-status {
+    background: rgb(212 175 55 / 0.16);
+    color: var(--eh-gold-400);
+}
+
+[data-elora-home] .eh-roadmap-body p {
+    margin-top: 0.375rem;
+    font-size: var(--eh-text-base);
+    line-height: 1.6;
+    color: var(--eh-fg-muted);
+    max-width: 46ch;
+}
+
+@media (min-width: 900px) {
+    [data-elora-home] .eh-roadmap-list { gap: 2rem; }
+}
+
+/* ==========================================================================
+   Scene 6 — Global guidance
+   ========================================================================== */
+
+[data-elora-home] .eh-global {
+    background:
+        radial-gradient(60% 45% at 20% 10%, rgb(223 240 231 / 0.9), transparent 70%);
+}
+
+[data-elora-home] .eh-global-head { max-width: 46rem; }
+
+[data-elora-home] .eh-global-grid {
+    display: grid;
+    gap: clamp(2rem, 1rem + 4vw, 3.5rem);
+    margin-top: var(--eh-space-12);
+    align-items: center;
+}
+
+[data-elora-home] .eh-global-globe-inner {
+    position: relative;
+    /* Square so the projection percentages map 1:1 onto the SVG viewBox. */
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    max-width: 34rem;
+    margin-inline: auto;
+}
+
+[data-elora-home] .eh-global-horizon {
+    position: absolute;
+    inset: 0;
+}
+
+[data-elora-home] .eh-global-markers {
+    position: absolute;
+    inset: 0;
+}
+
+[data-elora-home] .eh-global-marker {
+    position: absolute;
+    /* Centres the button on its projected coordinate. */
+    translate: -50% -50%;
+    display: grid;
+    place-items: center;
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    color: var(--eh-fg-muted);
+}
+
+/* An invisible 44px hit area around a 3px marker. The visual can stay
+   delicate; the target cannot. */
+[data-elora-home] .eh-global-marker-hit {
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+}
+
+[data-elora-home] .eh-global-marker-ring {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1.5px solid var(--eh-green-400);
+    background: rgb(30 122 88 / 0.2);
+    transition:
+        transform var(--eh-dur-2) var(--eh-ease-out),
+        background-color var(--eh-dur-2) var(--eh-ease-out),
+        border-color var(--eh-dur-2) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-global-marker[data-selected="true"] .eh-global-marker-ring {
+    transform: scale(1.45);
+    background: var(--eh-gold-500);
+    border-color: var(--eh-gold-200);
+    box-shadow: var(--eh-glow-amber);
+}
+
+[data-elora-home] .eh-global-marker-label {
+    position: absolute;
+    top: calc(100% + 6px);
+    white-space: nowrap;
+    font-family: var(--eh-font-mono);
+    font-size: 0.5625rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity var(--eh-dur-2) var(--eh-ease-out);
+    pointer-events: none;
+}
+
+[data-elora-home] .eh-global-marker[data-selected="true"] .eh-global-marker-label,
+[data-elora-home] .eh-global-marker:focus-visible .eh-global-marker-label {
+    opacity: 1;
+    color: var(--eh-fg);
+}
+
+/* ---------------------------------------------------------------- panel -- */
+
+[data-elora-home] .eh-global-panel {
+    padding: clamp(1.25rem, 1rem + 1.5vw, 1.875rem);
+    border-radius: var(--eh-radius-xl);
+    background: var(--eh-panel);
+    border: 1px solid var(--eh-line);
+    box-shadow: var(--eh-shadow-md);
+}
+
+[data-elora-home] .eh-global-panel-title {
+    margin-top: 0.5rem;
+    font-family: var(--eh-font-display);
+    font-size: var(--eh-text-2xl);
+    color: var(--eh-fg);
+}
+
+[data-elora-home] .eh-global-block { margin-top: 1.25rem; }
+
+[data-elora-home] .eh-global-block h4 {
+    font-family: var(--eh-font-mono);
+    font-size: 0.5625rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--eh-fg-subtle);
+}
+
+[data-elora-home] .eh-chiplist {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    list-style: none;
+    margin: 0.625rem 0 0;
+    padding: 0;
+}
+
+[data-elora-home] .eh-chiplist li {
+    padding: 0.3125rem 0.625rem;
+    border-radius: var(--eh-radius-pill);
+    background: rgb(30 122 88 / 0.12);
+    border: 1px solid rgb(30 122 88 / 0.28);
+    font-size: 0.75rem;
+    color: var(--eh-green-200);
+}
+
+[data-elora-home] .eh-bulletlist {
+    display: grid;
+    gap: 0.5rem;
+    list-style: none;
+    margin: 0.625rem 0 0;
+    padding: 0;
+}
+
+[data-elora-home] .eh-bulletlist li {
+    position: relative;
+    padding-left: 1rem;
+    font-size: var(--eh-text-sm);
+    line-height: 1.6;
+    color: var(--eh-fg-muted);
+}
+
+[data-elora-home] .eh-bulletlist li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.55em;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--eh-accent-soft);
+}
+
+[data-elora-home] .eh-global-row {
+    display: grid;
+    gap: 1rem;
+}
+
+[data-elora-home] .eh-global-value {
+    margin-top: 0.5rem;
+    font-size: var(--eh-text-sm);
+    line-height: 1.5;
+    color: var(--eh-fg);
+}
+
+@media (min-width: 620px) {
+    [data-elora-home] .eh-global-row { grid-template-columns: 1fr 1fr; }
+}
+
+@media (min-width: 1020px) {
+    [data-elora-home] .eh-global-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
+    }
+}
+
+/* ==========================================================================
+   Scene 7 — Live classes (broadcast treatment)
+   ========================================================================== */
+
+[data-elora-home] .eh-classes-grid {
+    display: grid;
+    gap: clamp(2rem, 1rem + 4vw, 3.5rem);
+    align-items: center;
+}
+
+[data-elora-home] .eh-broadcast {
+    border-radius: var(--eh-radius-xl);
+    border: 1px solid var(--eh-line-strong);
+    background: linear-gradient(168deg, var(--eh-panel-strong), var(--eh-panel-deep));
+    overflow: hidden;
+    box-shadow: var(--eh-shadow-lg);
+}
+
+[data-elora-home] .eh-broadcast-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.875rem 1.25rem;
+    border-bottom: 1px solid var(--eh-line);
+}
+
+[data-elora-home] .eh-broadcast-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4375rem;
+    font-family: var(--eh-font-mono);
+    font-size: 0.5625rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #FF6B6B;
+}
+
+[data-elora-home] .eh-broadcast-live .eh-live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+[data-elora-home] .eh-broadcast-off {
+    font-family: var(--eh-font-mono);
+    font-size: 0.5625rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--eh-fg-subtle);
+}
+
+[data-elora-home] .eh-broadcast-screen {
+    position: relative;
+    padding: clamp(1.5rem, 1rem + 3vw, 2.75rem);
+    min-height: 19rem;
+    display: grid;
+    align-items: center;
+    isolation: isolate;
+}
+
+[data-elora-home] .eh-broadcast-grid {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    opacity: 0.5;
+}
+
+/* Slow moving light across the stage. Transform-only and low opacity, and
+   suppressed under reduced motion by the global rule. */
+[data-elora-home] .eh-broadcast-sweep {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+        100deg,
+        transparent 35%,
+        rgb(93 191 149 / 0.10) 50%,
+        transparent 65%
+    );
+    animation: eh-sweep 9s var(--eh-ease-in-out) infinite;
+}
+
+@keyframes eh-sweep {
+    0%, 100% { transform: translate3d(-30%, 0, 0); }
+    50%      { transform: translate3d(30%, 0, 0); }
+}
+
+[data-elora-home] .eh-broadcast-content { color: var(--eh-accent-soft); }
+
+[data-elora-home] .eh-broadcast-title {
+    margin-top: 1rem;
+    font-family: var(--eh-font-display);
+    font-size: var(--eh-text-2xl);
+    color: var(--eh-fg);
+}
+
+[data-elora-home] .eh-broadcast-body {
+    margin-top: 0.625rem;
+    font-size: var(--eh-text-base);
+    line-height: 1.6;
+    color: var(--eh-fg-muted);
+    max-width: 42ch;
+}
+
+/* --- waitlist form ------------------------------------------------------- */
+
+[data-elora-home] .eh-waitlist {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+}
+
+[data-elora-home] .eh-waitlist input,
+[data-elora-home] .eh-subscribe-row input {
+    flex: 1 1 14rem;
+    min-height: 44px;
+    padding-inline: 1rem;
+    border-radius: var(--eh-radius-pill);
+    background: var(--eh-surface);
+    border: 1px solid var(--eh-line-strong);
+    color: var(--eh-fg);
+    font-size: var(--eh-text-base);
+    font-family: inherit;
+    transition: border-color var(--eh-dur-2) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-waitlist input::placeholder,
+[data-elora-home] .eh-subscribe-row input::placeholder { color: var(--eh-fg-subtle); }
+
+[data-elora-home] .eh-waitlist input:focus-visible,
+[data-elora-home] .eh-subscribe-row input:focus-visible { border-color: var(--eh-green-400); }
+
+/* Invalid state carries a border colour AND the message below, so validation
+   is never signalled by colour alone. */
+[data-elora-home] .eh-waitlist input[aria-invalid="true"],
+[data-elora-home] .eh-subscribe-row input[aria-invalid="true"] {
+    border-color: #FF8A8A;
+}
+
+[data-elora-home] .eh-waitlist button:disabled,
+[data-elora-home] .eh-subscribe-row button:disabled {
+    opacity: 0.6;
+    cursor: progress;
+}
+
+[data-elora-home] .eh-waitlist-status,
+[data-elora-home] .eh-subscribe-status {
+    margin-top: 0.625rem;
+    font-size: var(--eh-text-sm);
+    line-height: 1.5;
+    min-height: 1.2em;
+    color: var(--eh-fg-muted);
+}
+
+[data-elora-home] .eh-waitlist-status[data-status="error"],
+[data-elora-home] .eh-subscribe-status[data-status="error"] { color: #FFB3B3; }
+
+[data-elora-home] .eh-waitlist-status[data-status="success"],
+[data-elora-home] .eh-subscribe-status[data-status="success"] { color: var(--eh-green-500); }
+
+[data-elora-home] .eh-waitlist-done,
+[data-elora-home] .eh-subscribe-done {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin-top: 0.5rem;
+    font-size: var(--eh-text-sm);
+    color: var(--eh-green-500);
+}
+
+[data-elora-home] .eh-class-list {
+    display: grid;
+    gap: 1rem;
+    list-style: none;
+    margin: 1rem 0 0;
+    padding: 0;
+}
+
+[data-elora-home] .eh-class-topic {
+    font-family: var(--eh-font-display);
+    font-size: var(--eh-text-xl);
+    color: var(--eh-fg);
+}
+
+[data-elora-home] .eh-class-meta,
+[data-elora-home] .eh-class-seats {
+    margin-top: 0.25rem;
+    font-size: var(--eh-text-sm);
+    color: var(--eh-fg-muted);
+}
+
+@media (min-width: 1020px) {
+    [data-elora-home] .eh-classes-grid {
+        grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    }
+}
+
+/* ==========================================================================
+   Scene 8 — Ecosystem constellation
+   ========================================================================== */
+
+[data-elora-home] .eh-eco-head { max-width: 46rem; }
+
+[data-elora-home] .eh-constellation {
+    position: relative;
+    display: none;
+    aspect-ratio: 16 / 10;
+    width: 100%;
+    margin-top: var(--eh-space-12);
+}
+
+[data-elora-home] .eh-eco-edges {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+[data-elora-home] .eh-eco-edge {
+    stroke: rgb(174 185 212 / 0.22);
+    stroke-width: 1;
+    stroke-dasharray: 3 4;
+    transition:
+        stroke var(--eh-dur-3) var(--eh-ease-out),
+        stroke-width var(--eh-dur-3) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-eco-edge[data-lit="true"] {
+    stroke: var(--eh-green-400);
+    stroke-width: 1.6;
+}
+
+[data-elora-home] .eh-node {
+    position: absolute;
+    translate: -50% -50%;
+    display: grid;
+    justify-items: center;
+    gap: 0.5rem;
+    width: 11rem;
+    padding: 1rem 0.875rem;
+    border-radius: var(--eh-radius-lg);
+    background: var(--eh-panel);
+    border: 1px solid var(--eh-line);
+    text-align: center;
+    text-decoration: none;
+    color: var(--eh-fg);
+    transition:
+        transform var(--eh-dur-3) var(--eh-ease-out),
+        border-color var(--eh-dur-3) var(--eh-ease-out),
+        opacity var(--eh-dur-3) var(--eh-ease-out),
+        box-shadow var(--eh-dur-3) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-node[data-hub="true"] {
+    width: 12.5rem;
+    border-color: rgb(30 122 88 / 0.4);
+    background: linear-gradient(160deg, var(--eh-panel-strong), var(--eh-panel));
+    box-shadow: var(--eh-glow-blue);
+}
+
+[data-elora-home] .eh-node[data-dimmed="true"] { opacity: 0.42; }
+
+[data-elora-home] .eh-node[data-active="true"] {
+    transform: translate(-50%, -50%) scale(1.06);
+    border-color: var(--eh-green-400);
+    box-shadow: var(--eh-glow-blue);
+    z-index: var(--eh-z-raised);
+}
+
+[data-elora-home] .eh-node-icon {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border-radius: var(--eh-radius-md);
+    background: rgb(30 122 88 / 0.14);
+    color: var(--eh-green-400);
+    flex-shrink: 0;
+}
+
+[data-elora-home] .eh-node-name {
+    font-family: var(--eh-font-display);
+    font-size: 0.9375rem;
+    line-height: 1.2;
+}
+
+/* The benefit is present in the DOM at all times (so it is announced and
+   searchable) but only takes up space when the node is engaged. */
+[data-elora-home] .eh-node-benefit {
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: var(--eh-fg-muted);
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition:
+        grid-template-rows var(--eh-dur-3) var(--eh-ease-out),
+        opacity var(--eh-dur-3) var(--eh-ease-out);
+    overflow: hidden;
+}
+
+[data-elora-home] .eh-node[data-active="true"] .eh-node-benefit {
+    grid-template-rows: 1fr;
+    opacity: 1;
+}
+
+[data-elora-home] .eh-eco-caption {
+    position: absolute;
+    left: 0;
+    bottom: -1.5rem;
+    font-size: var(--eh-text-sm);
+    color: var(--eh-fg-subtle);
+}
+
+/* --- mobile list --------------------------------------------------------- */
+
+[data-elora-home] .eh-eco-list {
+    display: grid;
+    gap: 0.75rem;
+    list-style: none;
+    margin: var(--eh-space-12) 0 0;
+    padding: 0;
+}
+
+[data-elora-home] .eh-eco-listitem {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 1rem;
+    text-decoration: none;
+    color: var(--eh-fg);
+}
+
+[data-elora-home] .eh-eco-listitem b {
+    display: block;
+    font-family: var(--eh-font-display);
+    font-weight: 400;
+    font-size: 1rem;
+}
+
+[data-elora-home] .eh-eco-listitem em {
+    display: block;
+    margin-top: 0.125rem;
+    font-style: normal;
+    font-size: var(--eh-text-sm);
+    line-height: 1.5;
+    color: var(--eh-fg-muted);
+}
+
+[data-elora-home] .eh-eco-listitem > svg {
+    margin-left: auto;
+    flex-shrink: 0;
+    color: var(--eh-fg-subtle);
+}
+
+/* The constellation needs room to be legible; below that it is replaced
+   wholesale by the list, not shrunk. */
+@media (min-width: 980px) {
+    [data-elora-home] .eh-constellation { display: block; }
+    [data-elora-home] .eh-eco-list { display: none; }
+}
+
+/* ==========================================================================
+   Scene 9 — Trust
+   ========================================================================== */
+
+[data-elora-home] .eh-trust {
+    position: relative;
+    background: var(--eh-bg-tint);
+    border-block: 1px solid var(--eh-line);
+}
+
+[data-elora-home] .eh-trust-pattern {
+    position: absolute;
+    inset: 0;
+    opacity: 0.6;
+    pointer-events: none;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 50%, #000 20%, transparent 75%);
+}
+
+[data-elora-home] .eh-trust-head { max-width: 44rem; }
+
+[data-elora-home] .eh-trust-grid {
+    display: grid;
+    gap: 1.75rem;
+    margin-top: var(--eh-space-12);
+}
+
+[data-elora-home] .eh-trust-icon {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--eh-radius-md);
+    background: rgb(46 155 114 / 0.12);
+    color: var(--eh-green-500);
+}
+
+[data-elora-home] .eh-trust-pillar h3 {
+    margin-top: 0.875rem;
+    font-family: var(--eh-font-display);
+    font-size: var(--eh-text-xl);
+    color: var(--eh-fg);
+}
+
+[data-elora-home] .eh-trust-pillar p {
+    margin-top: 0.5rem;
+    font-size: var(--eh-text-base);
+    line-height: 1.65;
+    color: var(--eh-fg-muted);
+    max-width: 42ch;
+}
+
+[data-elora-home] .eh-trust-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: var(--eh-space-12);
+}
+
+[data-elora-home] .eh-trust-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 44px;
+    padding-inline: 1rem;
+    border-radius: var(--eh-radius-pill);
+    border: 1px solid var(--eh-line-strong);
+    font-size: var(--eh-text-sm);
+    color: var(--eh-fg-muted);
+    text-decoration: none;
+    transition:
+        color var(--eh-dur-2) var(--eh-ease-out),
+        border-color var(--eh-dur-2) var(--eh-ease-out);
+}
+
+@media (hover: hover) {
+    [data-elora-home] .eh-trust-link:hover {
+        color: var(--eh-fg);
+        border-color: var(--eh-green-400);
+    }
+}
+
+@media (min-width: 760px) {
+    [data-elora-home] .eh-trust-grid { grid-template-columns: repeat(2, 1fr); gap: 2.5rem; }
+}
+
+/* ==========================================================================
+   Scene 10 — Voices
+   ========================================================================== */
+
+[data-elora-home] .eh-voices-head { max-width: 44rem; }
+
+[data-elora-home] .eh-metrics {
+    display: grid;
+    gap: 1.5rem;
+    margin: var(--eh-space-12) 0 0;
+}
+
+[data-elora-home] .eh-metric {
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--eh-line);
+}
+
+[data-elora-home] .eh-metric-value {
+    font-family: var(--eh-font-display);
+    font-size: var(--eh-text-3xl);
+    color: var(--eh-fg);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+[data-elora-home] .eh-metric dd { margin: 0.5rem 0 0; }
+
+[data-elora-home] .eh-metric-label {
+    display: block;
+    font-family: var(--eh-font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--eh-accent-soft);
+}
+
+[data-elora-home] .eh-metric-caption {
+    display: block;
+    margin-top: 0.375rem;
+    font-size: var(--eh-text-sm);
+    line-height: 1.55;
+    color: var(--eh-fg-muted);
+}
+
+[data-elora-home] .eh-testimonials {
+    display: grid;
+    gap: 1.25rem;
+    list-style: none;
+    margin: var(--eh-space-12) 0 0;
+    padding: 0;
+}
+
+[data-elora-home] .eh-testimonial {
+    padding: 1.5rem;
+    border-radius: var(--eh-radius-lg);
+    background: var(--eh-surface);
+    border: 1px solid var(--eh-line);
+}
+
+[data-elora-home] .eh-testimonial blockquote p {
+    font-family: var(--eh-font-display);
+    font-size: var(--eh-text-xl);
+    line-height: 1.4;
+    color: var(--eh-fg);
+}
+
+[data-elora-home] .eh-testimonial-foot {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--eh-line);
+}
+
+[data-elora-home] .eh-testimonial-portrait {
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+[data-elora-home] .eh-testimonial-foot b {
+    display: block;
+    font-weight: 550;
+    color: var(--eh-fg);
+}
+
+[data-elora-home] .eh-testimonial-foot em {
+    display: block;
+    font-style: normal;
+    font-size: var(--eh-text-sm);
+    color: var(--eh-fg-muted);
+}
+
+[data-elora-home] .eh-testimonial-feature {
+    display: block;
+    margin-top: 0.25rem;
+    font-family: var(--eh-font-mono);
+    font-size: 0.5625rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--eh-fg-subtle);
+}
+
+/* Development-only placeholder. Deliberately looks unfinished — a dashed
+   amber box nobody could mistake for finished design. */
+[data-elora-home] .eh-placeholder {
+    margin-top: var(--eh-space-12);
+    padding: 1.5rem;
+    border: 1px dashed rgb(212 175 55 / 0.55);
+    border-radius: var(--eh-radius-lg);
+    background: rgb(212 175 55 / 0.05);
+}
+
+[data-elora-home] .eh-placeholder p {
+    margin-top: 0.75rem;
+    font-size: var(--eh-text-sm);
+    line-height: 1.6;
+    color: var(--eh-fg-muted);
+    max-width: 60ch;
+}
+
+[data-elora-home] .eh-placeholder code {
+    font-family: var(--eh-font-mono);
+    font-size: 0.8em;
+    color: var(--eh-gold-200);
+}
+
+@media (min-width: 760px) {
+    [data-elora-home] .eh-metrics { grid-template-columns: repeat(3, 1fr); gap: 2rem; }
+    [data-elora-home] .eh-testimonials { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ==========================================================================
+   Scene 11 — Pricing
+   ========================================================================== */
+
+[data-elora-home] .eh-pricing {
+    background: radial-gradient(70% 45% at 50% 0%, rgb(223 240 231 / 0.8), transparent 72%);
+}
+
+[data-elora-home] .eh-pricing-head { max-width: 44rem; }
+
+[data-elora-home] .eh-plans {
+    display: grid;
+    gap: 1rem;
+    margin-top: var(--eh-space-12);
+    align-items: start;
+}
+
+[data-elora-home] .eh-plan {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: 1.75rem 1.5rem;
+    border-radius: var(--eh-radius-xl);
+    background: var(--eh-panel);
+    border: 1px solid var(--eh-line);
+    transition:
+        border-color var(--eh-dur-2) var(--eh-ease-out),
+        transform var(--eh-dur-2) var(--eh-ease-out);
+}
+
+/* Emphasis for the recommended plan: elevation, border, label. No countdown,
+   no fake scarcity, no struck-through price. */
+[data-elora-home] .eh-plan[data-recommended="true"] {
+    border-color: rgb(30 122 88 / 0.5);
+    background: linear-gradient(170deg, var(--eh-panel-strong), var(--eh-panel));
+    box-shadow: var(--eh-shadow-lg), var(--eh-glow-blue);
+}
+
+[data-elora-home] .eh-plan-flag {
+    position: absolute;
+    top: -0.6875rem;
+    left: 1.5rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--eh-radius-pill);
+    background: linear-gradient(96deg, var(--eh-green-600), var(--eh-ng-600));
+    color: #fff;
+    font-family: var(--eh-font-mono);
+    font-size: 0.5625rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+[data-elora-home] .eh-plan-name {
+    font-family: var(--eh-font-display);
+    font-size: var(--eh-text-xl);
+    color: var(--eh-fg);
+}
+
+[data-elora-home] .eh-plan-price {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+[data-elora-home] .eh-plan-amount {
+    font-family: var(--eh-font-display);
+    font-size: 2.75rem;
+    line-height: 1;
+    color: var(--eh-fg);
+}
+
+[data-elora-home] .eh-plan-period {
+    font-family: var(--eh-font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--eh-fg-subtle);
+}
+
+[data-elora-home] .eh-plan-audience {
+    margin-top: 0.875rem;
+    font-size: var(--eh-text-sm);
+    line-height: 1.6;
+    color: var(--eh-fg-muted);
+}
+
+[data-elora-home] .eh-plan-tokens {
+    margin-top: 1rem;
+    padding: 0.625rem 0.875rem;
+    border-radius: var(--eh-radius-md);
+    background: var(--eh-surface);
+    font-size: var(--eh-text-sm);
+    color: var(--eh-fg-muted);
+}
+
+[data-elora-home] .eh-plan-tokens b {
+    font-family: var(--eh-font-mono);
+    color: var(--eh-fg);
+}
+
+[data-elora-home] .eh-plan-features {
+    display: grid;
+    gap: 0.625rem;
+    list-style: none;
+    margin: 1.25rem 0 0;
+    padding: 0;
+    flex: 1;
+}
+
+[data-elora-home] .eh-plan-features li {
+    display: flex;
+    align-items: start;
+    gap: 0.5rem;
+    font-size: var(--eh-text-sm);
+    line-height: 1.55;
+    color: var(--eh-fg-muted);
+}
+
+[data-elora-home] .eh-plan-features svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: var(--eh-green-500);
+}
+
+[data-elora-home] .eh-plan-upgrade {
+    margin-top: 1rem;
+    font-family: var(--eh-font-mono);
+    font-size: 0.5625rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--eh-fg-subtle);
+}
+
+[data-elora-home] .eh-plan-cta { margin-top: 1.25rem; width: 100%; }
+
+/* --- tokens + top-up ------------------------------------------------------ */
+
+[data-elora-home] .eh-tokens {
+    display: grid;
+    gap: 1rem;
+    margin-top: var(--eh-space-12);
+}
+
+[data-elora-home] .eh-tokens > div {
+    padding: 1.5rem;
+    border-radius: var(--eh-radius-lg);
+    background: var(--eh-surface);
+    border: 1px solid var(--eh-line);
+}
+
+[data-elora-home] .eh-tokenspend {
+    display: grid;
+    gap: 0.5rem;
+    list-style: none;
+    margin: 1rem 0 0;
+    padding: 0;
+}
+
+[data-elora-home] .eh-tokenspend li {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: 0.4375rem;
+    border-bottom: 1px solid var(--eh-line);
+    font-size: var(--eh-text-sm);
+    color: var(--eh-fg-muted);
+}
+
+[data-elora-home] .eh-tokenspend b {
+    font-family: var(--eh-font-mono);
+    font-size: 0.75rem;
+    color: var(--eh-fg);
+    white-space: nowrap;
+}
+
+[data-elora-home] .eh-topup p {
+    margin-top: 1rem;
+    font-size: var(--eh-text-sm);
+    line-height: 1.65;
+    color: var(--eh-fg-muted);
+}
+
+[data-elora-home] .eh-topup b { color: var(--eh-fg); }
+
+[data-elora-home] .eh-pricing-foot {
+    display: grid;
+    gap: 1.5rem;
+    margin-top: var(--eh-space-12);
+    justify-items: start;
+}
+
+[data-elora-home] .eh-pricing-terms { display: grid; gap: 0.625rem; }
+
+@media (min-width: 700px) {
+    [data-elora-home] .eh-tokens { grid-template-columns: 1.2fr 0.8fr; }
+}
+
+@media (min-width: 980px) {
+    [data-elora-home] .eh-plans { grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
+}
+
+/* ==========================================================================
+   Final scene
+   ========================================================================== */
+
+[data-elora-home] .eh-final {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+}
+
+[data-elora-home] .eh-final .eh-aurora { z-index: -1; }
+
+[data-elora-home] .eh-final-grid {
+    display: grid;
+    gap: clamp(2.5rem, 1rem + 5vw, 4rem);
+    align-items: center;
+}
+
+[data-elora-home] .eh-final-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2.25rem;
+}
+
+[data-elora-home] .eh-final-stage {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    width: 100%;
+    max-width: 30rem;
+    margin-inline: auto;
+}
+
+[data-elora-home] .eh-final-portfolio {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+}
+
+/* The gathered stack: squared up and finished, in deliberate contrast to the
+   hero's loose, floating composition. */
+[data-elora-home] .eh-final-doc {
+    position: absolute;
+    width: 54%;
+    padding: 0.75rem 0.875rem;
+    display: grid;
+}
+
+[data-elora-home] .eh-final-doc span {
+    font-family: var(--eh-font-mono);
+    font-size: 0.5625rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #556B61;
+}
+
+[data-elora-home] .eh-final-doc[data-i="0"] { transform: translate3d(-14%, -26%, 0) rotate(-4deg); }
+[data-elora-home] .eh-final-doc[data-i="1"] { transform: translate3d(12%,  -12%, 0) rotate(-1.5deg); }
+[data-elora-home] .eh-final-doc[data-i="2"] { transform: translate3d(-10%,  4%, 0) rotate(1.5deg); }
+[data-elora-home] .eh-final-doc[data-i="3"] { transform: translate3d(14%,  18%, 0) rotate(4deg); }
+
+[data-elora-home] .eh-final-passport {
+    position: relative;
+    z-index: var(--eh-z-raised);
+    transform: translateY(14%);
+    filter: drop-shadow(0 30px 50px rgb(2 5 14 / 0.8));
+}
+
+html[data-eh-anim="ready"] [data-elora-home] .eh-final-doc,
+html[data-eh-anim="ready"] [data-elora-home] .eh-final-passport {
+    opacity: 0;
+}
+
+@media (min-width: 900px) {
+    [data-elora-home] .eh-final-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+    }
+}
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+
+/* The other dark scene. `.eh-dark` is applied in the component. */
+[data-elora-home] .eh-footer {
+    position: relative;
+    padding-block: var(--eh-scene-y) 2.5rem;
+    background: var(--eh-ng-900);
+    border-top: 1px solid var(--eh-line);
+}
+
+[data-elora-home] .eh-footer-top {
+    display: grid;
+    gap: clamp(2.5rem, 1rem + 5vw, 4rem);
+}
+
+[data-elora-home] .eh-footer-tagline {
+    margin-top: 1.25rem;
+    font-size: var(--eh-text-base);
+    line-height: 1.65;
+    color: var(--eh-fg-muted);
+    max-width: 34ch;
+}
+
+[data-elora-home] .eh-subscribe { margin-top: 2rem; }
+
+[data-elora-home] .eh-subscribe-body {
+    margin-top: 0.5rem;
+    font-size: var(--eh-text-sm);
+    color: var(--eh-fg-muted);
+    max-width: 36ch;
+}
+
+[data-elora-home] .eh-subscribe-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.875rem;
+    max-width: 26rem;
+}
+
+[data-elora-home] .eh-footer-cols {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem 1.5rem;
+}
+
+[data-elora-home] .eh-footer-cols h3 {
+    font-family: var(--eh-font-mono);
+    font-size: 0.5625rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--eh-fg-subtle);
+}
+
+[data-elora-home] .eh-footer-cols ul {
+    display: grid;
+    gap: 0.125rem;
+    list-style: none;
+    margin: 0.875rem 0 0;
+    padding: 0;
+}
+
+[data-elora-home] .eh-footer-cols a {
+    display: inline-flex;
+    align-items: center;
+    /* 44px rows: footer links are a common fat-finger failure. */
+    min-height: 36px;
+    font-size: var(--eh-text-sm);
+    color: var(--eh-fg-muted);
+    text-decoration: none;
+    transition: color var(--eh-dur-2) var(--eh-ease-out);
+}
+
+@media (hover: hover) {
+    [data-elora-home] .eh-footer-cols a:hover { color: var(--eh-fg); }
+}
+
+[data-elora-home] .eh-footer-rule { margin-block: var(--eh-space-12) 2rem; }
+
+/* Body contrast, not fine print — this is the most consequential sentence on
+   the page and it is set to be read. */
+[data-elora-home] .eh-footer-disclaimer {
+    font-size: var(--eh-text-sm);
+    line-height: 1.7;
+    color: var(--eh-fg-muted);
+    max-width: 78ch;
+}
+
+[data-elora-home] .eh-footer-base {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 2rem;
+    font-size: var(--eh-text-sm);
+    color: var(--eh-fg-subtle);
+}
+
+[data-elora-home] .eh-footer-promise {
+    font-family: var(--eh-font-display);
+    color: var(--eh-fg-muted);
+}
+
+@media (min-width: 900px) {
+    [data-elora-home] .eh-footer-top {
+        grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr);
+    }
+    [data-elora-home] .eh-footer-cols {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+}
+
+/* ==========================================================================
+   Three.js globe layer (hero enhancement)
+   --------------------------------------------------------------------------
+   Sits exactly over the SVG horizon and crossfades with it. See
+   components/GlobeLayer.tsx for the capability gate that decides whether this
+   ever mounts at all.
+   ========================================================================== */
+
+[data-elora-home] .eh-globe-layer {
+    position: absolute;
+    right: -18%;
+    bottom: -22%;
+    width: 118%;
+    aspect-ratio: 1 / 1;
+    opacity: 0;
+    transition: opacity 900ms var(--eh-ease-out);
+    pointer-events: none;
+}
+
+[data-elora-home] .eh-globe-layer[data-active="true"] { opacity: 1; }
+
+/* Crossfade: once the 3D globe is live, retire the SVG so the two don't
+   double-expose. `:has()` keeps this in CSS rather than lifting the globe's
+   readiness into React state purely to toggle a class.
+
+   Degradation is safe: in a browser without `:has()` the SVG simply stays
+   visible beneath the globe. Slightly denser, never broken. */
+[data-elora-home] .eh-hero-layer--far:has(.eh-globe-layer[data-active="true"]) > svg {
+    opacity: 0;
+    transition: opacity 700ms var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-hero-layer--far > svg {
+    transition: opacity 700ms var(--eh-ease-out);
+}
+
+/* --- destination selector -------------------------------------------------
+   The real, keyboard-complete control for Scene 6. The globe markers mirror it
+   for pointer users but can't replace it: orthographic projection hides the far
+   side of the sphere, so any destination there has no marker to click. */
+
+[data-elora-home] .eh-global-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    justify-content: center;
+}
+
+[data-elora-home] .eh-global-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding-inline: 0.875rem;
+    border-radius: var(--eh-radius-pill);
+    background: var(--eh-surface);
+    border: 1px solid var(--eh-line);
+    color: var(--eh-fg-muted);
+    font-size: var(--eh-text-sm);
+    font-family: inherit;
+    cursor: pointer;
+    transition:
+        color var(--eh-dur-2) var(--eh-ease-out),
+        border-color var(--eh-dur-2) var(--eh-ease-out),
+        background-color var(--eh-dur-2) var(--eh-ease-out);
+}
+
+/* Selection is carried by the country code chip inverting AND by
+   aria-pressed — not by border colour alone. */
+[data-elora-home] .eh-global-tab[data-selected="true"] {
+    color: var(--eh-fg);
+    border-color: rgb(212 175 55 / 0.55);
+    background: rgb(212 175 55 / 0.10);
+}
+
+[data-elora-home] .eh-global-tab-code {
+    display: inline-grid;
+    place-items: center;
+    min-width: 26px;
+    padding: 2px 5px;
+    border-radius: var(--eh-radius-sm);
+    background: var(--eh-surface-2);
+    font-family: var(--eh-font-mono);
+    font-size: 0.5625rem;
+    letter-spacing: 0.1em;
+    color: var(--eh-fg-subtle);
+    transition:
+        background-color var(--eh-dur-2) var(--eh-ease-out),
+        color var(--eh-dur-2) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-global-tab[data-selected="true"] .eh-global-tab-code {
+    background: var(--eh-gold-500);
+    color: #1B1502;
+}
+
+@media (hover: hover) {
+    [data-elora-home] .eh-global-tab:hover {
+        color: var(--eh-fg);
+        border-color: var(--eh-line-strong);
+    }
+}
+
+/* ==========================================================================
+   Story photography
+   --------------------------------------------------------------------------
+   Five images carry the arc: preparing (hero) → learning together (classes) →
+   arriving (destinations) → settling and living (final).
+
+   Every one of them sits under a treatment rather than raw, so the page reads
+   as one designed surface instead of a slideshow with UI on top.
+   ========================================================================== */
+
+/* --- Scene 7: the classroom behind the broadcast panel ------------------- */
+
+[data-elora-home] .eh-broadcast-photo {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Pushed well back: the waitlist copy on top has to stay at full contrast,
+       so the photograph is atmosphere, not content. */
+    opacity: 0.3;
+    filter: saturate(0.7);
+}
+
+/* The wash that guarantees the copy's contrast over the photograph. */
+[data-elora-home] .eh-broadcast-screen::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(
+        105deg,
+        rgb(8 32 26 / 0.96) 0%,
+        rgb(8 32 26 / 0.88) 45%,
+        rgb(18 58 48 / 0.72) 100%
+    );
+}
+
+/* --- Scene 6: the arrival photograph ------------------------------------ */
+
+[data-elora-home] .eh-global-photo {
+    position: relative;
+    margin: 0;
+    border-radius: var(--eh-radius-xl);
+    overflow: hidden;
+    box-shadow: var(--eh-shadow-lg);
+    /* Fixed ratio so the box is reserved before the image decodes. */
+    aspect-ratio: 4 / 5;
+    max-height: 26rem;
+}
+
+[data-elora-home] .eh-global-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 38%;
+}
+
+[data-elora-home] .eh-global-photo figcaption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 2.5rem 1rem 0.875rem;
+    background: linear-gradient(to top, rgb(8 32 26 / 0.85), transparent);
+    color: #EAF4EF;
+    font-family: var(--eh-font-mono);
+    font-size: 0.5625rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+/* A gold hairline, echoing the passport foil. */
+[data-elora-home] .eh-global-photo::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 1px solid rgb(212 175 55 / 0.45);
+    pointer-events: none;
+}
+
+/* --- Final scene: the two closing photographs --------------------------- */
+
+[data-elora-home] .eh-final-photo {
+    position: absolute;
+    margin: 0;
+    width: 38%;
+    border-radius: var(--eh-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--eh-shadow-doc);
+    border: 1px solid rgb(212 175 55 / 0.4);
+}
+
+[data-elora-home] .eh-final-photo img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    aspect-ratio: 3 / 4;
+}
+
+[data-elora-home] .eh-final-photo figcaption {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 1.75rem 0.625rem 0.5rem;
+    background: linear-gradient(to top, rgb(8 32 26 / 0.85), transparent);
+    color: #EAF4EF;
+    font-family: var(--eh-font-mono);
+    font-size: 0.5rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+/* Placed so the passport stays the focal point and the photographs frame it. */
+[data-elora-home] .eh-final-photo[data-i="0"] {
+    left: -2%;
+    top: 4%;
+    transform: rotate(-4deg);
+    z-index: 1;
+}
+
+[data-elora-home] .eh-final-photo[data-i="1"] {
+    right: -3%;
+    bottom: 2%;
+    transform: rotate(4deg);
+    z-index: 1;
+}
+
+html[data-eh-anim="ready"] [data-elora-home] .eh-final-photo { opacity: 0; }
+
+@media (max-width: 640px) {
+    /* Two rotated photographs plus a passport is too much for a phone-width
+       composition; the second one steps out rather than being shrunk. */
+    [data-elora-home] .eh-final-photo[data-i="1"] { display: none; }
+    [data-elora-home] .eh-final-photo[data-i="0"] { width: 34%; }
+}
+
+@media (min-width: 1020px) {
+    /* On desktop the photograph sits under the globe, in the same column. */
+    [data-elora-home] .eh-global-photo { margin-top: 1.5rem; }
+}
+
+/* ==========================================================================
+   Small-screen corrections
+   --------------------------------------------------------------------------
+   The desktop compositions are built from absolutely-positioned layers inside
+   fixed-ratio boxes. That is right on a wide screen and wrong on a phone: below
+   ~760px those layers overlap into an unreadable pile.
+
+   So rather than scaling the desktop composition down, these rules take it
+   apart and re-flow it as an ordinary vertical stack. Same elements, same
+   meaning, a layout that actually fits.
+   ========================================================================== */
+
+@media (max-width: 760px) {
+    /* --------------------------------------------------------------- hero -- */
+
+    /* Release the square box and the 3D context; the stage becomes a normal
+       column with real gaps instead of a canvas of overlapping absolutes. */
+    [data-elora-home] .eh-hero-stage {
+        aspect-ratio: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.25rem;
+        perspective: none;
+        max-width: none;
+        margin-top: 2.5rem;
+    }
+
+    [data-elora-home] .eh-hero-layer {
+        position: static;
+        inset: auto;
+        /* The parallax transforms are meaningless without a pointer and would
+           otherwise offset these back out of the flow. */
+        transform: none;
+        width: 100%;
+    }
+
+    /* The fanned document stack is decorative and, at this width, illegible.
+       It steps out rather than being shrunk into noise. */
+    [data-elora-home] .eh-hero-layer--mid { display: none; }
+
+    [data-elora-home] .eh-hero-passport {
+        position: static;
+        width: min(52%, 200px);
+        margin-inline: auto;
+    }
+
+    [data-elora-home] .eh-hero-readiness {
+        position: static;
+        width: auto;
+    }
+
+    [data-elora-home] .eh-hero-signals {
+        position: static;
+        width: 100%;
+        max-width: 22rem;
+        top: auto;
+        left: auto;
+    }
+
+    /* There is room for the status word again once the list is full width. */
+    [data-elora-home] .eh-hero-signal-state { display: inline; }
+    [data-elora-home] .eh-hero-signal::after { content: none; }
+
+    [data-elora-home] .eh-hero-sample {
+        position: static;
+        text-align: center;
+    }
+
+    /* Full-width CTAs: two side-by-side pills wrap awkwardly at this width and
+       leave a stranded half-row. */
+    [data-elora-home] .eh-hero-ctas { flex-direction: column; align-items: stretch; }
+    [data-elora-home] .eh-hero-ctas .eh-btn { width: 100%; }
+
+    /* The hero no longer needs to fill the viewport once it is a stack — a
+       forced 100svh just pushes the CTAs below the fold. */
+    [data-elora-home] .eh-hero {
+        min-height: 0;
+        padding-block: 7rem 3rem;
+    }
+
+    [data-elora-home] .eh-hero-cue { display: none; }
+
+    /* The backdrop is a landscape photograph (979×653) in a tall portrait
+       frame, so `cover` crops it to a narrow vertical slice — by default the
+       middle, which lands on the subject's shoulder and reads as a blur.
+       Biasing upward keeps the reading room itself in frame, which is the part
+       that carries the meaning. */
+    [data-elora-home] .eh-hero-media-img,
+    [data-elora-home] .eh-hero-media-video {
+        object-position: 50% 22%;
+    }
+
+    /* --------------------------------------------------- document intelligence */
+
+    /* The fan spreads each document by 62% of its own width per step, which
+       overflows hard on a narrow screen. Two of the six already drop out; this
+       tightens what remains so the stack reads as a stack. */
+    [data-elora-home] .eh-doc {
+        width: 68%;
+        min-height: 52%;
+        transform:
+            translate(-50%, -50%)
+            translateX(calc(var(--eh-i) * var(--eh-fan) * 26%))
+            translateY(calc(var(--eh-i) * var(--eh-fan) * -3%))
+            rotate(calc(var(--eh-i) * var(--eh-fan) * 4deg));
+    }
+
+    [data-elora-home] .eh-docs-stack { aspect-ratio: 4 / 3.6; }
+
+    /* ---------------------------------------------------------- interview -- */
+
+    /* 40 bars at 3px + 3px gap needs 240px before padding; below that the
+       waveform clips. Thinner bars and a tighter gap keep it whole. */
+    [data-elora-home] .eh-wave { gap: 2px; height: 68px; }
+    [data-elora-home] .eh-wave span { width: 2px; }
+
+    [data-elora-home] .eh-console-actions { flex-direction: column; align-items: stretch; }
+    [data-elora-home] .eh-console-actions > * { width: 100%; }
+
+    /* ------------------------------------------------------------ roadmap -- */
+
+    /* The status pill on its own line rather than crushed against a wrapping
+       title. */
+    [data-elora-home] .eh-roadmap-titlerow { gap: 0.375rem; }
+    [data-elora-home] .eh-roadmap-track { padding-left: 2.25rem; }
+    [data-elora-home] .eh-roadmap-node { left: -2.25rem; width: 28px; height: 28px; }
+
+    /* ------------------------------------------------------------- global -- */
+
+    [data-elora-home] .eh-global-photo { aspect-ratio: 3 / 2; max-height: 15rem; }
+    [data-elora-home] .eh-global-tabs { justify-content: flex-start; }
+
+    /* -------------------------------------------------------------- final -- */
+
+    [data-elora-home] .eh-final-ctas { flex-direction: column; align-items: stretch; }
+    [data-elora-home] .eh-final-ctas .eh-btn { width: 100%; }
+    [data-elora-home] .eh-final-stage { max-width: 20rem; }
+
+    /* ------------------------------------------------------------- footer -- */
+
+    /* Five columns at two-up leaves a single orphan; one column reads better
+       than a ragged grid. */
+    [data-elora-home] .eh-footer-cols { grid-template-columns: 1fr; gap: 1.5rem; }
+    [data-elora-home] .eh-subscribe-row { flex-direction: column; align-items: stretch; }
+    [data-elora-home] .eh-subscribe-row .eh-btn { width: 100%; }
+
+    /* ------------------------------------------------------------ classes -- */
+
+    [data-elora-home] .eh-waitlist { flex-direction: column; align-items: stretch; }
+    [data-elora-home] .eh-waitlist .eh-btn { width: 100%; }
+
+    /* Both email fields carry `flex: 1 1 14rem` for the desktop row layout.
+       Once the container becomes a COLUMN, flex-basis sizes the cross axis —
+       height — and the field inflates to a 224px-tall blob. Resetting flex
+       hands sizing back to `min-height`. */
+    [data-elora-home] .eh-waitlist input,
+    [data-elora-home] .eh-subscribe-row input {
+        flex: 0 0 auto;
+        width: 100%;
+    }
+    [data-elora-home] .eh-broadcast-screen { min-height: 0; }
+}
+
+/* Very small phones (≤380px): the last places where two things still share a
+   row and neither gets enough of it. */
+@media (max-width: 380px) {
+    [data-elora-home] {
+        /* A slightly tighter gutter buys back real reading width. */
+        --eh-gutter: 1.125rem;
+    }
+
+    [data-elora-home] .eh-journey-rail { gap: 0.75rem; }
+    [data-elora-home] .eh-journey-rail li { font-size: 0.5625rem; }
+    [data-elora-home] .eh-hero-signal { font-size: 0.6875rem; }
+    [data-elora-home] .eh-plan { padding: 1.5rem 1.125rem; }
+    [data-elora-home] .eh-global-tab { font-size: 0.75rem; padding-inline: 0.625rem; }
+    [data-elora-home] .eh-tokenspend li { font-size: 0.75rem; }
+}
+
+/* ==========================================================================
+   "Who is this for" — expanding photographic panels
+   --------------------------------------------------------------------------
+   Desktop: four panels in a row; the selected one takes most of the width and
+   opens its copy, the rest narrow to a spine with a vertical title. The width
+   change is a `flex` transition, so it runs on the compositor and the only
+   JavaScript involved is which id is selected.
+
+   Below 900px the accordion is abandoned entirely — see the media query at the
+   bottom. Four collapsed slivers on a phone is a puzzle, not a layout.
+   ========================================================================== */
+
+[data-elora-home] .eh-aud-head { max-width: 46rem; }
+
+[data-elora-home] .eh-aud-rail {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: var(--eh-space-12);
+    /* Fixed height so the panels can change width without the section's height
+       moving — no reflow of anything below as you move across them. */
+    height: clamp(24rem, 20rem + 14vw, 32rem);
+}
+
+[data-elora-home] .eh-aud-panel {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    /* The whole panel is a button: reset the UA chrome, keep the semantics. */
+    appearance: none;
+    border: 1px solid var(--eh-line);
+    background: var(--eh-ng-900);
+    padding: 0;
+    margin: 0;
+    border-radius: var(--eh-radius-xl);
+    overflow: hidden;
+    cursor: pointer;
+    text-align: left;
+    color: #EAF4EF;
+    isolation: isolate;
+    transition:
+        flex-grow var(--eh-dur-5) var(--eh-ease-entrance),
+        border-color var(--eh-dur-3) var(--eh-ease-out),
+        box-shadow var(--eh-dur-3) var(--eh-ease-out);
+}
+
+/* The open panel takes roughly half the row; the three closed ones share the
+   rest. `flex-grow` rather than width so the row always fills exactly. */
+[data-elora-home] .eh-aud-panel[data-active="true"] {
+    flex-grow: 4.2;
+    border-color: rgb(212 175 55 / 0.5);
+    box-shadow: var(--eh-shadow-lg);
+}
+
+[data-elora-home] .eh-aud-photo {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Closed panels sit back; the open one comes forward and settles to its
+       natural framing. */
+    transform: scale(1.08);
+    filter: saturate(0.75);
+    transition:
+        transform var(--eh-dur-6) var(--eh-ease-out),
+        filter var(--eh-dur-5) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-aud-panel[data-active="true"] .eh-aud-photo {
+    transform: scale(1);
+    filter: saturate(0.95);
+}
+
+/* Closed: a heavy navy-green wash so the spine title reads and the row looks
+   like one object. Open: a directional gradient that clears the top-right of
+   the photograph and protects the copy at the bottom-left. */
+[data-elora-home] .eh-aud-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(180deg, rgb(8 32 26 / 0.72), rgb(5 19 15 / 0.88));
+    transition: background var(--eh-dur-5) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-aud-panel[data-active="true"] .eh-aud-scrim {
+    background: linear-gradient(
+        160deg,
+        rgb(5 19 15 / 0.15) 0%,
+        rgb(6 26 20 / 0.62) 45%,
+        rgb(5 19 15 / 0.94) 100%
+    );
+}
+
+/* --------------------------------------------------------------- spine --- */
+
+[data-elora-home] .eh-aud-spine {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 0.75rem;
+    opacity: 1;
+    transition: opacity var(--eh-dur-3) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-aud-panel[data-active="true"] .eh-aud-spine {
+    opacity: 0;
+    pointer-events: none;
+}
+
+[data-elora-home] .eh-aud-index {
+    font-family: var(--eh-font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.2em;
+    color: var(--eh-gold-300);
+}
+
+/* Vertical title, reading bottom-to-top like a book spine. */
+[data-elora-home] .eh-aud-spine-title {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-family: var(--eh-font-display);
+    font-size: 1.125rem;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    color: #EAF4EF;
+}
+
+/* -------------------------------------------------------------- content -- */
+
+[data-elora-home] .eh-aud-content {
+    position: absolute;
+    inset: auto 0 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: clamp(1.25rem, 1rem + 1.2vw, 2rem);
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+    transition:
+        opacity var(--eh-dur-4) var(--eh-ease-out),
+        transform var(--eh-dur-4) var(--eh-ease-entrance);
+    pointer-events: none;
+}
+
+[data-elora-home] .eh-aud-panel[data-active="true"] .eh-aud-content {
+    opacity: 1;
+    transform: none;
+    /* Delayed so the panel has visibly opened before the words arrive. */
+    transition-delay: 120ms;
+}
+
+[data-elora-home] .eh-aud-index-open {
+    font-family: var(--eh-font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.22em;
+    color: var(--eh-gold-300);
+}
+
+[data-elora-home] .eh-aud-title {
+    font-family: var(--eh-font-display);
+    font-size: var(--eh-text-2xl);
+    line-height: 1.1;
+    color: #FFFFFF;
+}
+
+[data-elora-home] .eh-aud-tagline {
+    font-size: var(--eh-text-lg);
+    line-height: 1.35;
+    color: var(--eh-gold-200);
+}
+
+[data-elora-home] .eh-aud-body {
+    font-size: var(--eh-text-sm);
+    line-height: 1.65;
+    color: #C6D9CF;
+    max-width: 46ch;
+}
+
+/* ------------------------------------------------------------ responsive -- */
+
+@media (max-width: 899px) {
+    /* No accordion. Every panel is a full card, always open — the interaction
+       has nothing useful to do at this width and the copy matters more. */
+    [data-elora-home] .eh-aud-rail {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        height: auto;
+    }
+
+    [data-elora-home] .eh-aud-panel {
+        flex: none;
+        min-height: 22rem;
+        cursor: default;
+    }
+
+    [data-elora-home] .eh-aud-panel,
+    [data-elora-home] .eh-aud-panel[data-active="true"] {
+        flex-grow: 0;
+        border-color: rgb(212 175 55 / 0.35);
+    }
+
+    [data-elora-home] .eh-aud-spine { display: none; }
+
+    [data-elora-home] .eh-aud-photo { transform: scale(1); filter: saturate(0.95); }
+
+    [data-elora-home] .eh-aud-scrim {
+        background: linear-gradient(
+            170deg,
+            rgb(5 19 15 / 0.2) 0%,
+            rgb(6 26 20 / 0.68) 42%,
+            rgb(5 19 15 / 0.95) 100%
+        );
+    }
+
+    [data-elora-home] .eh-aud-content {
+        opacity: 1;
+        transform: none;
+        transition-delay: 0ms;
+    }
+}
+
+/* The panels carry `eh-reveal` in the markup, so the global orchestrator
+   staggers them in. Deliberately NOT a bespoke hidden state here: a hidden
+   state with no matching reveal is precisely what made the section titles
+   disappear earlier in this build. */
+
+/* ==========================================================================
+   Landing tokens inside the fixed brand surface
+   --------------------------------------------------------------------------
+   `[data-elora-home]` is a fixed LIGHT surface — it declares `color-scheme:
+   light` and paints white regardless of the app-wide theme toggle, because it
+   is marketing chrome rather than a themable product screen.
+
+   The marketing page bodies that now render inside it (`about`,
+   `how-it-works`, `pricing`, …) are built on the `--lp-*` tokens, which DO
+   follow the theme. Left alone, a visitor with dark mode on would get dark
+   cards and light-on-dark body copy sitting on a white page.
+
+   Pinning the light values here keeps that surface internally consistent. The
+   dark `--lp-*` values still apply everywhere outside this wrapper.
+   ========================================================================== */
+
+[data-elora-home] {
+    --lp-page: #FFFFFF;
+    --lp-card: #FFFFFF;
+    --lp-card-2: #F2F9F5;
+    --lp-fg: #0A2720;
+    --lp-muted: #40584E;
+    --lp-line: rgba(10, 39, 32, 0.12);
+    --lp-sky: #DFF0E7;
+    --lp-sky-2: #F2F9F5;
+    --lp-azure: #1E7A58;
+    --lp-azure-2: #165C42;
+    --lp-stroke: rgba(30, 122, 88, 0.35);
+
+    /* The shadcn semantics too, for any component that renders inside. */
+    --background: #FFFFFF;
+    --foreground: #0A2720;
+    --card: #FFFFFF;
+    --card-foreground: #0A2720;
+    --muted: #F2F9F5;
+    --muted-foreground: #556B61;
+    --border: #DCE7E1;
+    --input: #DCE7E1;
+}
+
+/* ==========================================================================
+   Navigation tone
+   --------------------------------------------------------------------------
+   While the bar is transparent it inherits the colours of whatever it sits
+   over. The homepage hero is white, so the default dark-green links are right.
+   The marketing pages open on a navy-green hero band, where those same links
+   are all but invisible.
+
+   `data-tone="dark"` re-points the foreground tokens for the transparent state
+   only — the `[data-condensed="false"]` qualifier means the bar reverts to the
+   standard colours the moment it condenses into its white surface, with no
+   second rule to keep in sync.
+   ========================================================================== */
+
+[data-elora-home] .eh-nav[data-tone="dark"][data-condensed="false"] {
+    --eh-fg: #EAF4EF;
+    --eh-fg-muted: #C6D9CF;
+    --eh-line-strong: rgb(255 255 255 / 0.28);
+}
+
+@media (hover: hover) {
+    [data-elora-home] .eh-nav[data-tone="dark"][data-condensed="false"] .eh-nav-link:hover {
+        background: rgb(255 255 255 / 0.12);
+    }
+}
+
+/* The logo chip keeps its light plate in both tones — the mark is artwork on a
+   white field, so it needs one. */
+[data-elora-home] .eh-nav[data-tone="dark"][data-condensed="false"] .eh-nav-burger {
+    background: rgb(255 255 255 / 0.1);
+}

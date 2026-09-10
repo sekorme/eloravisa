@@ -1,0 +1,38 @@
+.ribbonViewport {
+  overflow-x: auto;
+  scrollbar-width: none;
+  mask-image: linear-gradient(to right, transparent, #000 5%, #000 95%, transparent);
+}
+
+.ribbonViewport::-webkit-scrollbar { display: none; }
+.ribbonTrack { display: flex; width: max-content; animation: destination-journey 80s linear infinite; animation-play-state: paused; }
+.destinationList { display: flex; align-items: center; padding-block: 4px; }
+.ribbon[data-running="true"] .ribbonTrack { animation-play-state: running; }
+.ribbon:hover .ribbonTrack, .ribbon:focus-within .ribbonTrack { animation-play-state: paused; }
+
+@keyframes destination-journey { to { transform: translateX(-50%); } }
+
+.journeySurface { background: radial-gradient(ellipse at 100% 100%, rgb(124 58 237 / 6%), transparent 65%), var(--lp-card); }
+.stepButton { position: relative; text-align: left; }
+.stepButton:focus-visible { outline: 2px solid var(--lp-azure); outline-offset: 5px; border-radius: 12px; }
+.stepNode { transition: background-color 250ms, box-shadow 250ms, color 250ms; }
+.stepButton[aria-selected="true"] .stepNode { box-shadow: 0 0 0 6px rgb(37 99 235 / 9%), 0 6px 25px rgb(37 99 235 / 22%); }
+
+.comparisonFrame { position: relative; min-height: 440px; }
+.comparisonPanel { min-height: 440px; }
+.comparisonRange { width: 100%; height: 44px; accent-color: var(--lp-azure); cursor: ew-resize; }
+.comparisonRange:focus-visible { outline: 2px solid var(--lp-azure); outline-offset: 4px; border-radius: 8px; }
+.divider { touch-action: none; cursor: ew-resize; }
+.mobileDocumentPanel { min-height: 510px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ribbonViewport { overflow: visible; mask-image: none; }
+  .ribbonTrack { width: auto; animation: none; }
+  .destinationList { flex-wrap: wrap; justify-content: center; gap: 12px 0; }
+  .ribbonDuplicate, .ribbonControl { display: none; }
+  .stepNode { transition: none; }
+}
+
+@media (max-width: 767px) {
+  .mobileDocumentPanel { min-height: 540px; }
+}
