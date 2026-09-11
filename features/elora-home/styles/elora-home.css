@@ -4316,25 +4316,50 @@ html[data-eh-anim="ready"] [data-elora-home] .eh-final-photo { opacity: 0; }
 /* ------------------------------------------------------------ responsive -- */
 
 @media (max-width: 899px) {
-    /* No accordion. Every panel is a full card, always open — the interaction
-       has nothing useful to do at this width and the copy matters more. */
+    /* ---- Swipeable carousel ---------------------------------------------
+       Native scroll-snap, not a JS drag handler. The browser keeps momentum
+       scrolling, honours platform rubber-banding, and resolves the
+       scroll-direction conflict itself — so a mostly-vertical swipe still
+       scrolls the page instead of being swallowed by the rail. */
     [data-elora-home] .eh-aud-rail {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 1rem;
+        display: flex;
         height: auto;
+        gap: 0.75rem;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        /* Stops a swipe past the last card triggering browser back-navigation. */
+        overscroll-behavior-x: contain;
+        -webkit-overflow-scrolling: touch;
+        /* Bleed to the viewport edges so the neighbouring card peeks, which is
+           what tells the visitor there is more to swipe to. */
+        margin-inline: calc(var(--eh-gutter) * -1);
+        padding-inline: var(--eh-gutter);
+        padding-block: 0.25rem 0.5rem;
+        scroll-padding-inline: var(--eh-gutter);
     }
 
+    /* The scrollbar is noise here — the dots communicate position. */
+    [data-elora-home] .eh-aud-rail::-webkit-scrollbar { display: none; }
+    [data-elora-home] .eh-aud-rail { scrollbar-width: none; }
+
     [data-elora-home] .eh-aud-panel {
-        flex: none;
-        min-height: 22rem;
-        cursor: default;
+        flex: 0 0 82%;
+        min-height: 24rem;
+        scroll-snap-align: center;
+        /* Without this a fast flick can skip past a card entirely. */
+        scroll-snap-stop: always;
     }
 
     [data-elora-home] .eh-aud-panel,
     [data-elora-home] .eh-aud-panel[data-active="true"] {
         flex-grow: 0;
-        border-color: rgb(212 175 55 / 0.35);
+        transform: none;
+    }
+
+    /* The centred card takes the gold edge; the peeking neighbours sit back. */
+    [data-elora-home] .eh-aud-panel { border-color: var(--eh-line); }
+    [data-elora-home] .eh-aud-panel[data-active="true"] {
+        border-color: rgb(212 175 55 / 0.5);
     }
 
     [data-elora-home] .eh-aud-spine { display: none; }
@@ -4355,6 +4380,50 @@ html[data-eh-anim="ready"] [data-elora-home] .eh-final-photo { opacity: 0; }
         transform: none;
         transition-delay: 0ms;
     }
+
+    /* ---- Dots -------------------------------------------------------------
+       Real buttons, 44px targets, rendered only while the carousel is live.
+       Swiping is a shortcut; this is the route for anyone who can't. */
+    [data-elora-home] .eh-aud-dots {
+        display: flex;
+        justify-content: center;
+        gap: 0.25rem;
+        margin-top: 1rem;
+    }
+
+    [data-elora-home] .eh-aud-dot {
+        display: grid;
+        place-items: center;
+        width: 44px;
+        height: 44px;
+        padding: 0;
+        border: 0;
+        background: none;
+        cursor: pointer;
+    }
+
+    [data-elora-home] .eh-aud-dot-mark {
+        display: block;
+        width: 7px;
+        height: 7px;
+        border-radius: var(--eh-radius-pill);
+        background: var(--eh-line-strong);
+        transition:
+            width var(--eh-dur-3) var(--eh-ease-out),
+            background-color var(--eh-dur-3) var(--eh-ease-out);
+    }
+
+    /* The active dot stretches into a bar — position readable at a glance and
+       not conveyed by colour alone. */
+    [data-elora-home] .eh-aud-dot[data-active="true"] .eh-aud-dot-mark {
+        width: 22px;
+        background: var(--eh-guide-fill);
+    }
+}
+
+/* The dots only exist in the carousel layout. */
+@media (min-width: 900px) {
+    [data-elora-home] .eh-aud-dots { display: none; }
 }
 
 /* The panels carry `eh-reveal` in the markup, so the global orchestrator

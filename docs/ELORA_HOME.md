@@ -81,6 +81,23 @@ deliberate act rather than an accident:
    wrong." → rewritten. There is no refusal-letter analyser in this product, and
    a refusal letter rarely states a specific fault.
 
+The section has two layouts, not one shrunk. Desktop (≥900px) is the expanding
+accordion; below that it becomes a **swipeable carousel**.
+
+The swipe is native `overflow-x: auto` + `scroll-snap-type`, deliberately not a
+JS drag handler — the browser keeps momentum scrolling, honours platform
+rubber-banding, and resolves the scroll-direction conflict itself, so a
+mostly-vertical swipe still scrolls the page. A custom pointer-drag has to guess
+at that, and guessing wrong is how carousels end up trapping the page.
+`overscroll-behavior-x: contain` stops a swipe past the last card triggering
+browser back-navigation.
+
+**Swipe is never the only way in.** The dots below the rail are real 44px
+buttons that scroll a card into view, so anyone using a keyboard, a switch or
+voice control has an equivalent control. `aria-expanded` is dropped in carousel
+mode because every card is fully open there — claiming a collapsed state would
+be a lie.
+
 ### Adding a tool to the constellation
 
 Append to `data/tools.ts` with `x`/`y` as percentages of the canvas and `feeds`
