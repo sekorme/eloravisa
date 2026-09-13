@@ -4509,3 +4509,27 @@ html[data-eh-anim="ready"] [data-elora-home] .eh-final-photo { opacity: 0; }
 [data-elora-home] .eh-nav[data-tone="dark"][data-condensed="false"] .eh-nav-burger {
     background: rgb(255 255 255 / 0.1);
 }
+
+/* Parent-company attribution in the footer base row. The only outbound link on
+   the page, so it gets a persistent underline rather than a hover-only one —
+   an external destination should be obvious before you click it. */
+[data-elora-home] .eh-footer-attribution {
+    color: var(--eh-fg-subtle);
+}
+
+[data-elora-home] .eh-footer-attribution a {
+    color: var(--eh-fg);
+    text-decoration: underline;
+    text-decoration-color: var(--eh-line-strong);
+    text-underline-offset: 3px;
+    transition:
+        color var(--eh-dur-2) var(--eh-ease-out),
+        text-decoration-color var(--eh-dur-2) var(--eh-ease-out);
+}
+
+@media (hover: hover) {
+    [data-elora-home] .eh-footer-attribution a:hover {
+        color: var(--eh-guide);
+        text-decoration-color: var(--eh-guide);
+    }
+}

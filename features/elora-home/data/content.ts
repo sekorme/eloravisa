@@ -299,6 +299,19 @@ export const FINAL = {
 
 export const FOOTER = {
     tagline: "An intelligent preparation workspace for people applying for a visa.",
+    /**
+     * Parent-company attribution.
+     *
+     * The only OUTBOUND link on the homepage, so it is the one exception to the
+     * "every href must exist in adapters/routes.ts" rule — that adapter maps
+     * internal app routes, and this is a third-party site. It opens in a new
+     * tab, which is announced to screen readers rather than left as a surprise.
+     */
+    attribution: {
+        prefix: "Powered by",
+        name: "Souhait Hub",
+        href: "https://souhaithub.com",
+    },
     subscribe: {
         title: "Occasional, useful updates",
         body: "New tools and preparation guides. No pressure, no spam.",

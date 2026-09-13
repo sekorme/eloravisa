@@ -149,6 +149,22 @@ export function Footer() {
                     <p>
                         © {year} {BRAND.name}. All rights reserved.
                     </p>
+
+                    <p className="eh-footer-attribution">
+                        {FOOTER.attribution.prefix}{" "}
+                        <a
+                            href={FOOTER.attribution.href}
+                            target="_blank"
+                            // `noopener` is the security half (the opened page
+                            // can't reach back through window.opener);
+                            // `noreferrer` keeps our URL out of its analytics.
+                            rel="noopener noreferrer"
+                        >
+                            {FOOTER.attribution.name}
+                            <span className="eh-sr"> (opens in a new tab)</span>
+                        </a>
+                    </p>
+
                     <p className="eh-footer-promise">{BRAND.promise}</p>
                 </div>
             </Shell>
