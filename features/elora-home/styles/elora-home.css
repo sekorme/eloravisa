@@ -795,7 +795,14 @@ html[data-eh-anim="ready"] [data-elora-home] .eh-line-inner {
 
 [data-elora-home] .eh-burger-bars span:last-child { width: 12px; margin-left: auto; }
 
-@media (min-width: 900px) {
+/* The inline link row needs 1024px to fit.
+   Measured with the six current links: the brand, links and actions total
+   ~901px, and at 900px the gutters leave only ~831px — the "Start Preparing"
+   button was pushed past the right edge. Raising the breakpoint is more robust
+   than shaving padding, because a longer link label would silently break the
+   tighter version again.
+   Below this the burger drawer carries the same list, so nothing is lost. */
+@media (min-width: 1024px) {
     [data-elora-home] .eh-nav-links { display: flex; }
     [data-elora-home] .eh-nav-signin { display: inline-flex; }
     [data-elora-home] .eh-nav-cta { display: inline-flex; }

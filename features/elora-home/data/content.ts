@@ -42,6 +42,7 @@ export const NAV_LINKS = [
     { label: "Visa Classes", href: "#live-classes" },
     { label: "Pricing", href: ROUTES.pricing },
     { label: "Resources", href: ROUTES.resources },
+    { label: "Affiliate", href: ROUTES.affiliate },
 ] as const
 
 export const NAV_CTA = {
