@@ -3,6 +3,7 @@ import "./styles/elora-home.css"
 
 import { AnimationGate } from "./motion/AnimationGate"
 import { RevealOrchestrator } from "./motion/RevealOrchestrator"
+import { Preloader } from "./components/Preloader"
 import { Navigation } from "./scenes/Navigation"
 import { Footer } from "./scenes/Footer"
 
@@ -47,6 +48,12 @@ export function SiteChrome({
                 start state before any `.eh-reveal` element is parsed. */}
             <AnimationGate />
             <RevealOrchestrator />
+
+            {/* Brand curtain. Server-rendered and CSS-driven, so it completes
+                and leaves without JavaScript. Plays on every load; see
+                Preloader for the gate that suppresses it under reduced
+                motion. */}
+            <Preloader />
 
             <a className="eh-skip" href="#eh-main">
                 Skip to main content
