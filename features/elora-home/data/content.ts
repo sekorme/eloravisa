@@ -27,9 +27,9 @@ import { ROUTES } from "../adapters/routes"
 export const BRAND = {
     name: "Elora Visa",
     /** The positioning line the whole page has to earn. */
-    promise: "Prepare smarter. Apply with confidence...",
+    promise: "Prepare smarter. Apply with confidence.",
     logoSrc: "/eloravisa.PNG",
-    logoAlt: "Elora Visa",
+    logoAlt: "Elora Visa AI",
 } as const
 
 /* ------------------------------------------------------------------------ */
