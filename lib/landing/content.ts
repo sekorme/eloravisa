@@ -27,7 +27,7 @@ export const CTA = {
   /** Reassurance shown directly beneath the hero buttons. */
   microcopy: "Start free • No credit card required • Upgrade when you're ready",
   /** Honesty note about what the platform is and isn't. */
-  trustNote: "Built to support applicants—not replace official immigration advice.",
+  trustNote: "Built to support applicants, not replace official immigration advice.",
 } as const
 
 /* -------------------------------------------------------------------------- */
@@ -40,7 +40,7 @@ export const HERO = {
   headline: "Prepare Your Visa Application",
   headlineAccent: "With Confidence.",
   supporting:
-    "Get personalized guidance, review your documents, practise your visa interview, and understand your application readiness—all in one intelligent platform.",
+    "Get personalized guidance, review your documents, practise your visa interview, and understand your application readiness, all in one intelligent platform.",
   /** The compact journey row under the CTAs. */
   journey: ["Choose destination", "Prepare documents", "Practise interview"],
   scrollCue: "Explore your journey",
@@ -163,7 +163,7 @@ export const INTERVIEW_SPOTLIGHT = {
   feedback: [
     { label: "Clarity", note: "Structure your answer around one clear reason." },
     { label: "Completeness", note: "Mention the course content, not only the country." },
-    { label: "Confidence", note: "Steady pace — avoid trailing off at the end." },
+    { label: "Confidence", note: "Steady pace avoid trailing off at the end." },
   ],
   cta: "Practise My Interview",
 } as const
@@ -244,7 +244,7 @@ export const FAQS: Faq[] = [
   },
   {
     q: "Does Elora replace an immigration lawyer or official embassy guidance?",
-    a: "No. Elora Visa is not a law firm, immigration consultancy, embassy or government body, and it does not provide legal advice. Use it to prepare, and confirm final requirements with the official authority for your destination — or a qualified adviser if your case is complex.",
+    a: "No. Elora Visa is not a law firm, immigration consultancy, embassy or government body, and it does not provide legal advice. Use it to prepare, and confirm final requirements with the official authority for your destination or a qualified adviser if your case is complex.",
   },
   {
     q: "Can I use Elora Visa for free?",

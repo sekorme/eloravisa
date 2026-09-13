@@ -59,7 +59,7 @@ export const DESTINATIONS: Destination[] = [
         lon: -77.04,
         categories: ["F-1 student", "B1/B2 visitor", "J-1 exchange"],
         preparation: [
-            "Interview practice — this route is interview-led",
+            "Interview practice: this route is interview-led",
             "Consistency between your form and your answers",
             "Clear, evidenced funding narrative",
         ],

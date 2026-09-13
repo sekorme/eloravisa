@@ -15,7 +15,7 @@ export const JOURNEY_STAGES: JourneyStage[] = [
         railLabel: "Your plan",
         title: "Tell Elora your plan",
         body:
-            "Destination, visa type, purpose of travel and the date you're working towards. Four answers — that's the whole setup, and everything after this is shaped by them.",
+            "Destination, visa type, purpose of travel and the date you're working towards. Four answers. That's the whole setup, and everything after this is shaped by them.",
     },
     {
         id: "requirements",
@@ -31,7 +31,7 @@ export const JOURNEY_STAGES: JourneyStage[] = [
         railLabel: "Strengthen",
         title: "Strengthen your application",
         body:
-            "Elora reads your documents together rather than one at a time — surfacing what's missing, what contradicts something else, and what you've claimed without evidencing.",
+            "Elora reads your documents together rather than one at a time, surfacing what's missing, what contradicts something else, and what you've claimed without evidencing.",
     },
     {
         id: "decide",

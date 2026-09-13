@@ -16,7 +16,7 @@ const OG_IMAGE = {
     url: `${SITE_URL}/OG.png`,
     width: 1200,
     height: 630,
-    alt: "Elora Visa — an AI-powered visa preparation workspace",
+    alt: "Elora Visa: an AI-powered visa preparation workspace",
 }
 
 const TITLE = "Elora Visa | Prepare smarter. Apply with confidence."

@@ -138,7 +138,7 @@ export function Navigation({ tone = "light" }: { tone?: "light" | "dark" }) {
                     <Link
                         href="/"
                         className="eh-nav-brand"
-                        aria-label={`${"Elora Visa"} — home`}
+                        aria-label="Elora Visa home"
                     >
                         <BrandLogo size={condensed ? 30 : 34} />
                     </Link>

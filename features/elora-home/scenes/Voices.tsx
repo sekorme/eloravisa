@@ -112,7 +112,7 @@ export function Voices({ testimonials, metrics }: VoicesProps) {
                         /* Development-only. Never rendered in production — see
                            the NODE_ENV guard above. */
                         <div className="eh-placeholder" role="note">
-                            <Board>Development placeholder — not shown in production</Board>
+                            <Board>Development placeholder, not shown in production</Board>
                             <p>
                                 No verified testimonials are available. This block marks where
                                 consented applicant stories will render once{" "}

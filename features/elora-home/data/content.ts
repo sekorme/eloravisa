@@ -61,7 +61,7 @@ export const HERO = {
     /** The fragment that carries the gradient. Must appear in a headline line. */
     headlineAccent: "brilliantly clear.",
     supporting:
-        "Review your documents, practise your interview, build your application and know what to do next — with intelligent guidance tailored to your journey.",
+        "Review your documents, practise your interview, build your application and know what to do next, with intelligent guidance tailored to your journey.",
     primaryCta: { label: "Check My Visa Readiness", href: ROUTES.signUp },
     secondaryCta: { label: "Explore How Elora Works", href: "#journey" },
     reassurance: "Start free · No credit card required",
@@ -95,7 +95,7 @@ export const JOURNEY = {
 export const AUDIENCE = {
     eyebrow: "Who is this for",
     body:
-        "Elora is built for the person doing the work themselves. Wherever you are starting from, the preparation is the same shape — these are the four situations we see most.",
+        "Elora is built for the person doing the work themselves. Wherever you are starting from, the preparation is the same shape. These are the four situations we see most.",
 } as const
 
 /* ------------------------------------------------------------------------ */
@@ -106,7 +106,7 @@ export const DOCUMENTS = {
     eyebrow: "Document intelligence",
     headline: "Your documents should tell one convincing story.",
     body:
-        "A visa file is read as a whole. Elora reads it the same way — checking that your dates, finances, employment and intentions agree with each other before anyone else sees them.",
+        "A visa file is read as a whole. Elora reads it the same way, checking that your dates, finances, employment and intentions agree with each other before anyone else sees them.",
     outcomes: [
         {
             id: "missing",
@@ -142,7 +142,7 @@ export const INTERVIEW = {
     eyebrow: "Voice mock interviews",
     headline: "Walk into your interview already prepared.",
     body:
-        "Practise out loud with an AI interviewer that asks follow-up questions, then read back what you actually said — structure, clarity and the gaps worth tightening.",
+        "Practise out loud with an AI interviewer that asks follow-up questions, then read back what you actually said: structure, clarity and the gaps worth tightening.",
     micNotice:
         "The sample below runs entirely in your browser and never requests microphone access. A full voice session asks for your microphone first, and only when you start it.",
     sampleCta: "Try a Sample Question",
@@ -178,7 +178,7 @@ export const GLOBAL = {
         "Preparation for a UK student route looks nothing like preparation for a US visitor interview. Select a destination to see what Elora focuses on.",
     guideCta: "View Destination Guide",
     disclaimer:
-        "Preparation guidance only. Elora does not publish processing times, fees or eligibility rulings — always confirm requirements with the official embassy or consulate.",
+        "Preparation guidance only. Elora does not publish processing times, fees or eligibility rulings. Always confirm requirements with the official embassy or consulate.",
 } as const
 
 /* ------------------------------------------------------------------------ */
@@ -189,7 +189,7 @@ export const CLASSES = {
     eyebrow: "Expert-led live classes",
     headline: "Learn the process from people who have taught it.",
     body:
-        "Live sessions covering document preparation, interview technique and destination-specific requirements — with time for your questions.",
+        "Live sessions covering document preparation, interview technique and destination-specific requirements, with time for your questions.",
     /** Shown while `getUpcomingClasses()` has no verified schedule. */
     waitlist: {
         title: "Classes are being scheduled",
@@ -236,7 +236,7 @@ export const TRUST = {
         {
             id: "handling",
             title: "Controlled document handling",
-            body: "Documents you upload are used to generate your review and your guidance — not to advertise to you.",
+            body: "Documents you upload are used to generate your review and your guidance, not to advertise to you.",
         },
         {
             id: "control",
@@ -276,7 +276,7 @@ export const PRICING = {
     eyebrow: "Preparation plans",
     headline: "Start free. Upgrade when the work gets real.",
     body:
-        "Every plan runs on tokens — one balance spent across document review, interview practice, drafting and readiness insight.",
+        "Every plan runs on tokens: one balance spent across document review, interview practice, drafting and readiness insight.",
     cta: "Choose Your Preparation Plan",
 } as const
 

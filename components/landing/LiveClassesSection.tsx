@@ -14,7 +14,7 @@ import { Display, Eyebrow, Reveal, pillClass } from "./ui"
  * because none of that exists yet and inventing it would mislead applicants.
  */
 const TOPICS = [
-  "Reading a visa requirement list properly — and what officers actually look for",
+  "Reading a visa requirement list properly, and what officers actually look for",
   "Evidencing funds without over-explaining or contradicting your itinerary",
   "Answering interview questions about intent, ties and plans after study",
   "The mistakes that most often turn a complete application into a weak one",
@@ -180,7 +180,7 @@ export function LiveClassesSection() {
                 </div>
                 <p className="mt-3 max-w-xl text-xs leading-relaxed text-lp-muted">
                   Dates aren&apos;t open for booking yet. Add your email and we&apos;ll let you know once the first
-                  session is scheduled — including whether a replay will be available.
+                  session is scheduled, including whether a replay will be available.
                 </p>
 
                 <div className="mt-8 max-w-lg">

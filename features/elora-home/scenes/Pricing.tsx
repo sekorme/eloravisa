@@ -136,7 +136,7 @@ export function Pricing() {
                         <Board>Need more mid-month?</Board>
                         <p>
                             The <b>{topUp.name}</b> adds {topUp.tokens} tokens for{" "}
-                            {formatUsd(topUp.priceUsd)} as a one-off purchase — no
+                            {formatUsd(topUp.priceUsd)} as a one-off purchase, with no
                             subscription change.
                         </p>
                     </div>

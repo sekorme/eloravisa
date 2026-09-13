@@ -65,7 +65,7 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
 export const DEMO_BEATS = [
     { at: 0, state: "connecting", caption: "Establishing session" },
     { at: 900, state: "speaking", caption: "Interviewer is asking your question" },
-    { at: 3400, state: "listening", caption: "Your turn — the real session listens here" },
+    { at: 3400, state: "listening", caption: "Your turn. The real session listens here" },
     { at: 6200, state: "thinking", caption: "Reviewing structure and clarity" },
     { at: 7800, state: "speaking", caption: "Feedback ready" },
 ] as const

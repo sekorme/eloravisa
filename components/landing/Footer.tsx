@@ -36,7 +36,7 @@ export function Footer() {
                 </span>
               </Link>
               <p className="mb-7 max-w-sm text-sm leading-relaxed text-lp-muted">
-                An intelligent companion for preparing a stronger, better-organized visa application — with clear
+                An intelligent companion for preparing a stronger, better-organized visa application, with clear
                 guidance, AI preparation tools, and no agent fees.
               </p>
 

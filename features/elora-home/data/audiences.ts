@@ -66,7 +66,7 @@ export const AUDIENCES: Audience[] = [
         title: "Past Refusals",
         tagline: "Turning a setback into a stronger application.",
         body:
-            "A previous refusal isn't the end of the road. Elora helps you read your application back against the areas refusals most often turn on — evidence gaps, inconsistent dates, weakly supported intentions — and makes sure a previous refusal is declared properly. You reapply with a file you understand.",
+            "A previous refusal isn't the end of the road. Elora helps you read your application back against the areas refusals most often turn on: evidence gaps, inconsistent dates, weakly supported intentions. It also makes sure a previous refusal is declared properly. You reapply with a file you understand.",
         image: {
             src: "/pastrefusal.png",
             alt: "A woman looking distressed as she reads a visa application form stamped REJECTED in red.",
@@ -94,7 +94,7 @@ export const AUDIENCES: Audience[] = [
         title: "Tired of Agents",
         tagline: "Take full control of your journey.",
         body:
-            "Say goodbye to middlemen and hidden fees. We give you the knowledge and the tools to handle your own application, so you can avoid misinformation and stay in the driver's seat — with pricing you can see before you pay.",
+            "Say goodbye to middlemen and hidden fees. We give you the knowledge and the tools to handle your own application, so you can avoid misinformation and stay in the driver's seat, with pricing you can see before you pay.",
         image: {
             src: "/tiredofagent.png",
             alt: "A woman gesturing in frustration across a desk towards a man seated behind a nameplate reading Visa Consultant, in an office with a visa services poster on the wall.",
