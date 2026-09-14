@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
+import { usePathname } from "next/navigation"
 import { gsap, ScrollTrigger, prefersReducedMotion, DUR, EASE, STAGGER } from "./useMotion"
 
 /**
@@ -20,13 +21,26 @@ import { gsap, ScrollTrigger, prefersReducedMotion, DUR, EASE, STAGGER } from ".
  * when "hide" and "show" live in different places and one of them is opt-in.
  *
  * So the reveal is now global and automatic: this component finds every
- * revealable element on the page and wires it up, once. A scene cannot forget
+ * revealable element on the page and wires it up, once per route. A scene cannot forget
  * to opt in, because there is nothing to opt into. Adding a new section can no
  * longer make its own title disappear.
  *
  * `ScrollTrigger.batch` groups elements that enter the viewport together, so a
  * row of four cards still staggers as a row rather than each animating alone —
  * the grouped feel is kept without the grouping being a manual step.
+ *
+ * ------------------------------------------------------------------------
+ * RE-WIRED ON EVERY ROUTE CHANGE
+ * ------------------------------------------------------------------------
+ * Both effects are keyed on the pathname, not run once. When pages share a
+ * layout that renders `SiteChrome` (the four legal pages do), a client-side
+ * navigation swaps the page but keeps this component mounted. Wired once, it
+ * never saw the new page's `.eh-reveal` elements, which the CSS gate had
+ * already hidden — so clicking between legal documents showed a blank page.
+ *
+ * Re-running reverts the previous context (its elements are gone) and wires
+ * the new page. The persistent chrome carries no reveal classes, so nothing
+ * that survives the navigation is re-hidden.
  */
 
 /** Elements that translate up into place. */
@@ -43,6 +57,8 @@ const REVEAL_POP = ".eh-reveal-pop"
 const HEADLINE = ".eh-line-inner:not(.eh-hero-line)"
 
 export function RevealOrchestrator() {
+    const pathname = usePathname()
+
     useEffect(() => {
         // Gate closed — no JS-driven hiding happened, so there is nothing to
         // un-hide. Content is already visible and must stay that way.
@@ -141,7 +157,7 @@ export function RevealOrchestrator() {
         })
 
         return () => ctx.revert()
-    }, [])
+    }, [pathname])
 
     /**
      * Safety net.
@@ -195,7 +211,7 @@ export function RevealOrchestrator() {
         }, 4000)
 
         return () => window.clearTimeout(timer)
-    }, [])
+    }, [pathname])
 
     return null
 }

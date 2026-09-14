@@ -141,7 +141,13 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en" suppressHydrationWarning>
+        // `data-scroll-behavior="smooth"`: globals.css sets `scroll-behavior:
+        // smooth` on <html>, which turned Next's reset-to-top on navigation
+        // into a slow animation that GSAP's ScrollTrigger refresh then
+        // cancelled, so a page could open scrolled halfway down. With the
+        // attribute, Next switches smooth scrolling off just for route
+        // changes; in-page anchor links stay smooth.
+        <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
         <head>
             <Script
                 src="https://www.googletagmanager.com/gtag/js?id=G-M11K918X76"

@@ -1,0 +1,1095 @@
+/* ==========================================================================
+   Legal documents — privacy, terms, cookies, disclaimer
+   --------------------------------------------------------------------------
+   Rendered inside SiteChrome, so every value here is an `--eh-*` token from
+   features/elora-home/styles/elora-home.css. No raw colours for text or lines:
+   restyle by editing tokens there.
+   ========================================================================== */
+
+[data-elora-home] .eh-legal {
+    /* Clears the fixed navigation, which is ~84px tall before it condenses. */
+    --eh-legal-nav-clear: clamp(7rem, 5.5rem + 4vw, 9.5rem);
+    /* How far the document switcher overlaps the bottom of the header. */
+    --eh-legal-overlap: 1.75rem;
+}
+
+[data-elora-home] .eh-legal-shell {
+    width: 100%;
+    max-width: 74rem;
+    margin-inline: auto;
+    padding-inline: var(--eh-gutter);
+}
+
+[data-elora-home] .eh-legal-texture {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    mask-image: linear-gradient(to bottom, #000, transparent 80%);
+    -webkit-mask-image: linear-gradient(to bottom, #000, transparent 80%);
+}
+
+/* ------------------------------------------------------------------ header */
+
+[data-elora-home] .eh-legal-hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    background: var(--eh-bg-tint);
+    border-bottom: 1px solid var(--eh-line);
+    padding-top: var(--eh-legal-nav-clear);
+    padding-bottom: calc(var(--eh-space-12) + var(--eh-legal-overlap));
+}
+
+[data-elora-home] .eh-legal-hero .eh-aurora {
+    z-index: -1;
+}
+
+[data-elora-home] .eh-legal-crumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--eh-space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--eh-font-mono);
+    font-size: var(--eh-text-xs);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--eh-fg-subtle);
+}
+
+[data-elora-home] .eh-legal-crumbs li + li::before {
+    content: "/";
+    margin-right: var(--eh-space-2);
+    color: var(--eh-line-strong);
+}
+
+[data-elora-home] .eh-legal-crumbs a {
+    color: var(--eh-fg-muted);
+    text-decoration: none;
+    border-radius: var(--eh-radius-sm);
+}
+
+[data-elora-home] .eh-legal-crumbs a:hover {
+    color: var(--eh-fg);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+[data-elora-home] .eh-legal-crumbs [aria-current="page"] {
+    color: var(--eh-fg);
+}
+
+[data-elora-home] .eh-legal-heading {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--eh-space-6);
+    margin-top: var(--eh-space-12);
+}
+
+[data-elora-home] .eh-legal-mark {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: clamp(3.5rem, 2.75rem + 2.5vw, 5rem);
+    aspect-ratio: 1;
+    border-radius: var(--eh-radius-xl);
+    background: var(--eh-bg);
+    border: 1px solid var(--eh-line);
+    box-shadow: var(--eh-shadow-md);
+    color: var(--eh-accent);
+}
+
+[data-elora-home] .eh-legal-mark svg {
+    width: 45%;
+    height: 45%;
+    stroke-width: 1.6;
+}
+
+[data-elora-home] .eh-legal-title {
+    margin-top: var(--eh-space-3);
+    font-size: var(--eh-text-5xl);
+    color: var(--eh-fg);
+}
+
+[data-elora-home] .eh-legal-lead {
+    margin-top: var(--eh-space-6);
+    max-width: 52ch;
+    font-size: var(--eh-text-xl);
+    line-height: 1.5;
+    color: var(--eh-fg-muted);
+    text-wrap: pretty;
+}
+
+/* Reserve two lines for the lead from tablet up, so the document switcher sits
+   at the same height on all four pages and doesn't jump when a tab is clicked.
+   (Phones vary more; there the transition glides the switcher instead.) */
+@media (min-width: 640px) {
+    [data-elora-home] .eh-legal-lead {
+        min-height: 2lh;
+    }
+}
+
+[data-elora-home] .eh-legal-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--eh-space-4) 0;
+    margin: var(--eh-space-8) 0 0;
+}
+
+[data-elora-home] .eh-legal-meta > div {
+    padding-inline: var(--eh-space-6);
+    border-left: 1px solid var(--eh-line-strong);
+}
+
+[data-elora-home] .eh-legal-meta > div:first-child {
+    padding-left: 0;
+    border-left: 0;
+}
+
+[data-elora-home] .eh-legal-meta dt {
+    font-family: var(--eh-font-mono);
+    font-size: var(--eh-text-xs);
+    letter-spacing: var(--eh-tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--eh-fg-subtle);
+}
+
+[data-elora-home] .eh-legal-meta dd {
+    margin: var(--eh-space-1) 0 0;
+    font-size: var(--eh-text-base);
+    font-weight: 550;
+    color: var(--eh-fg);
+}
+
+[data-elora-home] .eh-legal-meta a {
+    color: inherit;
+    text-decoration: underline;
+    text-decoration-color: var(--eh-line-strong);
+    text-underline-offset: 3px;
+}
+
+[data-elora-home] .eh-legal-meta a:hover {
+    text-decoration-color: currentColor;
+}
+
+@media (max-width: 639px) {
+    [data-elora-home] .eh-legal-hero {
+        padding-bottom: calc(var(--eh-space-6) + var(--eh-legal-overlap));
+    }
+
+    [data-elora-home] .eh-legal-heading {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--eh-space-4);
+        margin-top: var(--eh-space-8);
+    }
+
+    /* Stacked rows read better than a wrapped row with orphaned dividers. */
+    [data-elora-home] .eh-legal-meta {
+        display: grid;
+        gap: var(--eh-space-3);
+    }
+
+    [data-elora-home] .eh-legal-meta > div,
+    [data-elora-home] .eh-legal-meta > div:first-child {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: var(--eh-space-2);
+        padding: 0 0 var(--eh-space-3);
+        border-left: 0;
+        border-bottom: 1px solid var(--eh-line);
+    }
+
+    [data-elora-home] .eh-legal-meta dd {
+        margin: 0;
+    }
+}
+
+/* ---------------------------------------------------------------- switcher */
+
+[data-elora-home] .eh-legal-switch {
+    position: relative;
+    z-index: var(--eh-z-raised);
+    margin-top: calc(var(--eh-legal-overlap) * -1);
+}
+
+[data-elora-home] .eh-legal-switch-track {
+    --eh-tab-pad: 0.375rem;
+    --eh-tab-gap: var(--eh-space-1);
+    --eh-tab-h: 3rem;
+    position: relative;
+    padding: var(--eh-tab-pad);
+    background: var(--eh-bg);
+    border: 1px solid var(--eh-line);
+    border-radius: var(--eh-radius-xl);
+    box-shadow: var(--eh-shadow-md);
+}
+
+[data-elora-home] .eh-legal-switch ul {
+    /* Positioned so the labels paint above the pill. */
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--eh-tab-gap);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* The active pill. It is one cell wide and translated by whole cells: a
+   percentage in translate() is relative to the pill itself, so
+   `100% + gap` is exactly one column step. */
+[data-elora-home] .eh-legal-switch-pill {
+    position: absolute;
+    top: var(--eh-tab-pad);
+    left: var(--eh-tab-pad);
+    width: calc((100% - 2 * var(--eh-tab-pad) - 3 * var(--eh-tab-gap)) / 4);
+    height: var(--eh-tab-h);
+    border-radius: calc(var(--eh-radius-xl) - var(--eh-tab-pad));
+    background: linear-gradient(120deg, var(--eh-ng-800), var(--eh-ng-600));
+    box-shadow: var(--eh-glow-blue);
+    transform: translate(calc(var(--eh-tab-col) * (100% + var(--eh-tab-gap))), 0);
+}
+
+[data-elora-home] .eh-legal-switch a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--eh-space-2);
+    min-height: var(--eh-tab-h);
+    padding-inline: var(--eh-space-4);
+    border-radius: calc(var(--eh-radius-xl) - var(--eh-tab-pad));
+    font-size: var(--eh-text-sm);
+    font-weight: 550;
+    color: var(--eh-fg-muted);
+    text-decoration: none;
+    white-space: nowrap;
+    transition:
+        background-color var(--eh-dur-2) var(--eh-ease-out),
+        color var(--eh-dur-2) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-legal-switch-label {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--eh-space-2);
+}
+
+[data-elora-home] .eh-legal-switch svg {
+    width: 1rem;
+    height: 1rem;
+    flex: none;
+    color: var(--eh-fg-subtle);
+    transition:
+        color var(--eh-dur-2) var(--eh-ease-out),
+        transform var(--eh-dur-3) var(--eh-ease-out);
+}
+
+@media (hover: hover) {
+    [data-elora-home] .eh-legal-switch a:not([aria-current]):hover {
+        background: var(--eh-surface-2);
+        color: var(--eh-fg);
+    }
+
+    [data-elora-home] .eh-legal-switch a:not([aria-current]):hover svg {
+        color: var(--eh-accent);
+        transform: translate3d(0, -1px, 0) rotate(-6deg);
+    }
+}
+
+[data-elora-home] .eh-legal-switch a[aria-current="page"] {
+    color: #fff;
+}
+
+[data-elora-home] .eh-legal-switch a[aria-current="page"] svg {
+    color: var(--eh-green-300);
+}
+
+@media (max-width: 719px) {
+    [data-elora-home] .eh-legal-switch ul {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    [data-elora-home] .eh-legal-switch-pill {
+        width: calc((100% - 2 * var(--eh-tab-pad) - var(--eh-tab-gap)) / 2);
+        transform: translate(
+            calc(var(--eh-tab-col-sm) * (100% + var(--eh-tab-gap))),
+            calc(var(--eh-tab-row-sm) * (100% + var(--eh-tab-gap)))
+        );
+    }
+
+    [data-elora-home] .eh-legal-switch a {
+        justify-content: flex-start;
+        padding-inline: var(--eh-space-3);
+    }
+}
+
+/* ------------------------------------------------------------------ layout */
+
+[data-elora-home] .eh-legal-layout {
+    display: grid;
+    gap: var(--eh-space-8);
+    padding-top: clamp(1rem, 0.5rem + 2vw, 2.5rem);
+}
+
+@media (min-width: 1024px) {
+    [data-elora-home] .eh-legal-layout {
+        grid-template-columns: 15.5rem minmax(0, 1fr);
+        gap: clamp(3rem, 1rem + 4vw, 6rem);
+    }
+}
+
+[data-elora-home] .eh-legal-article {
+    min-width: 0;
+    max-width: 46rem;
+}
+
+/* --------------------------------------------------------- contents (rail) */
+
+[data-elora-home] .eh-legal-aside {
+    display: none;
+}
+
+@media (min-width: 1024px) {
+    [data-elora-home] .eh-legal-aside {
+        display: block;
+        position: sticky;
+        top: 6.5rem;
+        align-self: start;
+        max-height: calc(100svh - 8rem);
+        overflow-y: auto;
+        padding-top: var(--eh-space-12);
+    }
+}
+
+[data-elora-home] .eh-legal-contents-track {
+    position: relative;
+    margin-top: var(--eh-space-4);
+    border-left: 1px solid var(--eh-line);
+}
+
+[data-elora-home] .eh-legal-contents ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* Glides onto the active entry; position and height are set by LegalContents. */
+[data-elora-home] .eh-legal-contents-thumb {
+    position: absolute;
+    top: 0;
+    left: -1px;
+    width: 2px;
+    height: 0;
+    border-radius: 2px;
+    background: var(--eh-accent);
+    transition:
+        transform var(--eh-dur-3) var(--eh-ease-entrance),
+        height var(--eh-dur-3) var(--eh-ease-entrance);
+}
+
+[data-elora-home] .eh-legal-contents a {
+    display: flex;
+    gap: var(--eh-space-3);
+    padding: 0.55rem 0 0.55rem var(--eh-space-4);
+    font-size: var(--eh-text-sm);
+    line-height: 1.45;
+    color: var(--eh-fg-subtle);
+    text-decoration: none;
+    transition:
+        color var(--eh-dur-2) var(--eh-ease-out),
+        transform var(--eh-dur-2) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-legal-contents a:hover {
+    color: var(--eh-fg);
+    transform: translate3d(2px, 0, 0);
+}
+
+/* Colour only, no weight change: a bolder weight would re-wrap the title
+   and make the gliding bar land on a moving target. */
+[data-elora-home] .eh-legal-contents a[aria-current="location"] {
+    color: var(--eh-fg);
+}
+
+[data-elora-home] .eh-legal-contents a[aria-current="location"] .eh-legal-contents-num {
+    color: var(--eh-accent);
+}
+
+[data-elora-home] .eh-legal-contents-num {
+    flex: none;
+    padding-top: 0.1em;
+    font-family: var(--eh-font-mono);
+    font-size: 0.6875rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    color: var(--eh-fg-subtle);
+    font-variant-numeric: tabular-nums;
+    transition: color var(--eh-dur-2) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-legal-print {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--eh-space-2);
+    min-height: 44px;
+    margin-top: var(--eh-space-6);
+    padding-inline: var(--eh-space-4);
+    border: 1px solid var(--eh-line-strong);
+    border-radius: var(--eh-radius-pill);
+    background: transparent;
+    font: inherit;
+    font-size: var(--eh-text-sm);
+    font-weight: 550;
+    color: var(--eh-fg-muted);
+    cursor: pointer;
+    transition:
+        background-color var(--eh-dur-2) var(--eh-ease-out),
+        color var(--eh-dur-2) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-legal-print:hover {
+    background: var(--eh-surface-2);
+    color: var(--eh-fg);
+}
+
+[data-elora-home] .eh-legal-print svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* ------------------------------------------------------ contents (mobile) */
+
+[data-elora-home] .eh-legal-toc-mobile {
+    margin-bottom: var(--eh-space-4);
+    border: 1px solid var(--eh-line);
+    border-radius: var(--eh-radius-lg);
+    background: var(--eh-panel);
+}
+
+[data-elora-home] .eh-legal-toc-mobile summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--eh-space-4);
+    min-height: 3.25rem;
+    padding-inline: var(--eh-space-4);
+    list-style: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: var(--eh-text-base);
+    color: var(--eh-fg);
+    border-radius: inherit;
+}
+
+[data-elora-home] .eh-legal-toc-mobile summary::-webkit-details-marker {
+    display: none;
+}
+
+[data-elora-home] .eh-legal-toc-count {
+    margin-left: var(--eh-space-3);
+    font-weight: 400;
+    font-size: var(--eh-text-sm);
+    color: var(--eh-fg-subtle);
+}
+
+[data-elora-home] .eh-legal-toc-mobile summary svg {
+    width: 1.125rem;
+    height: 1.125rem;
+    color: var(--eh-fg-subtle);
+    transition: transform var(--eh-dur-2) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-legal-toc-mobile[open] summary svg {
+    transform: rotate(180deg);
+}
+
+[data-elora-home] .eh-legal-toc-mobile ol {
+    margin: 0;
+    padding: 0 var(--eh-space-4) var(--eh-space-2);
+    list-style: none;
+}
+
+[data-elora-home] .eh-legal-toc-mobile a {
+    display: flex;
+    align-items: center;
+    gap: var(--eh-space-3);
+    min-height: 44px;
+    border-top: 1px solid var(--eh-line);
+    font-size: var(--eh-text-base);
+    color: var(--eh-fg-muted);
+    text-decoration: none;
+}
+
+/* Animated open/close where `::details-content` is supported; elsewhere the
+   panel simply opens instantly. */
+@supports selector(::details-content) {
+    [data-elora-home] .eh-legal-toc-mobile {
+        interpolate-size: allow-keywords;
+    }
+
+    [data-elora-home] .eh-legal-toc-mobile::details-content {
+        block-size: 0;
+        overflow: hidden;
+        transition:
+            block-size var(--eh-dur-3) var(--eh-ease-out),
+            content-visibility var(--eh-dur-3) allow-discrete;
+    }
+
+    [data-elora-home] .eh-legal-toc-mobile[open]::details-content {
+        block-size: auto;
+    }
+}
+
+@media (min-width: 1024px) {
+    [data-elora-home] .eh-legal-toc-mobile {
+        display: none;
+    }
+}
+
+/* ---------------------------------------------------------------- sections */
+
+[data-elora-home] .eh-legal-section {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    padding-block: clamp(2rem, 1.5rem + 2vw, 3rem);
+    border-top: 1px solid var(--eh-line);
+    /* Lands below the condensed navigation when reached by anchor. */
+    scroll-margin-top: 5.5rem;
+}
+
+[data-elora-home] .eh-legal-toc-mobile + .eh-legal-section,
+[data-elora-home] .eh-legal-article > .eh-legal-section:first-of-type {
+    border-top: 0;
+}
+
+@media (min-width: 640px) {
+    [data-elora-home] .eh-legal-section {
+        grid-template-columns: 3.5rem minmax(0, 1fr);
+    }
+
+    [data-elora-home] .eh-legal-section-head,
+    [data-elora-home] .eh-legal-prose {
+        grid-column: 2;
+    }
+
+    [data-elora-home] .eh-legal-num {
+        grid-row: 1;
+    }
+}
+
+[data-elora-home] .eh-legal-num {
+    align-self: start;
+    justify-self: start;
+    margin: 0.35rem 0 var(--eh-space-3);
+    padding: 0.2rem 0.45rem;
+    border: 1px solid var(--eh-line);
+    border-radius: var(--eh-radius-sm);
+    background: var(--eh-bg-tint);
+    font-family: var(--eh-font-mono);
+    font-size: var(--eh-text-xs);
+    letter-spacing: 0.06em;
+    color: var(--eh-accent-soft);
+    font-variant-numeric: tabular-nums;
+    transition:
+        background-color var(--eh-dur-3) var(--eh-ease-out),
+        border-color var(--eh-dur-3) var(--eh-ease-out),
+        color var(--eh-dur-3) var(--eh-ease-out),
+        transform var(--eh-dur-3) var(--eh-ease-entrance);
+}
+
+[data-elora-home] .eh-legal-section-head {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--eh-space-2);
+}
+
+[data-elora-home] .eh-legal-section-head h2 {
+    font-size: var(--eh-text-2xl);
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    color: var(--eh-fg);
+}
+
+/* The anchor link is keyboard-reachable always, and visible on hover/focus. */
+[data-elora-home] .eh-legal-anchor {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    margin-top: -0.1rem;
+    border-radius: var(--eh-radius-md);
+    color: var(--eh-fg-subtle);
+    opacity: 0;
+    transition:
+        opacity var(--eh-dur-2) var(--eh-ease-out),
+        background-color var(--eh-dur-2) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-legal-anchor svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+[data-elora-home] .eh-legal-section:hover .eh-legal-anchor,
+[data-elora-home] .eh-legal-anchor:focus-visible {
+    opacity: 1;
+}
+
+[data-elora-home] .eh-legal-anchor:hover {
+    background: var(--eh-surface-2);
+    color: var(--eh-fg);
+}
+
+@media (hover: none) {
+    [data-elora-home] .eh-legal-anchor {
+        display: none;
+    }
+}
+
+/* The section being read. `data-active` is set by LegalContents. */
+[data-elora-home] .eh-legal-section[data-active] .eh-legal-num {
+    background: var(--eh-accent);
+    border-color: var(--eh-accent);
+    color: #fff;
+    transform: scale(1.06);
+}
+
+/* ------------------------------------------------------------------- prose */
+
+[data-elora-home] .eh-legal-prose {
+    margin-top: var(--eh-space-4);
+    font-size: var(--eh-text-base);
+    line-height: var(--eh-leading-body);
+    color: var(--eh-fg-muted);
+}
+
+[data-elora-home] .eh-legal-prose > * + * {
+    margin-top: var(--eh-space-4);
+}
+
+[data-elora-home] .eh-legal-prose strong {
+    color: var(--eh-fg);
+    font-weight: 600;
+}
+
+[data-elora-home] .eh-legal-prose a:not([class]) {
+    color: var(--eh-accent);
+    font-weight: 550;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+}
+
+[data-elora-home] .eh-legal-prose a:not([class]):hover {
+    text-decoration-thickness: 2px;
+}
+
+[data-elora-home] .eh-legal-list {
+    display: grid;
+    gap: var(--eh-space-3);
+    margin: var(--eh-space-4) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+[data-elora-home] .eh-legal-list li {
+    position: relative;
+    padding-left: var(--eh-space-6);
+}
+
+[data-elora-home] .eh-legal-list li::before {
+    content: "";
+    position: absolute;
+    left: 0.3rem;
+    top: 0.68em;
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 50%;
+    background: var(--eh-green-500);
+}
+
+/* Definitions */
+[data-elora-home] .eh-legal-defs {
+    margin: var(--eh-space-6) 0 0;
+    border: 1px solid var(--eh-line);
+    border-radius: var(--eh-radius-lg);
+    overflow: hidden;
+}
+
+[data-elora-home] .eh-legal-defs > div {
+    display: grid;
+    gap: var(--eh-space-1) var(--eh-space-6);
+    padding: var(--eh-space-4) var(--eh-space-6);
+}
+
+[data-elora-home] .eh-legal-defs > div + div {
+    border-top: 1px solid var(--eh-line);
+}
+
+[data-elora-home] .eh-legal-defs > div:nth-child(odd) {
+    background: var(--eh-surface);
+}
+
+@media (min-width: 640px) {
+    [data-elora-home] .eh-legal-defs > div {
+        grid-template-columns: 10rem minmax(0, 1fr);
+    }
+}
+
+[data-elora-home] .eh-legal-defs dt {
+    font-weight: 600;
+    color: var(--eh-fg);
+}
+
+[data-elora-home] .eh-legal-defs dd {
+    margin: 0;
+}
+
+/* Term cards */
+[data-elora-home] .eh-legal-terms {
+    display: grid;
+    gap: var(--eh-space-3);
+    margin: var(--eh-space-6) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+@media (min-width: 640px) {
+    [data-elora-home] .eh-legal-terms {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 900px) {
+    [data-elora-home] .eh-legal-terms[data-columns="3"] {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+[data-elora-home] .eh-legal-terms li {
+    padding: var(--eh-space-6);
+    border: 1px solid var(--eh-line);
+    border-radius: var(--eh-radius-lg);
+    background: var(--eh-panel);
+    transition:
+        border-color var(--eh-dur-2) var(--eh-ease-out),
+        box-shadow var(--eh-dur-2) var(--eh-ease-out),
+        transform var(--eh-dur-2) var(--eh-ease-out);
+}
+
+@media (hover: hover) {
+    [data-elora-home] .eh-legal-terms li:hover {
+        border-color: var(--eh-line-strong);
+        box-shadow: var(--eh-shadow-md);
+        transform: translate3d(0, -3px, 0);
+    }
+
+    [data-elora-home] .eh-legal-terms li:hover .eh-legal-terms-icon {
+        background: var(--eh-accent);
+        border-color: var(--eh-accent);
+        color: #fff;
+    }
+}
+
+[data-elora-home] .eh-legal-terms-icon {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--eh-radius-md);
+    border: 1px solid var(--eh-line);
+    background: var(--eh-bg);
+    color: var(--eh-accent);
+    transition:
+        background-color var(--eh-dur-2) var(--eh-ease-out),
+        border-color var(--eh-dur-2) var(--eh-ease-out),
+        color var(--eh-dur-2) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-legal-terms-icon svg {
+    width: 1.05rem;
+    height: 1.05rem;
+}
+
+[data-elora-home] .eh-legal-terms h3 {
+    margin-top: var(--eh-space-4);
+    font-size: var(--eh-text-base);
+    font-weight: 600;
+    color: var(--eh-fg);
+}
+
+[data-elora-home] .eh-legal-terms p {
+    margin-top: var(--eh-space-1);
+    font-size: 0.9375rem;
+    line-height: 1.6;
+}
+
+/* Callouts */
+[data-elora-home] .eh-legal-callout {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--eh-space-4);
+    margin-top: var(--eh-space-6);
+    padding: var(--eh-space-4) var(--eh-space-6) var(--eh-space-6) var(--eh-space-4);
+    border: 1px solid var(--eh-green-200);
+    border-radius: var(--eh-radius-lg);
+    background: var(--eh-green-50);
+}
+
+[data-elora-home] .eh-legal-callout[data-tone="important"] {
+    border-color: var(--eh-gold-200);
+    background: var(--eh-gold-100);
+    box-shadow: inset 3px 0 0 var(--eh-gold-400);
+}
+
+[data-elora-home] .eh-legal-callout-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: 0.2rem 0 0 0.25rem;
+    color: var(--eh-green-700);
+}
+
+[data-elora-home] .eh-legal-callout[data-tone="important"] .eh-legal-callout-icon {
+    color: var(--eh-gold-600);
+}
+
+[data-elora-home] .eh-legal-callout-label {
+    font-family: var(--eh-font-mono);
+    font-size: var(--eh-text-xs);
+    letter-spacing: var(--eh-tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--eh-green-700);
+}
+
+[data-elora-home] .eh-legal-callout[data-tone="important"] .eh-legal-callout-label {
+    color: var(--eh-gold-600);
+}
+
+[data-elora-home] .eh-legal-callout-body {
+    margin-top: var(--eh-space-1);
+    color: var(--eh-fg);
+}
+
+[data-elora-home] .eh-legal-email {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--eh-space-2);
+    min-height: 44px;
+    padding-inline: var(--eh-space-4);
+    border: 1px solid var(--eh-line-strong);
+    border-radius: var(--eh-radius-pill);
+    font-weight: 550;
+    color: var(--eh-fg);
+    text-decoration: none;
+    transition: background-color var(--eh-dur-2) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-legal-email:hover {
+    background: var(--eh-surface-2);
+}
+
+[data-elora-home] .eh-legal-email svg {
+    width: 1rem;
+    height: 1rem;
+    color: var(--eh-accent);
+}
+
+/* ------------------------------------------------------------- help panel */
+
+[data-elora-home] .eh-legal-end {
+    padding-top: var(--eh-space-8);
+    padding-bottom: var(--eh-scene-y);
+}
+
+[data-elora-home] .eh-legal-help {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    display: grid;
+    gap: var(--eh-space-12);
+    padding: clamp(1.75rem, 1rem + 3.5vw, 4rem);
+    border: 1px solid var(--eh-line);
+    border-radius: var(--eh-radius-2xl);
+    background:
+        radial-gradient(55% 80% at 100% 0%, rgb(212 175 55 / 0.14), transparent 70%),
+        var(--eh-bg-tint);
+}
+
+@media (min-width: 900px) {
+    [data-elora-home] .eh-legal-help {
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+        align-items: center;
+    }
+}
+
+[data-elora-home] .eh-legal-help h2 {
+    margin-top: var(--eh-space-3);
+    font-size: var(--eh-text-3xl);
+    color: var(--eh-fg);
+}
+
+[data-elora-home] .eh-legal-help-copy > p:not(.eh-eyebrow) {
+    margin-top: var(--eh-space-4);
+    max-width: 44ch;
+    font-size: var(--eh-text-lg);
+    line-height: 1.55;
+    color: var(--eh-fg-muted);
+}
+
+[data-elora-home] .eh-legal-help-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--eh-space-3);
+    margin-top: var(--eh-space-8);
+}
+
+[data-elora-home] .eh-legal-help-actions .eh-btn-secondary {
+    background: var(--eh-bg);
+}
+
+[data-elora-home] .eh-legal-others ul {
+    margin: var(--eh-space-3) 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+[data-elora-home] .eh-legal-others a {
+    display: flex;
+    align-items: center;
+    gap: var(--eh-space-4);
+    min-height: 3.75rem;
+    border-bottom: 1px solid var(--eh-line);
+    font-family: var(--eh-font-display);
+    font-size: var(--eh-text-xl);
+    color: var(--eh-fg);
+    text-decoration: none;
+}
+
+[data-elora-home] .eh-legal-others span {
+    flex: 1;
+}
+
+[data-elora-home] .eh-legal-others-icon {
+    width: 1.125rem;
+    height: 1.125rem;
+    color: var(--eh-accent);
+}
+
+[data-elora-home] .eh-legal-others-arrow {
+    width: 1.125rem;
+    height: 1.125rem;
+    color: var(--eh-fg-subtle);
+    transition:
+        transform var(--eh-dur-2) var(--eh-ease-out),
+        color var(--eh-dur-2) var(--eh-ease-out);
+}
+
+[data-elora-home] .eh-legal-others a:hover .eh-legal-others-arrow {
+    transform: translate3d(4px, 0, 0);
+    color: var(--eh-fg);
+}
+
+/* ---------------------------------------------------------- reading progress */
+
+[data-elora-home] .eh-legal-progress {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: calc(var(--eh-z-nav) + 1);
+    height: 3px;
+    background: linear-gradient(90deg, var(--eh-green-500), var(--eh-gold-400));
+    transform: scaleX(0);
+    transform-origin: 0 50%;
+    pointer-events: none;
+}
+
+/* --------------------------------------------------------- view transitions */
+/* Only active while transition.ts has its class on <html>, so these timings
+   never leak into any other navigation. */
+
+html.eh-legal-vt::view-transition-old(root),
+html.eh-legal-vt::view-transition-new(root) {
+    /* Same duration on both halves keeps the default cross-fade complementary,
+       so pixels that don't change (the nav) stay perfectly still. */
+    animation-duration: 320ms;
+    animation-timing-function: cubic-bezier(0.33, 0.02, 0, 1);
+}
+
+/* Named only for tab clicks, so the pill can slide and the labels ride above
+   it. From the bottom-of-page links the switcher is off-screen and would fly
+   in from outside the viewport. */
+html.eh-legal-vt-tabs [data-elora-home] .eh-legal-switch-track {
+    view-transition-name: eh-legal-tab-track;
+}
+
+html.eh-legal-vt-tabs [data-elora-home] .eh-legal-switch-pill {
+    view-transition-name: eh-legal-tab-pill;
+}
+
+html.eh-legal-vt-tabs [data-elora-home] .eh-legal-switch-label {
+    view-transition-name: var(--eh-vt-name);
+}
+
+/* The track, pill and labels share one timing so they move as a unit. */
+html.eh-legal-vt-tabs::view-transition-group(*) {
+    animation-duration: 520ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html.eh-legal-vt::view-transition-group(*),
+    html.eh-legal-vt::view-transition-old(*),
+    html.eh-legal-vt::view-transition-new(*) {
+        animation: none !important;
+    }
+
+    [data-elora-home] .eh-legal-progress {
+        display: none;
+    }
+}
+
+/* ------------------------------------------------------------------- focus */
+
+[data-elora-home] .eh-legal :is(a, button, summary):focus-visible {
+    outline: 2px solid var(--eh-accent);
+    outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------- print */
+
+@media print {
+    [data-elora-home]:has(.eh-legal) :is(.eh-nav, .eh-footer, .eh-curtain, .eh-skip),
+    [data-elora-home] .eh-legal :is(.eh-legal-switch, .eh-legal-aside, .eh-legal-toc-mobile, .eh-legal-end, .eh-legal-anchor, .eh-aurora, .eh-legal-texture, .eh-legal-mark, .eh-legal-progress) {
+        display: none !important;
+    }
+
+    [data-elora-home] .eh-legal-hero {
+        padding: 0 0 1.5rem;
+        background: none;
+    }
+
+    [data-elora-home] .eh-legal-layout {
+        display: block;
+        padding-top: 0;
+    }
+
+    [data-elora-home] .eh-legal-article {
+        max-width: none;
+    }
+
+    [data-elora-home] .eh-legal-section {
+        break-inside: avoid-page;
+    }
+
+    /* Content hidden behind the animation gate must still print. */
+    html[data-eh-anim] [data-elora-home] .eh-legal :is(.eh-reveal, .eh-reveal-pop, .eh-line-inner) {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+}
