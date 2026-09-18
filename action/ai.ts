@@ -2,28 +2,68 @@
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { checkRateLimit } from "@/lib/ratelimit";
-import { getClientIp } from "@/lib/getClientIp";
+import { verifyActionUser } from "@/lib/actionAuth";
+import { deductTokensAdmin, refundTokensAdmin } from "@/lib/tokensAdmin";
+import { TOKEN_COSTS } from "@/lib/billing/plans";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
+const MAX_DOCUMENT_BYTES = 20 * 1024 * 1024;
 
-export async function analyzeDocument(documentUrl: string, documentType: string, userData: any, mimeType: string) {
+/** Only documents in our own Firebase Storage bucket may be analyzed. */
+function isOwnStorageUrl(raw: string): URL | null {
+  const bucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
+  if (!bucket) return null;
+  let url: URL;
   try {
-    // These Server Actions don't verify a Firebase ID token today, so there's
-    // no uid to key a limiter on — fall back to IP. See app/api/gemini/* for
-    // the uid-keyed version used by routes that do authenticate.
-    const ip = await getClientIp();
-    const rateLimit = await checkRateLimit("aiGeneration", `ip:${ip}`);
+    url = new URL(raw);
+  } catch {
+    return null;
+  }
+  const ok =
+    url.protocol === "https:" &&
+    url.hostname === "firebasestorage.googleapis.com" &&
+    url.pathname.startsWith(`/v0/b/${bucket}/o/`);
+  return ok ? url : null;
+}
+
+export async function analyzeDocument(idToken: string, documentUrl: string, documentType: string, userData: any, mimeType: string) {
+  let chargedUid: string | null = null;
+  try {
+    const user = await verifyActionUser(idToken);
+    if (!user) {
+      return { success: false, error: "Please sign in to analyze documents." };
+    }
+    const rateLimit = await checkRateLimit("aiGeneration", user.uid);
     if (!rateLimit.success) {
       return { success: false, error: "Too many requests. Please slow down and try again shortly." };
     }
 
-    // 1. Fetch the file
-    const response = await fetch(documentUrl);
+    // 1. Fetch the file — own storage bucket only, capped size
+    const url = isOwnStorageUrl(documentUrl);
+    if (!url) {
+      return { success: false, error: "Document must be uploaded to Elora Visa storage." };
+    }
+    const response = await fetch(url.toString());
     if (!response.ok) throw new Error("Failed to fetch document");
-      console.log(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET);
+    const declaredLength = Number(response.headers.get("content-length") || 0);
+    if (declaredLength > MAX_DOCUMENT_BYTES) {
+      return { success: false, error: "Document is too large to analyze (20MB max)." };
+    }
     const arrayBuffer = await response.arrayBuffer();
+    if (arrayBuffer.byteLength > MAX_DOCUMENT_BYTES) {
+      return { success: false, error: "Document is too large to analyze (20MB max)." };
+    }
     const base64Data = Buffer.from(arrayBuffer).toString("base64");
+
+    // Charge server-side once the input has passed validation; refunded in
+    // the catch below if generation fails after this point.
+    try {
+      await deductTokensAdmin(user.uid, TOKEN_COSTS.DOCUMENT_REVIEW);
+    } catch {
+      return { success: false, error: `Insufficient tokens. You need ${TOKEN_COSTS.DOCUMENT_REVIEW} tokens for a document review.` };
+    }
+    chargedUid = user.uid;
 
     // 2. Initialize Model
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
@@ -90,18 +130,33 @@ export async function analyzeDocument(documentUrl: string, documentType: string,
     return { success: true, data: analysis };
 
   } catch (error: any) {
+    if (chargedUid) {
+      await refundTokensAdmin(chargedUid, TOKEN_COSTS.DOCUMENT_REVIEW).catch(() => {});
+    }
     console.error("AI Analysis Error:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: "Document analysis failed. Please try again." };
   }
 }
 
-export async function getVisaInformation(userData: any) {
+export async function getVisaInformation(idToken: string, userData: any) {
+  let chargedUid: string | null = null;
   try {
-    const ip = await getClientIp();
-    const rateLimit = await checkRateLimit("aiGeneration", `ip:${ip}`);
+    const user = await verifyActionUser(idToken);
+    if (!user) {
+      return { success: false, error: "Please sign in to generate visa information." };
+    }
+    const rateLimit = await checkRateLimit("aiGeneration", user.uid);
     if (!rateLimit.success) {
       return { success: false, error: "Too many requests. Please slow down and try again shortly." };
     }
+
+    // Charge server-side; refunded in the catch below if generation fails.
+    try {
+      await deductTokensAdmin(user.uid, TOKEN_COSTS.INFORMATION_GENERATION);
+    } catch {
+      return { success: false, error: `Insufficient tokens. You need ${TOKEN_COSTS.INFORMATION_GENERATION} tokens to generate new information.` };
+    }
+    chargedUid = user.uid;
 
     // Use the specific model version that is known to work for text generation
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
@@ -137,7 +192,10 @@ export async function getVisaInformation(userData: any) {
     return { success: true, data };
 
   } catch (error: any) {
+    if (chargedUid) {
+      await refundTokensAdmin(chargedUid, TOKEN_COSTS.INFORMATION_GENERATION).catch(() => {});
+    }
     console.error("AI Visa Info Error:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: "Failed to generate visa information. Please try again." };
   }
 }

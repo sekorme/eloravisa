@@ -136,12 +136,12 @@ export function AlertsSection() {
             ))}
           </Accordion>
         ) : (
-          <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 rounded-lg">
+          <div className="bg-primary/10 border-l-4 border-primary p-4 rounded-lg">
             <div className="flex items-start">
-              <Info className="text-blue-500 dark:text-blue-400 mr-3 mt-0.5 w-5 h-5" />
+              <Info className="text-primary dark:text-primary mr-3 mt-0.5 w-5 h-5" />
               <div>
-                <p className="text-sm font-semibold text-blue-800 dark:text-blue-200 mb-1">No Critical Alerts</p>
-                <p className="text-xs text-blue-700 dark:text-blue-300/80">Great job! Your documents look good so far.</p>
+                <p className="text-sm font-semibold text-primary dark:text-primary mb-1">No Critical Alerts</p>
+                <p className="text-xs text-primary dark:text-primary/80">Great job! Your documents look good so far.</p>
               </div>
             </div>
           </div>

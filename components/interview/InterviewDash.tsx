@@ -13,7 +13,6 @@ import { collection, addDoc } from "firebase/firestore";
 import { toast } from "sonner";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import {useRouter} from "next/navigation";
-import { deductTokens, TOKEN_COSTS } from "@/lib/subscriptions";
 import { mintGeminiSessionToken } from "@/lib/geminiSession";
 
 const InterviewDash = () => {
@@ -148,7 +147,7 @@ const InterviewDash = () => {
         try {
             // Generate AI Feedback
             console.log("Generating feedback...");
-            const feedbackResponse = await generateInterviewFeedback(finalTranscript);
+            const feedbackResponse = await generateInterviewFeedback(await currentUser.getIdToken(), finalTranscript);
             const feedback = feedbackResponse.success ? feedbackResponse.data : null;
             console.log("Feedback generated:", feedback);
 
@@ -200,17 +199,10 @@ const InterviewDash = () => {
     const handleStop = async () => {
         console.log("handleStop called. Entries:", entriesRef.current);
         
-        // Stop the session immediately to release resources
+        // Stop the session immediately to release resources. Tokens were
+        // already charged server-side when the session token was minted
+        // (app/api/gemini/session, purpose "interview_dash").
         stopSession();
-
-        if (currentUser) {
-            try {
-                await deductTokens(currentUser.uid, TOKEN_COSTS.MOCK_INTERVIEW);
-            } catch (error) {
-                console.error("Failed to deduct tokens:", error);
-                toast.error("Failed to deduct tokens. Please check your balance.");
-            }
-        }
 
         // Save session
         await saveSession(entriesRef.current, currentInputRef.current, currentOutputRef.current);
@@ -421,13 +413,13 @@ const InterviewDash = () => {
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8">
-            <div className="w-full max-w-2xl  backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden flex flex-col shadow-2xl h-[85vh]">
+            <div className="w-full max-w-2xl bg-white dark:bg-card backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-3xl overflow-hidden flex flex-col shadow-2xl h-[85vh]">
 
                 {/* Header */}
-                <div className="p-6 border-b border-white/5 flex items-center justify-between ">
+                <div className="p-6 border-b border-slate-100 dark:border-white/5 flex items-center justify-between ">
                     <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 rounded-xl  flex items-center justify-center shadow-lg">
-                            <svg className="w-6 h-6  dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-6 h-6 text-slate-700 dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                             </svg>
                         </div>
@@ -442,7 +434,7 @@ const InterviewDash = () => {
 
                     <button
                         onClick={() => setEntries([])}
-                        className="p-2 hover:bg-white/10 rounded-lg transition-colors text-gray-400 hover:text-white"
+                        className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors text-slate-400 hover:text-slate-700 dark:hover:text-white"
                         title="Clear history"
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -453,7 +445,7 @@ const InterviewDash = () => {
 
                 {/* Status Messages */}
                 {error && (
-                    <div className="m-4 p-3 bg-red-900/30 border border-red-500/50 rounded-xl text-red-200 text-sm flex items-center space-x-2">
+                    <div className="m-4 p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-500/50 rounded-xl text-red-700 dark:text-red-200 text-sm flex items-center space-x-2">
                         <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                         </svg>
@@ -469,7 +461,7 @@ const InterviewDash = () => {
                 />
 
                 {/* Visualizer and Controls Footer */}
-                <div className="p-8 bg-gray-900/60 border-t border-white/5 space-y-6">
+                <div className="p-8 bg-slate-50 dark:bg-slate-900/60 border-t border-slate-100 dark:border-white/5 space-y-6">
                     <Visualizer isActive={status === SessionStatus.ACTIVE} stream={micStream} />
 
                     <div className="flex flex-col items-center space-y-4">
@@ -479,7 +471,7 @@ const InterviewDash = () => {
                             className={`relative group flex items-center justify-center p-6 rounded-full transition-all duration-500 ${
                                 status === SessionStatus.ACTIVE
                                     ? ' hover:bg-red-600 shadow-[0_0_30px_rgba(239,68,68,0.4)]'
-                                    : 'bg-blue-600 hover:bg-blue-700 shadow-[0_0_30px_rgba(37,99,235,0.4)]'
+                                    : 'bg-primary hover:bg-primary/90 shadow-[0_0_30px_rgba(37,99,235,0.4)]'
                             } disabled:opacity-50 disabled:cursor-not-allowed`}
                         >
                             {status === SessionStatus.CONNECTING ? (
@@ -508,8 +500,8 @@ const InterviewDash = () => {
 
             {/* Background blobs for depth */}
             <div className="fixed top-0 left-0 -z-10 w-full h-full overflow-hidden pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-600/10 blur-[120px] rounded-full"></div>
-                <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-600/10 blur-[120px] rounded-full"></div>
+                <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[120px] rounded-full"></div>
+                <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-lp-azure-2/10 blur-[120px] rounded-full"></div>
             </div>
         </div>
     );

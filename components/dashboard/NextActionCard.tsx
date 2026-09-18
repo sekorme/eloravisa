@@ -27,8 +27,8 @@ export function NextActionCard() {
   return (
     <div id="next-action-card" className="bg-white dark:bg-neutral-900 rounded-3xl shadow-xl border border-neutral-100 dark:border-neutral-800 p-6 transition-all duration-300 hover:shadow-2xl group">
       <div className="flex items-center mb-6">
-        <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center mr-4 group-hover:rotate-12 transition-transform duration-300">
-          <Bolt className="text-blue-600 dark:text-blue-400 w-6 h-6" />
+        <div className="w-12 h-12 bg-primary/15 rounded-2xl flex items-center justify-center mr-4 group-hover:rotate-12 transition-transform duration-300">
+          <Bolt className="text-primary w-6 h-6" />
         </div>
         <div>
           <h2 className="text-xl font-black text-neutral-800 dark:text-neutral-100 tracking-tight">Next Action</h2>
@@ -36,7 +36,7 @@ export function NextActionCard() {
         </div>
       </div>
       
-      <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-5 mb-6 text-white shadow-lg shadow-blue-200 dark:shadow-none relative overflow-hidden group/btn">
+      <div className="bg-gradient-to-br from-primary to-lp-azure-2 rounded-2xl p-5 mb-6 text-white shadow-lg shadow-primary/20 dark:shadow-none relative overflow-hidden group/btn">
         <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-8 -mt-8 blur-2xl group-hover/btn:scale-150 transition-transform duration-700"></div>
         <p className="font-bold mb-4 relative z-10 leading-snug">
           {nextPendingDoc 
@@ -74,7 +74,7 @@ export function NextActionCard() {
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="h-6 px-2 text-xs text-blue-600 hover:text-blue-700 bg-blue-50 dark:bg-blue-900/20  transition-opacity"
+                  className="h-6 px-2 text-xs text-primary hover:text-primary bg-primary/10  transition-opacity"
                   onClick={() => setReviewDoc({ key: doc.key, url: docUrl, label: doc.label, type: docType })}
                 >
                   <Sparkles className="w-3 h-3 mr-1" /> Review

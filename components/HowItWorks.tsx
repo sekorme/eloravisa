@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion, type Transition, type Variants } from "framer-motion";
 
 /**
  * HowItWorks — 3‑step timeline section
@@ -21,7 +21,7 @@ export default function HowItWorks() {
   const reduceMotion = useReducedMotion();
 
   // Shared animation presets
-  const item = {
+  const item: Variants = {
     hidden: { opacity: 0, y: 20 },
     show: {
       opacity: 1,
@@ -42,11 +42,11 @@ export default function HowItWorks() {
 
   // Dot animation distances depending on orientation (handled via CSS breakpoints).
   // We'll animate along X for md+ (horizontal) and along Y for mobile (vertical) using both with media queries.
-  const loopTransition = {
+  const loopTransition: Transition = {
     duration: 4.5,
     ease: "easeInOut",
     repeat: Infinity,
-    repeatType: "mirror" as const,
+    repeatType: "mirror",
   };
 
   return (

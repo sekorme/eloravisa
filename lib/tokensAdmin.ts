@@ -1,9 +1,9 @@
 import { db } from "@/firebase/admin";
 
-// Admin-SDK (server-side) equivalent of lib/subscriptions.ts's deductTokens,
-// for routes that authenticate via a Bearer ID token instead of the client
-// Firestore SDK. Both use a transaction so concurrent requests can't both
-// pass the balance check and double-spend.
+// The only token-deduction path: server-side via the Admin SDK, called from
+// authenticated routes and server actions. firestore.rules pins `tokens`
+// against client writes. The transaction ensures concurrent requests can't
+// both pass the balance check and double-spend.
 export async function deductTokensAdmin(uid: string, amount: number) {
     const userRef = db.collection("users").doc(uid);
     await db.runTransaction(async (tx) => {

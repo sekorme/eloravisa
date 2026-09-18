@@ -137,7 +137,7 @@ export default function DocumentManager() {
                                         href={docUrl} 
                                         target="_blank" 
                                         rel="noopener noreferrer"
-                                        className="text-xs text-blue-600 hover:underline flex items-center gap-1 mt-0.5"
+                                        className="text-xs text-primary hover:underline flex items-center gap-1 mt-0.5"
                                     >
                                         View Document <ExternalLink className="w-3 h-3" />
                                     </a>
@@ -149,7 +149,7 @@ export default function DocumentManager() {
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => handleDownload(docUrl, documentLabels[key] || key)}
-                                    className="h-8 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                                    className="h-8 text-xs text-primary hover:text-primary hover:bg-primary/10 dark:hover:bg-primary/15"
                                 >
                                     <Image src="/download.svg" alt="Download" width={12} height={12} className="w-3 h-3 mr-2" />
                                     Download

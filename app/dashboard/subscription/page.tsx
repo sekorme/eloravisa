@@ -6,11 +6,10 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { SUBSCRIPTION_PLANS, PlanId } from '@/lib/subscriptions'
 import { auth, db } from '@/firebase/client'
-import { doc, onSnapshot, collection, query, where, getDocs } from 'firebase/firestore'
+import { doc, getDoc, onSnapshot } from 'firebase/firestore'
 import { startPaystackPayment } from '@/lib/paystack'
 import { getUserCurrencyInfo } from '@/lib/currency'
 import { toast } from 'sonner'
-import {convertCurrency} from "@/lib/convertCurrency";
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -72,15 +71,18 @@ export default function SubscriptionPage() {
     setPayingPlan(planKey)
 
     try {
-      // If a promo code was entered, verify it exists in the influencers collection.
-      // If it doesn't exist, ask the user if they want to continue without it or re-enter.
-      let promoToUse: string | null = promoCode.trim() ? promoCode.trim() : null
+      // If a promo code was entered, verify it against the promo_codes
+      // collection (doc id = code, created at influencer signup). The old
+      // query against `influencers` is no longer readable under
+      // firestore.rules — influencer docs are owner-only.
+      // Codes are stored uppercase (see lib/influencerAuth.ts), and the
+      // server-side influencer lookup is case-sensitive, so normalize once
+      // here and use the same value for validation and payment.
+      let promoToUse: string | null = promoCode.trim() ? promoCode.trim().toUpperCase() : null
       if (promoToUse) {
         try {
-          const inflRef = collection(db, 'influencers')
-          const q = query(inflRef, where('promoCode', '==', promoToUse))
-          const snap = await getDocs(q)
-          if (snap.empty) {
+          const promoSnap = await getDoc(doc(db, 'promo_codes', promoToUse))
+          if (!promoSnap.exists()) {
             // Open modal to let the user continue without the promo code or cancel to re-enter
             setPendingPlan(planKey)
             setPendingPromo(promoToUse)
@@ -114,25 +116,20 @@ export default function SubscriptionPage() {
   async function startPaymentFlow(planKey: PlanId, promoToUse: string | null) {
     const plan = SUBSCRIPTION_PLANS[planKey]
     try {
-      const priceUSD = plan.price
-      const amount = await convertCurrency(priceUSD, 'GHS')
-
+      // Amount and currency are decided server-side by /api/paystack-initialize.
       await startPaystackPayment(
-        auth.currentUser.email,
-        amount,
-        'GHS',
-        plan.id,
+        planKey,
+        promoToUse || null,
         async (reference) => {
           try {
+            const idToken = await auth.currentUser?.getIdToken()
             const res = await fetch('/api/paystack-success', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                email: auth.currentUser?.email,
-                reference,
-                planId: planKey,
-                promoCode: promoToUse || null,
-              }),
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${idToken}`,
+              },
+              body: JSON.stringify({ reference }),
             })
             const data = await res.json()
             if (data.success) {
@@ -149,6 +146,10 @@ export default function SubscriptionPage() {
             setPendingPromo(null)
             setPromoNotFoundOpen(false)
           }
+        },
+        () => {
+          // Cancelled/failed checkout — release the button spinner.
+          setPayingPlan(null)
         }
       )
     } catch (err) {
@@ -161,7 +162,7 @@ export default function SubscriptionPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     )
   }
@@ -190,9 +191,9 @@ export default function SubscriptionPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* FREE PLAN */}
-        <Card className={`relative flex flex-col ${currentPlanId === 'free' ? 'border-2 border-indigo-600 shadow-xl' : 'border border-slate-200 dark:border-slate-800'}`}>
+        <Card className={`relative flex flex-col ${currentPlanId === 'free' ? 'border-2 border-lp-azure-2 shadow-xl' : 'border border-slate-200 dark:border-slate-800'}`}>
           {currentPlanId === 'free' && (
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-lp-azure-2 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
               Current Plan
             </div>
           )}
@@ -232,13 +233,13 @@ export default function SubscriptionPage() {
         </Card>
 
         {/* PRO PLAN */}
-        <Card className={`relative flex flex-col ${currentPlanId === 'pro' ? 'border-2 border-indigo-600 shadow-xl' : 'border border-slate-200 dark:border-slate-800'}`}>
+        <Card className={`relative flex flex-col ${currentPlanId === 'pro' ? 'border-2 border-lp-azure-2 shadow-xl' : 'border border-slate-200 dark:border-slate-800'}`}>
           {currentPlanId === 'pro' && (
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-lp-azure-2 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
               Current Plan
             </div>
           )}
-          <div className="absolute top-4 right-4 text-indigo-600">
+          <div className="absolute top-4 right-4 text-primary">
             <Zap className="w-6 h-6 fill-current" />
           </div>
           <CardHeader>
@@ -272,7 +273,7 @@ export default function SubscriptionPage() {
           <CardFooter>
             <Button 
                 onClick={() => handleSubscribe('PRO')} 
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
+                className="w-full bg-lp-azure-2 hover:bg-lp-azure-2/90 text-white"
                 disabled={payingPlan === 'PRO' || currentPlanId === 'pro'}
             >
               {payingPlan === 'PRO' ? <Loader2 className="w-4 h-4 animate-spin" /> : currentPlanId === 'pro' ? 'Renew Plan' : 'Subscribe Now'}
@@ -281,9 +282,9 @@ export default function SubscriptionPage() {
         </Card>
 
         {/* FULL PLAN */}
-        <Card className={`relative flex flex-col ${currentPlanId === 'full' ? 'border-2 border-indigo-600 shadow-xl' : 'border border-slate-200 dark:border-slate-800'}`}>
+        <Card className={`relative flex flex-col ${currentPlanId === 'full' ? 'border-2 border-lp-azure-2 shadow-xl' : 'border border-slate-200 dark:border-slate-800'}`}>
           {currentPlanId === 'full' && (
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-lp-azure-2 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest">
               Current Plan
             </div>
           )}
@@ -383,7 +384,7 @@ export default function SubscriptionPage() {
         <h2 className="text-xl font-bold mb-6 text-center uppercase tracking-widest text-slate-400">Token Cost Guide</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="flex items-center gap-4 p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
-            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-blue-600">
+            <div className="p-3 bg-primary/10 rounded-xl text-primary">
                 <Shield className="w-6 h-6" />
             </div>
             <div>

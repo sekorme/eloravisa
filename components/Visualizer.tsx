@@ -8,9 +8,9 @@ interface VisualizerProps {
 
 const Visualizer: React.FC<VisualizerProps> = ({ isActive, stream }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const animationRef = useRef<number>();
-    const audioContextRef = useRef<AudioContext>();
-    const analyserRef = useRef<AnalyserNode>();
+    const animationRef = useRef<number | undefined>(undefined);
+    const audioContextRef = useRef<AudioContext | undefined>(undefined);
+    const analyserRef = useRef<AnalyserNode | undefined>(undefined);
 
     useEffect(() => {
         if (isActive && stream) {

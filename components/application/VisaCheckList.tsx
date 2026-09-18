@@ -64,7 +64,7 @@ export default function VisaCheckList() {
         <section className="space-y-8">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 px-2">
                 <div>
-                    <h3 className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-[0.2em] mb-2">
+                    <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2">
                         Requirements Masterlist
                     </h3>
                     <div className="flex items-baseline gap-2">
@@ -80,13 +80,13 @@ export default function VisaCheckList() {
                 <div className="flex flex-col items-start md:items-end gap-2">
                     <div className="flex items-center gap-2">
                         <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Completion Status</span>
-                        <span className="text-sm font-black text-blue-600 dark:text-blue-400">
+                        <span className="text-sm font-black text-primary">
                             {Math.round(checklistData.length > 0 ? (uploadedCount / checklistData.length) * 100 : 0)}%
                         </span>
                     </div>
                     <div className="w-48 h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-200/50 dark:border-slate-700/50 p-0.5">
                         <div 
-                            className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full transition-all duration-1000 ease-out shadow-sm" 
+                            className="h-full bg-gradient-to-r from-primary to-lp-azure-2 rounded-full transition-all duration-1000 ease-out shadow-sm" 
                             style={{ width: `${checklistData.length > 0 ? (uploadedCount / checklistData.length) * 100 : 0}%` }}
                         />
                     </div>

@@ -2,17 +2,33 @@
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { checkRateLimit } from "@/lib/ratelimit";
-import { getClientIp } from "@/lib/getClientIp";
+import { verifyActionUser } from "@/lib/actionAuth";
+import { deductTokensAdmin, refundTokensAdmin } from "@/lib/tokensAdmin";
+import { TOKEN_COSTS } from "@/lib/billing/plans";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
-export async function generateInterviewQuestions(userData: any, count: number) {
+export async function generateInterviewQuestions(idToken: string, userData: any, count: number) {
+  let chargedUid: string | null = null;
   try {
-    const ip = await getClientIp();
-    const rateLimit = await checkRateLimit("aiGeneration", `ip:${ip}`);
+    const user = await verifyActionUser(idToken);
+    if (!user) {
+      return { success: false, error: "Please sign in to use interview practice." };
+    }
+    const rateLimit = await checkRateLimit("aiGeneration", user.uid);
     if (!rateLimit.success) {
       return { success: false, error: "Too many requests. Please slow down and try again shortly." };
     }
+
+    // This is the entry point for a text mock interview, so the whole
+    // interview (questions + per-answer analysis + feedback) is charged
+    // here, server-side. Refunded in the catch below if generation fails.
+    try {
+      await deductTokensAdmin(user.uid, TOKEN_COSTS.MOCK_INTERVIEW);
+    } catch {
+      return { success: false, error: `Insufficient tokens. You need ${TOKEN_COSTS.MOCK_INTERVIEW} tokens to start a mock interview.` };
+    }
+    chargedUid = user.uid;
 
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
@@ -39,15 +55,21 @@ export async function generateInterviewQuestions(userData: any, count: number) {
     return { success: true, data: questions };
 
   } catch (error: any) {
+    if (chargedUid) {
+      await refundTokensAdmin(chargedUid, TOKEN_COSTS.MOCK_INTERVIEW).catch(() => {});
+    }
     console.error("AI Question Gen Error:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: "Failed to generate questions. Please try again." };
   }
 }
 
-export async function analyzeAnswer(question: string, answer: string) {
+export async function analyzeAnswer(idToken: string, question: string, answer: string) {
     try {
-        const ip = await getClientIp();
-        const rateLimit = await checkRateLimit("aiGeneration", `ip:${ip}`);
+        const user = await verifyActionUser(idToken);
+        if (!user) {
+          return { success: false, error: "Please sign in to use interview practice." };
+        }
+        const rateLimit = await checkRateLimit("aiGeneration", user.uid);
         if (!rateLimit.success) {
           return { success: false, error: "Too many requests. Please slow down and try again shortly." };
         }
@@ -76,14 +98,17 @@ export async function analyzeAnswer(question: string, answer: string) {
     
       } catch (error: any) {
         console.error("AI Answer Analysis Error:", error);
-        return { success: false, error: error.message };
+        return { success: false, error: "Failed to analyze the answer. Please try again." };
       }
 }
 
-export async function generateInterviewFeedback(transcript: any[]) {
+export async function generateInterviewFeedback(idToken: string, transcript: any[]) {
   try {
-    const ip = await getClientIp();
-    const rateLimit = await checkRateLimit("aiGeneration", `ip:${ip}`);
+    const user = await verifyActionUser(idToken);
+    if (!user) {
+      return { success: false, error: "Please sign in to use interview practice." };
+    }
+    const rateLimit = await checkRateLimit("aiGeneration", user.uid);
     if (!rateLimit.success) {
       return { success: false, error: "Too many requests. Please slow down and try again shortly." };
     }
@@ -132,6 +157,6 @@ export async function generateInterviewFeedback(transcript: any[]) {
 
   } catch (error: any) {
     console.error("AI Feedback Gen Error:", error);
-    return { success: false, error: error.message };
+    return { success: false, error: "Failed to generate feedback. Please try again." };
   }
 }

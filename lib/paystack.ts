@@ -1,33 +1,43 @@
-export async function startPaystackPayment(email: string, amount: number, currency: string, planId: string, onSuccess: (ref: string) => void) {
+/**
+ * Client-side checkout starter.
+ *
+ * The amount is never computed here: /api/paystack-initialize prices the plan
+ * server-side, creates the Paystack transaction + payment intent, and returns
+ * an access_code that the inline popup resumes. Fulfilment later refuses any
+ * reference that wasn't initialized this way.
+ */
+export async function startPaystackPayment(
+    planKey: string,
+    promoCode: string | null,
+    onSuccess: (reference: string) => void,
+    onCancel?: () => void,
+) {
     if (typeof window === "undefined") return;
 
-    const uid = (await import("firebase/auth")).getAuth().currentUser?.uid;
+    const user = (await import("firebase/auth")).getAuth().currentUser;
+    if (!user) throw new Error("You must be signed in to pay");
+    const idToken = await user.getIdToken();
 
-    await loadScript("https://js.paystack.co/v1/inline.js");
-
-    const handler = window.PaystackPop.setup({
-        key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
-        email,
-        amount: Math.round(amount * 100),
-        currency,
-        metadata: { uid, planId },
-        callback: (response: any) => {
-            onSuccess(response.reference);
+    const res = await fetch("/api/paystack-initialize", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${idToken}`,
         },
-        onClose: function () {
-            console.log("Payment window closed");
-        },
+        body: JSON.stringify({ planId: planKey, promoCode }),
     });
+    const data = await res.json();
+    if (!res.ok || !data.accessCode) {
+        throw new Error(data.error || "Failed to initialize payment");
+    }
 
-    handler.openIframe();
-}
-
-function loadScript(src: string) {
-    return new Promise<void>((resolve, reject) => {
-        const script = document.createElement("script");
-        script.src = src;
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error("Failed to load script"));
-        document.body.appendChild(script);
+    const PaystackPop = (await import("@paystack/inline-js")).default;
+    new PaystackPop().resumeTransaction(data.accessCode, {
+        onSuccess: (transaction) => onSuccess(transaction.reference),
+        onCancel: () => onCancel?.(),
+        onError: (error) => {
+            console.error("Paystack checkout error:", error?.message);
+            onCancel?.();
+        },
     });
 }

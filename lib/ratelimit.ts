@@ -20,10 +20,12 @@ const redis = isRateLimitConfigured ? new Redis({ url: url!, token: token! }) : 
 // (Firebase uid) rather than per-IP, since every AI-touching route here
 // already requires auth.
 const LIMITERS = {
+    // Sized so one text mock interview fits comfortably: questions + one
+    // analyzeAnswer per answer (up to 10) + final feedback ≈ 12 calls.
     aiGeneration: redis
         ? new Ratelimit({
               redis,
-              limiter: Ratelimit.slidingWindow(20, "10 m"),
+              limiter: Ratelimit.slidingWindow(30, "10 m"),
               prefix: "ratelimit:ai-generation",
           })
         : null,
@@ -32,6 +34,25 @@ const LIMITERS = {
               redis,
               limiter: Ratelimit.slidingWindow(10, "10 m"),
               prefix: "ratelimit:gemini-session",
+          })
+        : null,
+    // Transactional email sends (welcome mails) — keyed per-uid. An account
+    // legitimately triggers one or two of these, ever.
+    transactionalEmail: redis
+        ? new Ratelimit({
+              redis,
+              limiter: Ratelimit.slidingWindow(3, "1 h"),
+              prefix: "ratelimit:transactional-email",
+          })
+        : null,
+    // Checkout initialization — keyed per-uid. Each call creates a Paystack
+    // transaction and a payment-intent doc, so cap how fast one account can
+    // mint them.
+    paymentInit: redis
+        ? new Ratelimit({
+              redis,
+              limiter: Ratelimit.slidingWindow(10, "10 m"),
+              prefix: "ratelimit:payment-init",
           })
         : null,
     // Public, unauthenticated form on the marketing homepage, so this one is

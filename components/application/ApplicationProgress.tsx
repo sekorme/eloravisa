@@ -66,13 +66,13 @@ export default function ApplicationProgress() {
     const getProgressColor = () => {
         if (percentage >= 80) return "[&_[data-slot=progress-indicator]]:bg-green-500";
         if (percentage >= 40) return "[&_[data-slot=progress-indicator]]:bg-yellow-500";
-        return "[&_[data-slot=progress-indicator]]:bg-blue-600";
+        return "[&_[data-slot=progress-indicator]]:bg-primary";
     };
 
     const getTextColor = () => {
         if (percentage >= 80) return "text-green-500";
         if (percentage >= 40) return "text-yellow-500";
-        return "text-blue-600";
+        return "text-primary";
     };
 
     if (loading) {

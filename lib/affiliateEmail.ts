@@ -2,20 +2,35 @@
 "use server";
 
 import { MailerSend, EmailParams, Sender, Recipient } from "mailersend";
+import { verifyActionUser } from "@/lib/actionAuth";
+import { checkRateLimit } from "@/lib/ratelimit";
 
 const mailerSend = new MailerSend({
   apiKey: process.env.MAILERSEND_API_KEY!,
 });
 
 export async function sendAffiliateWelcomeEmail({
+  idToken,
   name,
   email,
   promoCode,
 }: {
+  idToken: string;
   name: string;
   email: string;
   promoCode: string;
 }) {
+  // Only the freshly created affiliate account may trigger its own welcome
+  // mail — otherwise this is an open relay for spamming arbitrary addresses.
+  const user = await verifyActionUser(idToken);
+  if (!user || user.email?.toLowerCase() !== email.toLowerCase()) {
+    return { success: false, error: "Unauthorized" };
+  }
+  const rateLimit = await checkRateLimit("transactionalEmail", user.uid);
+  if (!rateLimit.success) {
+    return { success: false, error: "Too many requests" };
+  }
+
   const sentFrom = new Sender("info@eloravisa.com", "Elora Visa Affiliate");
   const recipients = [new Recipient(email, name)];
 

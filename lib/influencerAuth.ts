@@ -64,6 +64,7 @@ export async function influencerSignup(
   });
 
   await sendAffiliateWelcomeEmail({
+    idToken: await user.getIdToken(),
     name: fullName,
     email,
     promoCode,

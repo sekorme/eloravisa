@@ -44,21 +44,21 @@ export default function VisaHeader() {
     return (
         <Card className="relative overflow-hidden border-none shadow-2xl rounded-3xl bg-white dark:bg-slate-950">
             {/* Multi-step Vibrant Gradient Background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-600/10 via-indigo-500/5 to-purple-600/10 dark:from-blue-500/20 dark:via-indigo-500/10 dark:to-purple-500/20" />
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-lp-azure-2/5 to-purple-600/10 dark:from-primary/20 dark:via-primary/10 dark:to-purple-500/20" />
             
             {/* Animated Glow Elements */}
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 animate-pulse" />
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 animate-pulse" />
             <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/3" />
             
             <div className="relative z-10 p-6 md:p-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
                 <div className="flex flex-col sm:flex-row gap-6 items-start">
-                    <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-xl shadow-blue-500/30 transform transition-transform hover:rotate-3 duration-300 shrink-0">
+                    <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-lp-azure-2 text-white shadow-xl shadow-primary/30 transform transition-transform hover:rotate-3 duration-300 shrink-0">
                         <FileText size={32} strokeWidth={1.5} />
                     </div>
                     
                     <div className="space-y-4">
                         <div className="flex items-center gap-3 flex-wrap">
-                            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 backdrop-blur-md">
+                            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 backdrop-blur-md">
                                 <MapPin size={12} className="animate-bounce" />
                                 <span className="text-[10px] font-black uppercase tracking-[0.2em]">Live Application</span>
                             </div>
@@ -71,7 +71,7 @@ export default function VisaHeader() {
                         
                         <div>
                             <h1 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-none mb-3">
-                                {destination} <span className="text-blue-500/40 dark:text-blue-500/30 font-light">/</span> {visaType}
+                                {destination} <span className="text-primary/40 dark:text-primary/30 font-light">/</span> {visaType}
                             </h1>
                             <p className="text-base md:text-lg text-slate-500 dark:text-slate-400 max-w-xl leading-relaxed font-medium">
                                 Your path to <span className="text-slate-900 dark:text-white font-bold">{destination}</span> starts here. Complete each step to maximize your approval odds.

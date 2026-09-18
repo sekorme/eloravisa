@@ -306,7 +306,7 @@ export default function HistoryPage() {
                 <Card className="metric-card overflow-hidden">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Documents Reviewed</CardTitle>
-                        <div className="p-2 rounded-full bg-blue-500/10 text-blue-500">
+                        <div className="p-2 rounded-full bg-primary/10 text-primary">
                             <FileText className="h-4 w-4" />
                         </div>
                     </CardHeader>

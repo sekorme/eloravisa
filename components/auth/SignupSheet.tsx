@@ -114,7 +114,7 @@ export function SignupSheet({className, desscription}: {className?: string, dess
                 trackEvent("account_creation_completed", { location: "signup_sheet" })
                 trackSignupConversion()
                 celebrateSignup()
-                await registrationEmail({email, name:fullName})
+                await registrationEmail({ idToken: await user.getIdToken(), email, name: fullName })
                 // 3. Redirect to onboarding
                 router.push("/onboarding")
             }

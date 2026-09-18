@@ -16,10 +16,11 @@ const PURPOSES = {
         requiredPlan: null as string[] | null,
     },
     interview_dash: {
-        // This flow deducts tokens itself when the session ends, so the
-        // mint step just needs to confirm the caller is logged in.
+        // Charged at mint time: deducting when the session ends (as the
+        // client used to) let a user close the tab mid-interview and never
+        // pay. A failed mint refunds below.
         model: "gemini-2.5-flash-native-audio-preview-12-2025",
-        chargeUpfront: 0,
+        chargeUpfront: TOKEN_COSTS.MOCK_INTERVIEW,
         requiredPlan: null as string[] | null,
     },
     assistant_voice: {

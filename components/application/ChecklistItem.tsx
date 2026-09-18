@@ -94,7 +94,7 @@ export default function ChecklistItem({
                 status === 'completed' ? 'border-l-emerald-500 shadow-emerald-500/5' : 
                 status === 'in-progress' ? 'border-l-amber-500 shadow-amber-500/5' : 
                 'border-l-slate-300 dark:border-l-slate-700'
-            } bg-white dark:bg-slate-900 hover:shadow-xl hover:shadow-blue-500/5 border border-slate-200 dark:border-slate-800 rounded-2xl`}>
+            } bg-white dark:bg-slate-900 hover:shadow-xl hover:shadow-primary/5 border border-slate-200 dark:border-slate-800 rounded-2xl`}>
                 <button
                     onClick={toggle}
                     className="flex items-center justify-between w-full p-6 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
@@ -110,14 +110,14 @@ export default function ChecklistItem({
                                     {getStatusLabel()}
                                 </Badge>
                                 {isUploaded && !reviewData && (
-                                    <Badge variant="secondary" className="text-[9px] uppercase font-black tracking-[0.15em] bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border-none">
+                                    <Badge variant="secondary" className="text-[9px] uppercase font-black tracking-[0.15em] bg-primary/15 text-primary border-none">
                                         Ready for AI
                                     </Badge>
                                 )}
                             </div>
                         </div>
                     </div>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${open ? 'bg-blue-500 text-white rotate-180' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-700'}`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${open ? 'bg-primary text-white rotate-180' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-700'}`}>
                         <ChevronDown size={16} />
                     </div>
                 </button>
@@ -131,17 +131,17 @@ export default function ChecklistItem({
                             <div className="grid gap-6">
                                 <div className="space-y-3">
                                     <div className="flex items-center gap-2">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                                        <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                                         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">Why it matters</p>
                                     </div>
                                     <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-medium pl-3.5">{explanation}</p>
                                 </div>
                                 
-                                <div className="p-5 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 border border-blue-100/50 dark:border-blue-800/50 relative overflow-hidden group/example">
+                                <div className="p-5 rounded-2xl bg-gradient-to-br from-primary/10 to-lp-sky dark:from-primary/10 dark:to-primary/10 border border-primary/10 dark:border-primary/30 relative overflow-hidden group/example">
                                     <div className="absolute top-0 right-0 p-3 opacity-10 group-hover/example:scale-110 transition-transform">
-                                        <Sparkles size={24} className="text-blue-600" />
+                                        <Sparkles size={24} className="text-primary" />
                                     </div>
-                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400 mb-3 flex items-center gap-2">
+                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-3 flex items-center gap-2">
                                         <CheckCircle2 size={12} />
                                         Pro Example
                                     </p>
@@ -175,7 +175,7 @@ export default function ChecklistItem({
                                     {!reviewData && (
                                         <Button 
                                             onClick={() => setIsReviewModalOpen(true)}
-                                            className="flex-1 h-12 bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white border-none gap-3 shadow-xl shadow-blue-500/25 rounded-xl transition-all hover:-translate-y-0.5 active:translate-y-0"
+                                            className="flex-1 h-12 bg-gradient-to-r from-primary to-lp-azure-2 hover:from-primary/90 hover:to-lp-azure-2 text-white border-none gap-3 shadow-xl shadow-primary/25 rounded-xl transition-all hover:-translate-y-0.5 active:translate-y-0"
                                         >
                                             <Sparkles size={18} />
                                             <span className="font-bold tracking-tight">Review with AI Analysis</span>

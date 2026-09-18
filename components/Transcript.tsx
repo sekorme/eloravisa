@@ -31,8 +31,8 @@ const Transcript: React.FC<TranscriptProps> = ({ entries, currentInput, currentO
                     <div
                         className={`max-w-[80%] rounded-2xl px-4 py-3 shadow-lg ${
                             entry.role === 'user'
-                                ? 'bg-blue-600 text-white rounded-tr-none'
-                                : 'bg-gray-800 text-gray-100 rounded-tl-none border border-gray-700'
+                                ? 'bg-primary text-primary-foreground rounded-tr-none'
+                                : 'bg-slate-100 dark:bg-gray-800 text-slate-800 dark:text-gray-100 rounded-tl-none border border-slate-200 dark:border-gray-700'
                         }`}
                     >
                         <p className="text-sm leading-relaxed">{entry.text}</p>
@@ -43,7 +43,7 @@ const Transcript: React.FC<TranscriptProps> = ({ entries, currentInput, currentO
             {/* Active transcription streams */}
             {currentInput && (
                 <div className="flex justify-end">
-                    <div className="max-w-[80%] rounded-2xl px-4 py-3 bg-blue-600/50 text-white/80 rounded-tr-none italic animate-pulse">
+                    <div className="max-w-[80%] rounded-2xl px-4 py-3 bg-primary/60 text-primary-foreground/80 rounded-tr-none italic animate-pulse">
                         <p className="text-sm leading-relaxed">{currentInput}...</p>
                     </div>
                 </div>
@@ -51,7 +51,7 @@ const Transcript: React.FC<TranscriptProps> = ({ entries, currentInput, currentO
 
             {currentOutput && (
                 <div className="flex justify-start">
-                    <div className="max-w-[80%] rounded-2xl px-4 py-3 bg-gray-800/50 text-gray-100/80 rounded-tl-none border border-gray-700 italic animate-pulse">
+                    <div className="max-w-[80%] rounded-2xl px-4 py-3 bg-slate-100/70 dark:bg-gray-800/50 text-slate-600 dark:text-gray-100/80 rounded-tl-none border border-slate-200 dark:border-gray-700 italic animate-pulse">
                         <p className="text-sm leading-relaxed">{currentOutput}...</p>
                     </div>
                 </div>

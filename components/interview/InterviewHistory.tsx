@@ -123,7 +123,7 @@ export function InterviewHistory() {
         ) : history.map((item) => (
           <Card
             key={item.id} 
-            className="group relative cursor-pointer hover:border-blue-500/50 transition-all border-slate-200 dark:border-slate-800 bg-white dark:bg-card/50 shadow-sm hover:shadow-md overflow-hidden"
+            className="group relative cursor-pointer hover:border-primary/50 transition-all border-slate-200 dark:border-slate-800 bg-white dark:bg-card/50 shadow-sm hover:shadow-md overflow-hidden"
             onClick={() => setSelectedInterview(item)}
           >
             <div className="absolute top-2 right-2 z-10 ">
@@ -143,11 +143,11 @@ export function InterviewHistory() {
             <CardContent className="p-4 flex flex-col gap-4 h-full justify-between">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                  <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-primary group-hover:text-white transition-colors">
                     <Mic size={18} />
                   </div>
                   <div className="text-right">
-                    <div className="text-blue-600 dark:text-blue-400 font-black text-lg">
+                    <div className="text-primary font-black text-lg">
                         {item.feedback?.overallScore ? `${item.feedback.overallScore}%` : '—'}
                     </div>
                     {item.status && (
@@ -177,7 +177,7 @@ export function InterviewHistory() {
 
               <div className="pt-2 flex items-center justify-between border-t border-slate-100 dark:border-slate-800/50">
                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">View Details</span>
-                <ChevronRight size={14} className="text-slate-300 group-hover:text-blue-500 group-hover:translate-x-1 transition-all" />
+                <ChevronRight size={14} className="text-slate-300 group-hover:text-primary group-hover:translate-x-1 transition-all" />
               </div>
             </CardContent>
           </Card>

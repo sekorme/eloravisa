@@ -347,8 +347,11 @@ If feedback mode is enabled after the interview:
                             }
                         }
                     },
+                    // console.warn, not console.error, in these callbacks:
+                    // Next.js dev surfaces every console.error as a full-screen
+                    // overlay, and the user already sees these via setError.
                     onerror: (error) => {
-                        console.error("Gemini Live Error:", error?.message || error);
+                        console.warn("Gemini Live Error:", error?.message || error);
                     },
                     onclose: (e) => {
                         const wasIntentional = intentionalCloseRef.current;
@@ -357,7 +360,7 @@ If feedback mode is enabled after the interview:
                         // A close we triggered ourselves (hanging up) doesn't
                         // come with a real CloseEvent — nothing to report.
                         if (!wasIntentional) {
-                            console.error("Gemini Live socket closed:", { code: e?.code, reason: e?.reason, wasClean: e?.wasClean });
+                            console.warn("Gemini Live socket closed:", { code: e?.code, reason: e?.reason, wasClean: e?.wasClean });
                             if (!e || e.code !== 1000) {
                                 setError(e?.reason || `Connection closed unexpectedly${e?.code ? ` (code ${e.code})` : ""}.`);
                             }
@@ -416,7 +419,7 @@ If feedback mode is enabled after the interview:
             }, 500);
 
         } catch (err: any) {
-            console.error(err);
+            console.warn("Failed to start live session:", err);
             setError(err.message || "An unknown error occurred");
             disconnect();
         }

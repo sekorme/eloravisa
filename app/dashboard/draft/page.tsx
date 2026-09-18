@@ -130,21 +130,21 @@ export default function DraftPage() {
         <div className=" w-full px-4 md:px-8 space-y-8">
             <header className="flex flex-col sm:flex-row items-center justify-between shrink-0 gap-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 via-blue-600 to-cyan-700 rounded-xl flex items-center justify-center font-bold text-xl shadow-[0_0_20px_rgba(147,51,234,0.5)] border border-white/20">
+                    <div className="w-10 h-10 bg-gradient-to-br from-primary via-primary to-lp-azure-2 rounded-xl flex items-center justify-center font-bold text-xl shadow-[0_0_20px_rgba(30,122,88,0.45)] border border-white/20">
                         <Wand2 className="w-5 h-5 text-white animate-pulse" />
                     </div>
                     <div>
                         <h1 className="text-lg md:text-2xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 dark:from-white dark:via-white dark:to-white/60">
                             DOCUMENT DRAFTER
                         </h1>
-                        <p className="text-[10px] text-purple-500 dark:text-purple-400 font-bold uppercase tracking-[0.2em] opacity-80">
+                        <p className="text-[10px] text-primary font-bold uppercase tracking-[0.2em] opacity-80">
                             AI-Powered Professional Drafts
                         </p>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20 px-3 py-1">
+                    <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 px-3 py-1">
                         <Coins className="w-3 h-3 mr-1.5" />
                         {TOKEN_COSTS.DOCUMENT_DRAFT} Tokens per draft
                     </Badge>
@@ -168,9 +168,9 @@ export default function DraftPage() {
                                     </SelectTrigger>
                                     <SelectContent className="bg-white dark:bg-[#0c0c0e] border-slate-200 dark:border-white/10 rounded-xl">
                                         {docTypes.map((type) => (
-                                            <SelectItem key={type.value} value={type.value} className="focus:bg-purple-500/10">
+                                            <SelectItem key={type.value} value={type.value} className="focus:bg-primary/10">
                                                 <div className="flex items-center gap-2">
-                                                    <type.icon className="w-4 h-4 text-purple-500" />
+                                                    <type.icon className="w-4 h-4 text-primary" />
                                                     <span>{type.label}</span>
                                                 </div>
                                             </SelectItem>
@@ -193,7 +193,7 @@ export default function DraftPage() {
                                     value={extra}
                                     onChange={(e) => setExtra(e.target.value)}
                                     placeholder="E.g., University name, course details, host's relationship, travel dates..."
-                                    className="min-h-[180px] bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 rounded-xl resize-none focus-visible:ring-purple-500/50"
+                                    className="min-h-[180px] bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 rounded-xl resize-none focus-visible:ring-primary/50"
                                 />
                                 <p className="text-[10px] text-slate-400 dark:text-white/30 italic">
                                     Pro tip: More details lead to better drafts.
@@ -202,7 +202,7 @@ export default function DraftPage() {
 
                             <Button 
                                 type="submit" 
-                                className="w-full h-12 bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:hover:bg-purple-50 rounded-xl font-bold tracking-tight transition-all active:scale-[0.98] shadow-lg" 
+                                className="w-full h-12 bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:hover:bg-primary/10 rounded-xl font-bold tracking-tight transition-all active:scale-[0.98] shadow-lg" 
                                 disabled={loading || !user}
                             >
                                 {loading ? (
@@ -212,7 +212,7 @@ export default function DraftPage() {
                                     </>
                                 ) : (
                                     <>
-                                        <Sparkles className="mr-2 h-4 w-4 text-purple-500" /> 
+                                        <Sparkles className="mr-2 h-4 w-4 text-primary" /> 
                                         <span>GENERATE DRAFT</span>
                                     </>
                                 )}

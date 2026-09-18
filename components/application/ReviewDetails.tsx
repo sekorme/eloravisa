@@ -14,7 +14,7 @@ export function ReviewDetails({ reviewData }: { reviewData: any }) {
                     <h3 className="font-semibold text-lg">AI Review Score</h3>
                 </div>
                 <div className="flex items-center gap-3">
-                    <div className="text-3xl font-bold text-blue-600">{reviewData.score}/100</div>
+                    <div className="text-3xl font-bold text-primary">{reviewData.score}/100</div>
                     <div className="w-16">
                         <Progress value={reviewData.score} className="h-2" />
                     </div>

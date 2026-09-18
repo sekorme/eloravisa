@@ -39,7 +39,7 @@ export default function EmbassyTips({ country }: { country: string }) {
                 </div>
 
                 <div className="flex items-start gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10">
-                    <Info size={16} className="text-blue-500 shrink-0 mt-0.5" />
+                    <Info size={16} className="text-primary shrink-0 mt-0.5" />
                     <p className="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400 font-medium italic">
                         Based on common refusal patterns and successful applications. Not an official guarantee.
                     </p>

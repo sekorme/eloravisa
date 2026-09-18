@@ -23,10 +23,10 @@ service cloud.firestore {
 
     // ── users/{uid} ──────────────────────────────────────────────────────
     // Profile + onboarding + document metadata. `tokens` is the paid
-    // resource: client writes may only ever decrease it (deductTokens uses
-    // this), never increase it — increases only happen server-side via
-    // firebase-admin after a verified payment (app/api/paystack-success).
-    // `planId` similarly can only change server-side after payment.
+    // resource and changes server-side only via firebase-admin: deductions
+    // in the AI actions/routes (lib/tokensAdmin.ts), increases after a
+    // verified payment (lib/paystackServer.ts). Client updates must leave
+    // it untouched. `planId` similarly can only change server-side.
     match /users/{uid} {
       allow read: if isOwner(uid);
 
@@ -35,11 +35,16 @@ service cloud.firestore {
         && request.resource.data.tokens is number
         && request.resource.data.tokens <= 50;
 
+      // diff/affectedKeys rather than field equality so updates on docs that
+      // predate the tokens/planId fields (e.g. Google sign-ins created by an
+      // older LoginModal) don't error out — touching either field is what's
+      // forbidden.
       allow update: if isOwner(uid)
-        && request.resource.data.planId == resource.data.planId
-        && request.resource.data.tokens <= resource.data.tokens;
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['planId', 'tokens']);
 
-      allow delete: if false;
+      // Account deletion in dashboard settings removes the user's own doc
+      // client-side before deleting the auth user.
+      allow delete: if isOwner(uid);
 
       // AI document-review results and mock-interview session history.
       // Only ever read/written by their owner from their own dashboard.
@@ -58,13 +63,14 @@ service cloud.firestore {
       }
 
       // Created server-side only (app/api/notifications/broadcast uses
-      // firebase-admin, bypassing these rules). Client may read its own and
-      // mark items read, not create or delete.
+      // firebase-admin, bypassing these rules). Client may read its own,
+      // mark items read, and dismiss (delete) them — NotificationBell does
+      // both — but never create.
       match /notifications/{notificationId} {
-        allow read: if isOwner(uid);
+        allow read, delete: if isOwner(uid);
         allow update: if isOwner(uid)
           && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']);
-        allow create, delete: if false;
+        allow create: if false;
       }
     }
 
@@ -79,7 +85,7 @@ service cloud.firestore {
         && request.resource.data.totalCommission == 0;
 
       allow update: if isOwner(uid)
-        && request.resource.data.totalCommission == resource.data.totalCommission;
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['totalCommission']);
 
       allow delete: if false;
     }
@@ -109,6 +115,19 @@ service cloud.firestore {
     match /withdrawals/{withdrawalId} {
       allow read: if isSignedIn() && resource.data.influencerId == request.auth.uid;
       allow write: if false;
+    }
+
+    // ── visits/{id} ──────────────────────────────────────────────────────
+    // Anonymous page-visit counter written by components/TrackVisit.tsx on
+    // the public homepage (no auth exists at that point). Create-only, with
+    // the exact shape logVisit sends, so the collection can't be used to
+    // store or read anything else.
+    match /visits/{visitId} {
+      allow create: if request.resource.data.keys().hasOnly(['country', 'timestamp'])
+        && request.resource.data.country is string
+        && request.resource.data.country.size() <= 60
+        && request.resource.data.timestamp == request.time;
+      allow read, update, delete: if false;
     }
 
     // Deny anything not explicitly matched above.

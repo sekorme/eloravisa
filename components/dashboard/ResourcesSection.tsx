@@ -15,7 +15,7 @@ export function ResourcesSection() {
         </div>
       </div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="flex flex-col items-center justify-center p-6 md:p-8 border-2 border-dashed border-neutral-200 dark:border-neutral-800 rounded-3xl hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all bg-transparent cursor-pointer group shadow-sm hover:shadow-xl hover:-translate-y-1">
+        <div className="flex flex-col items-center justify-center p-6 md:p-8 border-2 border-dashed border-neutral-200 dark:border-neutral-800 rounded-3xl hover:border-primary hover:bg-primary/10 dark:hover:bg-primary/15 transition-all bg-transparent cursor-pointer group shadow-sm hover:shadow-xl hover:-translate-y-1">
          <UploadDocumentsModal/>
         </div>
 

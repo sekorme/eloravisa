@@ -85,7 +85,7 @@ export function AvatarUploader({ currentAvatarUrl, fullName, onAvatarUpdate }: A
                 <input {...getInputProps()} />
                 <Avatar className="w-32 h-32 border-4 border-white dark:border-slate-800 shadow-xl">
                     <AvatarImage src={currentAvatarUrl} className="object-cover" />
-                    <AvatarFallback className="text-2xl bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300">
+                    <AvatarFallback className="text-2xl bg-primary/15 text-primary dark:bg-primary/30 dark:text-primary">
                         {initials}
                     </AvatarFallback>
                 </Avatar>

@@ -22,6 +22,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { signInWithGoogle } from "@/lib/googleSignin"
 import { toast } from "sonner"
 import {doc, getDoc, setDoc} from "firebase/firestore";
+import { SUBSCRIPTION_PLANS } from "@/lib/subscriptions";
 
 export function LoginModal() {
     const router = useRouter()
@@ -90,7 +91,9 @@ export function LoginModal() {
                         dob: null,
                         country: "",
                         createdAt: new Date().toISOString(),
-                        completedOnboarding: false
+                        completedOnboarding: false,
+                        tokens: SUBSCRIPTION_PLANS.FREE.tokens,
+                        planId: SUBSCRIPTION_PLANS.FREE.id
                     });
                     toast.success("Account created successfully")
                     router.push("/onboarding")

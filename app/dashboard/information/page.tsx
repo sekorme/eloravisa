@@ -31,7 +31,7 @@ import { getVisaInformation } from "@/action/ai";
 import { auth, db } from "@/firebase/client";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-import { TOKEN_COSTS, deductTokens } from "@/lib/subscriptions";
+import { TOKEN_COSTS } from "@/lib/subscriptions";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -94,7 +94,8 @@ export default function InformationPage() {
 
         // 3. Regenerate if cache is stale or missing
         if (!shouldUseCache) {
-            // Check for tokens
+            // Balance pre-check for UX only — the actual charge happens
+            // server-side in getVisaInformation (action/ai.ts).
             const infoDocRefUser = doc(db, "users", user.uid);
             const userSnap = await getDoc(infoDocRefUser);
             const tokens = userSnap.data()?.tokens || 0;
@@ -111,11 +112,8 @@ export default function InformationPage() {
               return;
             }
 
-            const response = await getVisaInformation(userData);
+            const response = await getVisaInformation(await user.getIdToken(), userData);
             if (response.success) {
-              // Deduct tokens
-              await deductTokens(user.uid, TOKEN_COSTS.INFORMATION_GENERATION);
-              
               const newData = {
                   ...response.data,
                   metadata: {
@@ -164,7 +162,7 @@ export default function InformationPage() {
   if (loading) {
     return (
       <div className="p-6 max-w-7xl mx-auto flex flex-col items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-12 h-12 text-blue-600 animate-spin mb-4" />
+        <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
         <p className="text-muted-foreground">Generating your personalized visa guide...</p>
       </div>
     );

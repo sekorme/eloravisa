@@ -16,7 +16,7 @@ import { db, auth } from "@/firebase/client"
 import { Progress } from "@/components/ui/progress"
 import { getCurrentUserDetails } from "@/action/user"
 import { toast } from "sonner"
-import { TOKEN_COSTS, deductTokens } from "@/lib/subscriptions"
+import { TOKEN_COSTS } from "@/lib/subscriptions"
 import { getDoc } from "firebase/firestore"
 
 interface DocumentReviewModalProps {
@@ -39,7 +39,8 @@ export function DocumentReviewModal({ isOpen, onClose, documentUrl, documentType
         setLoading(true)
         setError(null)
         try {
-            // Check tokens
+            // Balance pre-check for UX only — the actual charge happens
+            // server-side in analyzeDocument (action/ai.ts).
             const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
             const tokens = userDoc.data()?.tokens || 0;
 
@@ -65,12 +66,15 @@ export function DocumentReviewModal({ isOpen, onClose, documentUrl, documentType
                 return
             }
 
-            const response = await analyzeDocument(documentUrl, documentLabel, userData, mimeType)
+            const idToken = await auth.currentUser?.getIdToken()
+            if (!idToken) {
+                setError("Please sign in again to analyze documents.")
+                setLoading(false)
+                return
+            }
+            const response = await analyzeDocument(idToken, documentUrl, documentLabel, userData, mimeType)
             
             if (response.success) {
-                // Deduct tokens
-                await deductTokens(auth.currentUser.uid, TOKEN_COSTS.DOCUMENT_REVIEW);
-                
                 setResult(response.data)
                 // Save to Firestore
                 if (auth.currentUser) {
@@ -108,7 +112,7 @@ export function DocumentReviewModal({ isOpen, onClose, documentUrl, documentType
                 <div className="flex-1 overflow-y-auto p-6 pt-4">
                     {!result && !loading && !error && (
                         <div className="flex flex-col items-center justify-center py-8 space-y-4">
-                            <FileText className="w-16 h-16 text-blue-500 opacity-50" />
+                            <FileText className="w-16 h-16 text-primary opacity-50" />
                             <p className="text-center text-muted-foreground">
                                 Click below to start the AI analysis. This may take a few seconds.
                             </p>
@@ -120,7 +124,7 @@ export function DocumentReviewModal({ isOpen, onClose, documentUrl, documentType
 
                     {loading && (
                         <div className="flex flex-col items-center justify-center py-12 space-y-4">
-                            <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
+                            <Loader2 className="w-12 h-12 text-primary animate-spin" />
                             <p className="text-sm text-muted-foreground">Analyzing your document...</p>
                         </div>
                     )}
@@ -141,7 +145,7 @@ export function DocumentReviewModal({ isOpen, onClose, documentUrl, documentType
                                     <p className="text-sm text-muted-foreground">Based on visa requirements</p>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <div className="text-3xl font-bold text-blue-600">{result.score}/100</div>
+                                    <div className="text-3xl font-bold text-primary">{result.score}/100</div>
                                     <div className="w-16">
                                         <Progress value={result.score} className="h-2" />
                                     </div>
@@ -214,12 +218,12 @@ export function DocumentReviewModal({ isOpen, onClose, documentUrl, documentType
                             )}
 
                             {/* Improvements */}
-                            <div className="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-xl">
-                                <h4 className="font-semibold text-blue-600 mb-2">Improvement Suggestions</h4>
+                            <div className="p-4 bg-primary/10 rounded-xl">
+                                <h4 className="font-semibold text-primary mb-2">Improvement Suggestions</h4>
                                 <ul className="text-sm space-y-2">
                                     {result.improvement_suggestions?.map((item: string, i: number) => (
                                         <li key={i} className="flex gap-2">
-                                            <span className="text-blue-500 font-bold">•</span>
+                                            <span className="text-primary font-bold">•</span>
                                             <span className="text-slate-700 dark:text-slate-300">{item}</span>
                                         </li>
                                     ))}

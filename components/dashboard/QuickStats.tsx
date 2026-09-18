@@ -65,9 +65,9 @@ export function QuickStats() {
         progress: docsProgress,
         icon: FileText,
         color: "blue",
-        gradient: "from-blue-500/10 to-blue-600/5",
-        iconColor: "text-blue-600",
-        barColor: "bg-blue-600"
+        gradient: "from-primary/10 to-primary/5",
+        iconColor: "text-primary",
+        barColor: "bg-primary"
     },
     {
         title: "AI Review Score",

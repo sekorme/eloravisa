@@ -34,11 +34,26 @@ const nextConfig = {
         ],
     },
     eslint: {
+        // Still ignored: the codebase has many pre-existing style-level lint
+        // errors (no-explicit-any etc.). Type errors DO fail the build now.
         ignoreDuringBuilds: true,
     },
     turbopack: {},
-    typescript: {
-        ignoreBuildErrors: true,
+    async headers() {
+        return [
+            {
+                source: '/(.*)',
+                headers: [
+                    { key: 'X-Content-Type-Options', value: 'nosniff' },
+                    { key: 'X-Frame-Options', value: 'DENY' },
+                    { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+                    // Camera/mic stay allowed for this origin — the consular
+                    // and voice interview pages need them.
+                    { key: 'Permissions-Policy', value: 'camera=(self), microphone=(self), geolocation=()' },
+                    { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains' },
+                ],
+            },
+        ];
     },
     async rewrites() {
         return [
