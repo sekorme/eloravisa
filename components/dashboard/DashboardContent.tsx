@@ -1,13 +1,12 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef } from "react"
 import { WelcomeCard } from "./WelcomeCard"
 import { AlertsSection } from "./AlertsSection"
 import { ProgressTracker } from "./ProgressTracker"
 import { NextActionCard } from "./NextActionCard"
 import { QuickStats } from "./QuickStats"
 import { ResourcesSection } from "./ResourcesSection"
-import { MessageCircle, X } from "lucide-react"
 import gsap from "gsap"
 import { DashboardDataProvider } from "@/context/DashboardDataContext"
 
@@ -15,7 +14,6 @@ import { DashboardDataProvider } from "@/context/DashboardDataContext"
 
 export function DashboardContent() {
     const containerRef = useRef<HTMLDivElement>(null)
-    const [isChatOpen, setIsChatOpen] = useState(false)
 
     useEffect(() => {
         const ctx = gsap.context(() => {
@@ -59,11 +57,6 @@ export function DashboardContent() {
 
                 <div className="dashboard-section">
                     <ResourcesSection />
-                </div>
-
-                {/* Floating Chat */}
-                <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end">
-
                 </div>
             </div>
         </DashboardDataProvider>

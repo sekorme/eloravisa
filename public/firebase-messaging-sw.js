@@ -1,23 +1,30 @@
-/* Import the *compat* SDKs because service‑workers can’t use ES modules easily */
-importScripts('https://www.gstatic.com/firebasejs/10.11.0/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.11.0/firebase-messaging-compat.js');
+/* Import the *compat* SDKs because service-workers can't use ES modules easily.
+   Keep this version in lockstep with the `firebase` version in package.json —
+   a mismatched major here opens the shared IndexedDB databases with a
+   different schema version than the page SDK and throws
+   "VersionError: The requested version (N) is less than the existing version (M)". */
+importScripts('https://www.gstatic.com/firebasejs/12.8.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/12.8.0/firebase-messaging-compat.js');
 
-/* 
-   ⚠️ IMPORTANT: Service Workers do not have access to process.env.
-   You must replace the values below with your actual Firebase config strings.
-   You can find these in your Firebase Console -> Project Settings.
-*/
+/* Service workers can't read process.env, so the public client config is
+   inlined (same values as NEXT_PUBLIC_FIREBASE_* — they ship in the page
+   bundle anyway and are not secrets). */
 firebase.initializeApp({
-    apiKey: "AIzaSyC96V8BLHOeNakXOnYabJuj2PCYqSwR8bM",
-    authDomain: "visaplug-4bf52.firebaseapp.com",
-    projectId: "visaplug-4bf52",
-    storageBucket: "visaplug-4bf52.firebasestorage.app",
-    messagingSenderId: "165881291806",
-    appId: "1:165881291806:web:bc9ea3dc02f21f3a753a0f",
-    measurementId: "G-M11K918X76",
+    apiKey: "AIzaSyApPFNSrcGcMQ51_diOVU7shQtjtswNiiI",
+    authDomain: "eloravisa-100f2.firebaseapp.com",
+    projectId: "eloravisa-100f2",
+    storageBucket: "eloravisa-100f2.firebasestorage.app",
+    messagingSenderId: "327000978490",
+    appId: "1:327000978490:web:d2a69cf511f6872d48f103",
+    measurementId: "G-MTJNLY1HGN",
 });
 
 const messaging = firebase.messaging();
+
+/* Replace the previously shipped broken worker (old SDK + wrong project)
+   as soon as this one installs, instead of waiting for every tab to close. */
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));
 
 /* 1️⃣  Handle background message */
 messaging.onBackgroundMessage(({ data }) => {

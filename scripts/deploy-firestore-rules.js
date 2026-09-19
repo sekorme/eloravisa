@@ -71,6 +71,31 @@ async function main() {
     process.exit(1);
   }
   console.log("Release now points at:", patched.rulesetName);
+
+  // Also ensure the composite indexes from firestore.indexes.json exist
+  // (the affiliate analytics query needs payments/influencerId+createdAt).
+  const indexConfig = JSON.parse(
+    fs.readFileSync(path.join(repo, "firestore.indexes.json"), "utf8"),
+  );
+  for (const idx of indexConfig.indexes ?? []) {
+    const idxUrl =
+      `https://firestore.googleapis.com/v1/projects/${project}/databases/(default)` +
+      `/collectionGroups/${idx.collectionGroup}/indexes`;
+    const idxRes = await fetch(idxUrl, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ queryScope: idx.queryScope, fields: idx.fields }),
+    });
+    const idxBody = await idxRes.json();
+    if (idxRes.ok) {
+      console.log(`Index creation started for ${idx.collectionGroup}:`, idxBody.name ?? "(building)");
+    } else if (idxRes.status === 409) {
+      console.log(`Index on ${idx.collectionGroup} already exists — OK.`);
+    } else {
+      console.error(`Index creation failed for ${idx.collectionGroup}:`, JSON.stringify(idxBody));
+    }
+  }
+
   console.log("\nVerify the DB is closed (expect HTTP 403):");
   console.log(
     `  curl -s -o /dev/null -w "%{http_code}\\n" "https://firestore.googleapis.com/v1/projects/${project}/databases/(default)/documents/users?pageSize=1"`,
