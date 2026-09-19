@@ -12,7 +12,7 @@ export default function SuccessStoriesPage() {
   return (
     <MarketingPageShell
       eyebrow="Applicant experiences"
-      title="Real people. Better prepared applications."
+      title="Stories from applicants who prepared with Elora."
       description="Learn how applicants used Elora Visa tools to organize their documents, understand the process and prepare with greater confidence."
     >
       <Testimonial />
