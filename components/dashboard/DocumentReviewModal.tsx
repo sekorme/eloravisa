@@ -101,22 +101,25 @@ export function DocumentReviewModal({ isOpen, onClose, documentUrl, documentType
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[500px] max-h-[90vh] flex flex-col p-0 overflow-hidden">
-                <DialogHeader className="p-6 pb-0">
-                    <DialogTitle>AI Review: {documentLabel}</DialogTitle>
-                    <DialogDescription>
+            <DialogContent className="sm:max-w-[540px] max-h-[90vh] flex flex-col gap-0 overflow-hidden rounded-[1.5rem] border-lp-line bg-lp-card p-0 text-lp-fg">
+                <DialogHeader className="border-b border-lp-line p-6">
+                    <span className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-azure">AI Review</span>
+                    <DialogTitle className="font-display text-xl font-semibold tracking-[-0.03em]">{documentLabel}</DialogTitle>
+                    <DialogDescription className="text-lp-muted">
                         Get instant feedback on your document to improve your visa application.
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="flex-1 overflow-y-auto p-6 pt-4">
+                <div className="flex-1 overflow-y-auto p-6">
                     {!result && !loading && !error && (
                         <div className="flex flex-col items-center justify-center py-8 space-y-4">
-                            <FileText className="w-16 h-16 text-primary opacity-50" />
-                            <p className="text-center text-muted-foreground">
+                            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-lp-sky">
+                                <FileText className="h-7 w-7 text-lp-azure" />
+                            </div>
+                            <p className="max-w-xs text-center text-sm text-lp-muted">
                                 Click below to start the AI analysis. This may take a few seconds.
                             </p>
-                            <Button onClick={handleAnalyze} size="lg" className="w-full sm:w-auto">
+                            <Button onClick={handleAnalyze} size="lg" className="h-12 w-full rounded-full bg-lp-navy px-7 font-semibold text-white hover:bg-lp-navy-2 sm:w-auto">
                                 Start Analysis
                             </Button>
                         </div>
@@ -124,13 +127,13 @@ export function DocumentReviewModal({ isOpen, onClose, documentUrl, documentType
 
                     {loading && (
                         <div className="flex flex-col items-center justify-center py-12 space-y-4">
-                            <Loader2 className="w-12 h-12 text-primary animate-spin" />
-                            <p className="text-sm text-muted-foreground">Analyzing your document...</p>
+                            <Loader2 className="h-10 w-10 animate-spin text-lp-azure" />
+                            <p className="text-sm text-lp-muted">Analyzing your document...</p>
                         </div>
                     )}
 
                     {error && (
-                        <div className="p-4 bg-red-50 dark:bg-red-900/20 text-red-600 rounded-lg flex items-center gap-3">
+                        <div className="flex items-center gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-400/20 dark:bg-red-400/[0.06] dark:text-red-300">
                             <XCircle className="w-5 h-5" />
                             <p>{error}</p>
                         </div>
@@ -139,36 +142,36 @@ export function DocumentReviewModal({ isOpen, onClose, documentUrl, documentType
                     {result && (
                         <div className="space-y-6">
                             {/* Score */}
-                            <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900 rounded-xl">
+                            <div className="flex items-center justify-between gap-4 rounded-2xl bg-lp-navy p-5 text-white">
                                 <div>
-                                    <h3 className="font-semibold text-lg">Overall Score</h3>
-                                    <p className="text-sm text-muted-foreground">Based on visa requirements</p>
+                                    <h3 className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-white/60">Overall Score</h3>
+                                    <p className="mt-1 text-sm text-white/75">Based on visa requirements</p>
                                 </div>
                                 <div className="flex items-center gap-3">
-                                    <div className="text-3xl font-bold text-primary">{result.score}/100</div>
+                                    <div className="font-display text-3xl font-semibold tracking-[-0.04em]">{result.score}<span className="text-base text-white/50">/100</span></div>
                                     <div className="w-16">
-                                        <Progress value={result.score} className="h-2" />
+                                        <Progress value={result.score} className="h-1.5 bg-white/15 [&>*]:bg-[#8FCDAF]" />
                                     </div>
                                 </div>
                             </div>
 
                             {/* Summary */}
                             <div>
-                                <h4 className="font-semibold mb-2 flex items-center gap-2">
-                                    <FileText className="w-4 h-4 text-slate-500" /> Summary
+                                <h4 className="mb-2 flex items-center gap-2 font-display text-sm font-semibold">
+                                    <FileText className="h-4 w-4 text-lp-azure" /> Summary
                                 </h4>
-                                <p className="text-sm text-muted-foreground leading-relaxed bg-slate-50 dark:bg-slate-900 p-3 rounded-lg">
+                                <p className="rounded-xl border border-lp-line bg-lp-card-2 p-4 text-sm leading-relaxed text-lp-muted">
                                     {result.summary}
                                 </p>
                             </div>
 
                             {/* Inconsistencies Alert */}
                             {result.inconsistencies?.length > 0 && (
-                                <div className="p-4 border border-orange-200 dark:border-orange-900/50 bg-orange-50 dark:bg-orange-900/10 rounded-xl">
-                                    <h4 className="font-semibold text-orange-700 dark:text-orange-400 mb-2 flex items-center gap-2">
+                                <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-4 dark:border-amber-400/20 dark:bg-amber-400/[0.06]">
+                                    <h4 className="mb-2 flex items-center gap-2 font-display text-sm font-semibold text-amber-800 dark:text-amber-300">
                                         <AlertOctagon className="w-4 h-4" /> Profile Mismatches Detected
                                     </h4>
-                                    <ul className="text-sm space-y-1 list-disc pl-4 text-orange-800 dark:text-orange-300">
+                                    <ul className="list-disc space-y-1 pl-4 text-sm text-amber-900/80 dark:text-amber-200/80">
                                         {result.inconsistencies.map((item: string, i: number) => (
                                             <li key={i}>{item}</li>
                                         ))}
@@ -179,11 +182,11 @@ export function DocumentReviewModal({ isOpen, onClose, documentUrl, documentType
                             {/* Analysis Grid */}
                             <div className="grid md:grid-cols-2 gap-4">
                                 {/* Strengths */}
-                                <div className="space-y-2">
-                                    <h4 className="font-semibold text-green-600 flex items-center gap-2">
+                                <div className="space-y-2 rounded-xl border border-lp-line p-4">
+                                    <h4 className="flex items-center gap-2 font-display text-sm font-semibold text-lp-azure">
                                         <CheckCircle className="w-4 h-4" /> Strengths
                                     </h4>
-                                    <ul className="text-sm space-y-1 list-disc pl-4 text-muted-foreground">
+                                    <ul className="text-sm space-y-1 list-disc pl-4 text-lp-muted">
                                         {result.strengths?.map((item: string, i: number) => (
                                             <li key={i}>{item}</li>
                                         ))}
@@ -191,11 +194,11 @@ export function DocumentReviewModal({ isOpen, onClose, documentUrl, documentType
                                 </div>
 
                                 {/* Weaknesses */}
-                                <div className="space-y-2">
-                                    <h4 className="font-semibold text-orange-600 flex items-center gap-2">
+                                <div className="space-y-2 rounded-xl border border-lp-line p-4">
+                                    <h4 className="flex items-center gap-2 font-display text-sm font-semibold text-amber-700 dark:text-amber-300">
                                         <AlertTriangle className="w-4 h-4" /> Weaknesses
                                     </h4>
-                                    <ul className="text-sm space-y-1 list-disc pl-4 text-muted-foreground">
+                                    <ul className="text-sm space-y-1 list-disc pl-4 text-lp-muted">
                                         {result.weaknesses?.map((item: string, i: number) => (
                                             <li key={i}>{item}</li>
                                         ))}
@@ -205,11 +208,11 @@ export function DocumentReviewModal({ isOpen, onClose, documentUrl, documentType
 
                             {/* Risk Flags */}
                             {result.risk_flags?.length > 0 && (
-                                <div className="p-4 border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/10 rounded-xl">
-                                    <h4 className="font-semibold text-red-600 mb-2 flex items-center gap-2">
+                                <div className="rounded-xl border border-red-200 bg-red-50/70 p-4 dark:border-red-400/20 dark:bg-red-400/[0.06]">
+                                    <h4 className="mb-2 flex items-center gap-2 font-display text-sm font-semibold text-red-700 dark:text-red-300">
                                         <AlertTriangle className="w-4 h-4" /> Risk Flags
                                     </h4>
-                                    <ul className="text-sm space-y-1 list-disc pl-4 text-red-700 dark:text-red-300">
+                                    <ul className="list-disc space-y-1 pl-4 text-sm text-red-900/80 dark:text-red-200/80">
                                         {result.risk_flags.map((item: string, i: number) => (
                                             <li key={i}>{item}</li>
                                         ))}
@@ -218,13 +221,13 @@ export function DocumentReviewModal({ isOpen, onClose, documentUrl, documentType
                             )}
 
                             {/* Improvements */}
-                            <div className="p-4 bg-primary/10 rounded-xl">
-                                <h4 className="font-semibold text-primary mb-2">Improvement Suggestions</h4>
+                            <div className="rounded-xl bg-lp-sky p-4">
+                                <h4 className="mb-3 font-display text-sm font-semibold text-lp-fg">Improvement Suggestions</h4>
                                 <ul className="text-sm space-y-2">
                                     {result.improvement_suggestions?.map((item: string, i: number) => (
                                         <li key={i} className="flex gap-2">
-                                            <span className="text-primary font-bold">•</span>
-                                            <span className="text-slate-700 dark:text-slate-300">{item}</span>
+                                            <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-lp-azure"></span>
+                                            <span className="text-lp-fg/85">{item}</span>
                                         </li>
                                     ))}
                                 </ul>

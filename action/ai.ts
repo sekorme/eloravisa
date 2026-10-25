@@ -66,7 +66,7 @@ export async function analyzeDocument(idToken: string, documentUrl: string, docu
     chargedUid = user.uid;
 
     // 2. Initialize Model
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.8-flash" });
 
     // 3. Construct Enhanced Prompt
     const userProfileString = JSON.stringify({
@@ -159,7 +159,7 @@ export async function getVisaInformation(idToken: string, userData: any) {
     chargedUid = user.uid;
 
     // Use the specific model version that is known to work for text generation
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.8-flash" });
     const date = new Date();
 
     const prompt = `

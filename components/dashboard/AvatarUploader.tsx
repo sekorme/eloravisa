@@ -83,14 +83,14 @@ export function AvatarUploader({ currentAvatarUrl, fullName, onAvatarUpdate }: A
         <div className="flex flex-col items-center gap-4">
             <div {...getRootProps()} className="relative group cursor-pointer">
                 <input {...getInputProps()} />
-                <Avatar className="w-32 h-32 border-4 border-white dark:border-slate-800 shadow-xl">
+                <Avatar className="h-32 w-32 border-4 border-lp-card ring-1 ring-lp-line lp-shadow">
                     <AvatarImage src={currentAvatarUrl} className="object-cover" />
-                    <AvatarFallback className="text-2xl bg-primary/15 text-primary dark:bg-primary/30 dark:text-primary">
+                    <AvatarFallback className="bg-lp-sky font-display text-2xl font-semibold text-lp-azure">
                         {initials}
                     </AvatarFallback>
                 </Avatar>
                 
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="absolute inset-0 flex items-center justify-center bg-lp-navy/60 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
                     {uploading ? (
                         <Loader2 className="w-8 h-8 text-white animate-spin" />
                     ) : (
@@ -102,6 +102,7 @@ export function AvatarUploader({ currentAvatarUrl, fullName, onAvatarUpdate }: A
                 <Button 
                     variant="outline" 
                     size="sm" 
+                    className="rounded-full border-lp-fg/20 bg-transparent px-4 font-semibold text-lp-fg hover:border-lp-fg/50 hover:bg-lp-card-2"
                     onClick={(e) => { 
                         e.preventDefault(); 
                         (document.querySelector('input[type="file"]') as HTMLInputElement)?.click() 
@@ -110,7 +111,7 @@ export function AvatarUploader({ currentAvatarUrl, fullName, onAvatarUpdate }: A
                 >
                     {uploading ? "Uploading..." : "Change Photo"}
                 </Button>
-                <p className="text-xs text-muted-foreground mt-2">
+                <p className="mt-2 text-xs text-lp-muted">
                     JPG, GIF or PNG. Max 1MB.
                 </p>
             </div>

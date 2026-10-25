@@ -94,22 +94,21 @@ export function InterviewSetup({ onStart }: InterviewSetupProps) {
   }
 
   if (loading) {
-      return <div className="h-96 bg-white dark:bg-card rounded-2xl animate-pulse" />
+      return <div className="h-96 animate-pulse rounded-[1.5rem] border border-lp-line bg-lp-card-2" />
   }
 
   return (
-    <Card className="border-none shadow-xl bg-white dark:bg-card overflow-hidden relative group transition-all duration-300 hover:shadow-2xl">
-      <div className="absolute top-0 right-0 -mr-24 -mt-24 w-80 h-80 bg-primary/5 rounded-full blur-3xl pointer-events-none group-hover:bg-primary/10 transition-colors" />
-      
-      <CardHeader className="pb-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800">
-        <div className="flex items-center gap-3 mb-2">
-            <div className="p-2.5 rounded-xl bg-primary text-white shadow-lg shadow-primary/20">
-                <Mic size={22} />
+    <Card className="relative gap-0 overflow-hidden border border-lp-line bg-lp-card py-0 text-lp-fg lp-shadow">
+
+      <CardHeader className="border-b border-lp-line p-6 md:p-8">
+        <div className="mb-3 flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-lp-navy text-[#8FCDAF]">
+                <Mic size={20} />
             </div>
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-primary">Preparation</p>
+            <p className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-azure">Preparation</p>
         </div>
-        <CardTitle className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">Configure Your Session</CardTitle>
-        <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">
+        <CardTitle className="font-display text-2xl font-semibold tracking-[-0.04em] md:text-3xl">Configure Your Session</CardTitle>
+        <p className="text-sm text-lp-muted">
           Set your destination and visa category to match your actual embassy appointment.
         </p>
       </CardHeader>
@@ -117,15 +116,15 @@ export function InterviewSetup({ onStart }: InterviewSetupProps) {
       <CardContent className="p-6 md:p-8 space-y-8">
         <div className="grid gap-6 sm:grid-cols-2">
           <div className="space-y-3">
-            <label className="text-xs font-black uppercase tracking-[0.15em] text-slate-400 ml-1">Destination Country</label>
+            <label className="ml-1 font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-muted">Destination Country</label>
             <Select value={destination} onValueChange={setDestination}>
-              <SelectTrigger className="h-14 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 rounded-2xl px-4 focus:ring-2 focus:ring-primary/20 transition-all">
+              <SelectTrigger className="!h-14 w-full rounded-2xl border-lp-line bg-lp-card-2 px-4 transition-all focus:ring-2 focus:ring-lp-azure/20">
                 <div className="flex items-center gap-3">
-                  <Globe size={18} className="text-primary" />
+                  <Globe size={18} className="text-lp-azure" />
                   <SelectValue placeholder="Country" />
                 </div>
               </SelectTrigger>
-              <SelectContent className="rounded-2xl shadow-2xl border-slate-200 dark:border-slate-800 max-h-[300px]">
+              <SelectContent className="rounded-2xl shadow-2xl border-lp-line max-h-[300px]">
                 {countryList.map(c => (
                     <SelectItem key={c.code} value={c.name}>{c.name}</SelectItem>
                 ))}
@@ -134,15 +133,15 @@ export function InterviewSetup({ onStart }: InterviewSetupProps) {
           </div>
 
           <div className="space-y-3">
-            <label className="text-xs font-black uppercase tracking-[0.15em] text-slate-400 ml-1">Visa Category</label>
+            <label className="ml-1 font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-muted">Visa Category</label>
             <Select value={visaType} onValueChange={setVisaType}>
-              <SelectTrigger className="h-14 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 rounded-2xl px-4 focus:ring-2 focus:ring-primary/20 transition-all">
+              <SelectTrigger className="!h-14 w-full rounded-2xl border-lp-line bg-lp-card-2 px-4 transition-all focus:ring-2 focus:ring-lp-azure/20">
                 <div className="flex items-center gap-3">
-                  <GraduationCap size={18} className="text-primary" />
+                  <GraduationCap size={18} className="text-lp-azure" />
                   <SelectValue placeholder="Type" />
                 </div>
               </SelectTrigger>
-              <SelectContent className="rounded-2xl shadow-2xl border-slate-200 dark:border-slate-800">
+              <SelectContent className="rounded-2xl shadow-2xl border-lp-line">
                 <SelectItem value="Study">Study Visa</SelectItem>
                 <SelectItem value="Visit">Visit Visa</SelectItem>
                 <SelectItem value="Work">Work Visa</SelectItem>
@@ -161,7 +160,7 @@ export function InterviewSetup({ onStart }: InterviewSetupProps) {
         </div>
 
         <Button 
-          className="w-full h-16 bg-primary hover:bg-primary/90 text-white font-black text-xl shadow-xl shadow-primary/30 transition-all active:scale-95 border-none rounded-2xl gap-3 group/btn" 
+          className="group/btn h-16 w-full gap-3 rounded-full border-none bg-lp-navy font-display text-lg font-semibold tracking-[-0.02em] text-white transition-[background-color,box-shadow,transform] hover:bg-lp-navy-2 hover:shadow-[0_16px_40px_-12px_rgba(8,32,26,0.55)] motion-safe:hover:-translate-y-0.5 motion-safe:active:translate-y-0" 
           onClick={() => router.push("/dashboard/consular")}
           disabled={generating}
         >
@@ -172,7 +171,7 @@ export function InterviewSetup({ onStart }: InterviewSetupProps) {
           ) : (
               <>
                 <span>Begin Mock Interview</span>
-                <ArrowRight className="group-hover/btn:translate-x-1 transition-transform" />
+                <ArrowRight className="text-[#8FCDAF] transition-transform group-hover/btn:translate-x-1" />
               </>
           )}
         </Button>

@@ -1,41 +1,49 @@
 "use client"
 
-import { Mic, Book,Info, Headset } from "lucide-react"
+import { Mic, Info, Headset } from "lucide-react"
 import {UploadDocumentsModal} from "@/components/UploadDocumentsModal";
 import {useRouter} from "next/navigation";
 
 export function ResourcesSection() {
     const router = useRouter()
+  const tile = "group relative flex min-h-[168px] flex-col items-start justify-between rounded-[1.25rem] border border-lp-line bg-lp-card p-5 text-left transition-[transform,border-color,background-color] duration-300 hover:border-lp-azure/40 hover:bg-lp-card-2 motion-safe:hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-azure md:p-6"
+  const iconTile = "flex h-12 w-12 items-center justify-center rounded-xl bg-lp-sky text-lp-azure transition-transform duration-300 group-hover:-rotate-6"
+  const label = "font-display text-base font-semibold tracking-[-0.02em] text-lp-fg"
+  const index = "absolute right-5 top-5 font-display text-[10px] text-lp-muted/60"
   return (
-    <div id="quick-actions" className="bg-white dark:bg-neutral-900 rounded-3xl shadow-xl border border-neutral-100 dark:border-neutral-800 p-6 md:p-8 transition-all duration-300 hover:shadow-2xl">
-      <div className="flex items-center justify-between mb-8">
+    <div id="quick-actions" className="rounded-[1.5rem] border border-lp-line bg-lp-card p-6 text-lp-fg md:p-8 lp-shadow">
+      <div className="mb-8 flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-black text-neutral-800 dark:text-neutral-100 tracking-tight">Quick Actions</h2>
-          <p className="text-sm text-neutral-500 dark:text-neutral-400 font-medium">Common tasks at your fingertips</p>
+          <span className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-muted">Common tasks at your fingertips</span>
+          <h2 className="mt-2 font-display text-2xl font-semibold tracking-[-0.04em] md:text-3xl">Quick Actions</h2>
         </div>
       </div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="flex flex-col items-center justify-center p-6 md:p-8 border-2 border-dashed border-neutral-200 dark:border-neutral-800 rounded-3xl hover:border-primary hover:bg-primary/10 dark:hover:bg-primary/15 transition-all bg-transparent cursor-pointer group shadow-sm hover:shadow-xl hover:-translate-y-1">
-         <UploadDocumentsModal/>
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 md:gap-5">
+        <div className="relative min-h-[168px]">
+          <span className="pointer-events-none absolute right-5 top-5 z-10 font-display text-[10px] text-white/50">01</span>
+          <UploadDocumentsModal variant="tile"/>
         </div>
 
-        <button onClick={() => router.push("/dashboard/ai-mock-interview")} className="flex flex-col items-center justify-center p-6 md:p-8 border border-neutral-100 dark:border-neutral-800 rounded-3xl hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all bg-white dark:bg-neutral-800/50 cursor-pointer group shadow-sm hover:shadow-xl hover:-translate-y-1">
-          <div className="w-14 h-14 bg-purple-100 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center mb-4 group-hover:rotate-6 transition-transform">
-            <Mic className="text-purple-600 dark:text-purple-400 w-7 h-7" />
+        <button onClick={() => router.push("/dashboard/ai-mock-interview")} className={tile}>
+          <span className={index}>02</span>
+          <div className={iconTile}>
+            <Mic className="h-6 w-6" />
           </div>
-          <span className="font-bold text-neutral-800 dark:text-neutral-100 text-center">AI Interview</span>
+          <span className={label}>AI Interview</span>
         </button>
-        <button onClick={() => router.push("/dashboard/information")} className="flex flex-col items-center justify-center p-6 md:p-8 border border-neutral-100 dark:border-neutral-800 rounded-3xl hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all bg-white dark:bg-neutral-800/50 cursor-pointer group shadow-sm hover:shadow-xl hover:-translate-y-1">
-          <div className="w-14 h-14 bg-green-100 dark:bg-green-900/30 rounded-2xl flex items-center justify-center mb-4 group-hover:rotate-6 transition-transform">
-            <Info className="text-green-600 dark:text-green-400 w-7 h-7" />
+        <button onClick={() => router.push("/dashboard/information")} className={tile}>
+          <span className={index}>03</span>
+          <div className={iconTile}>
+            <Info className="h-6 w-6" />
           </div>
-          <span className="font-bold text-neutral-800 dark:text-neutral-100 text-center">View Guides</span>
+          <span className={label}>View Guides</span>
         </button>
-        <button className="flex flex-col items-center justify-center p-6 md:p-8 border border-neutral-100 dark:border-neutral-800 rounded-3xl hover:border-orange-500 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all bg-white dark:bg-neutral-800/50 cursor-pointer group shadow-sm hover:shadow-xl hover:-translate-y-1">
-          <div className="w-14 h-14 bg-orange-100 dark:bg-orange-900/30 rounded-2xl flex items-center justify-center mb-4 group-hover:rotate-6 transition-transform">
-            <Headset className="text-orange-600 dark:text-orange-400 w-7 h-7" />
+        <button className={tile}>
+          <span className={index}>04</span>
+          <div className={iconTile}>
+            <Headset className="h-6 w-6" />
           </div>
-          <span className="font-bold text-neutral-800 dark:text-neutral-100 text-center">Get Support</span>
+          <span className={label}>Get Support</span>
         </button>
       </div>
     </div>

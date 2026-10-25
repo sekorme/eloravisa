@@ -549,3 +549,21 @@
   .hero-preview { animation: hero-appear 1.3s ease-out; }
 }
 @media (max-width: 639px) { .motion-control { bottom: .75rem; left: .75rem; font-size: .625rem; padding-inline: .75rem; } }
+
+/* ---------------------------------------------------------------------------
+   Dashboard: home-page shapes + display type for shadcn primitives.
+   Scoped to `.dashboard-theme` (app/dashboard/layout.tsx). Colours already
+   come from the shared tokens; elements with their own rounded-[…] keep it.
+   --------------------------------------------------------------------------- */
+@layer utilities {
+    .dashboard-theme [data-slot="card"]:not([class*="rounded-["]) { border-radius: 1.5rem; }
+    .dashboard-theme [data-slot="card"]:not([class*="border-"]) { border-color: var(--lp-line); }
+    .dashboard-theme [data-slot="card-title"],
+    .dashboard-theme :is(h1, h2) {
+        font-family: var(--font-display);
+        letter-spacing: -0.035em;
+    }
+    .dashboard-theme [data-slot="button"]:not([class*="rounded-"]):not([data-size="icon"]) { border-radius: 9999px; }
+    .dashboard-theme :is([data-slot="input"], [data-slot="textarea"], [data-slot="select-trigger"]):not([class*="rounded-"]) { border-radius: 0.75rem; }
+    .dashboard-theme :is([data-slot="input"], [data-slot="textarea"], [data-slot="select-trigger"]):focus-visible { border-color: var(--lp-azure); }
+}

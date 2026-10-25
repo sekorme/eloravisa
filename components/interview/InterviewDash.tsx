@@ -413,28 +413,28 @@ const InterviewDash = () => {
 
     return (
         <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8">
-            <div className="w-full max-w-2xl bg-white dark:bg-card backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-3xl overflow-hidden flex flex-col shadow-2xl h-[85vh]">
+            <div className="w-full max-w-2xl bg-lp-card backdrop-blur-xl border border-lp-line rounded-3xl overflow-hidden flex flex-col shadow-2xl h-[85vh]">
 
                 {/* Header */}
-                <div className="p-6 border-b border-slate-100 dark:border-white/5 flex items-center justify-between ">
+                <div className="p-6 border-b border-lp-line flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 rounded-xl  flex items-center justify-center shadow-lg">
-                            <svg className="w-6 h-6 text-slate-700 dark:text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <div className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg">
+                            <svg className="w-6 h-6 text-lp-fg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                             </svg>
                         </div>
                         <div>
-                            <h1 className="font-outfit text-xl font-bold tracking-tight ">Visa Interview</h1>
+                            <h1 className="font-outfit text-xl font-bold tracking-tight">Visa Interview</h1>
                             <div className="flex items-center space-x-2">
-                                <span className={`w-2 h-2 rounded-full ${status === SessionStatus.ACTIVE ? 'bg-green-500 animate-pulse' : 'bg-gray-600'}`}></span>
-                                <span className="text-xs font-medium text-gray-400 uppercase tracking-widest">{status}</span>
+                                <span className={`w-2 h-2 rounded-full ${status === SessionStatus.ACTIVE ? 'bg-lp-azure animate-pulse' : 'bg-lp-muted'}`}></span>
+                                <span className="text-xs font-medium text-lp-muted uppercase tracking-widest">{status}</span>
                             </div>
                         </div>
                     </div>
 
                     <button
                         onClick={() => setEntries([])}
-                        className="p-2 hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors text-slate-400 hover:text-slate-700 dark:hover:text-white"
+                        className="p-2 hover:bg-lp-card-2 rounded-lg transition-colors text-lp-muted hover:text-lp-fg"
                         title="Clear history"
                     >
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -461,7 +461,7 @@ const InterviewDash = () => {
                 />
 
                 {/* Visualizer and Controls Footer */}
-                <div className="p-8 bg-slate-50 dark:bg-slate-900/60 border-t border-slate-100 dark:border-white/5 space-y-6">
+                <div className="p-8 bg-lp-card-2 border-t border-lp-line space-y-6">
                     <Visualizer isActive={status === SessionStatus.ACTIVE} stream={micStream} />
 
                     <div className="flex flex-col items-center space-y-4">
@@ -491,7 +491,7 @@ const InterviewDash = () => {
                             {/* Outer ring effect */}
                             <div className={`absolute -inset-2 rounded-full border border-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${status === SessionStatus.ACTIVE ? 'animate-pulse' : ''}`}></div>
                         </button>
-                        <p className="text-sm font-medium text-gray-400">
+                        <p className="text-sm font-medium text-lp-muted">
                             {status === SessionStatus.ACTIVE ? "Tap to disconnect" : "Tap to start conversation"}
                         </p>
                     </div>

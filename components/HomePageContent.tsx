@@ -13,10 +13,14 @@ export default function HomePageContent() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        // onAuthStateChanged ignores the callback's return value — clean up by hand.
+        let unsubDoc: (() => void) | undefined;
         const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+            unsubDoc?.();
+            unsubDoc = undefined;
             if (user) {
                 const userDocRef = doc(db, "users", user.uid);
-                const unsubDoc = onSnapshot(userDocRef, (doc) => {
+                unsubDoc = onSnapshot(userDocRef, (doc) => {
                     if (doc.exists()) {
                         const data = doc.data();
                         // Pro and Full plans have access to chatbot
@@ -24,22 +28,21 @@ export default function HomePageContent() {
                     }
                     setLoading(false);
                 });
-                return () => unsubDoc();
             } else {
                 setHasAccess(false);
                 setLoading(false);
             }
         });
-        return () => unsubscribeAuth();
+        return () => {
+            unsubDoc?.();
+            unsubscribeAuth();
+        };
     }, []);
 
     if (loading) return null;
 
     return (
-        <div className="relative w-full h-full bg-slate-50 dark:bg-neutral-800 overflow-hidden">
-            {/* Background / Placeholder Content for the main site */}
-
-
+        <div className="relative w-full overflow-hidden">
             {/* Chat Widget Container */}
             <div
                 className={`fixed bottom-4 right-4 z-50 transition-all duration-300 ease-in-out flex flex-col items-end
@@ -50,27 +53,28 @@ export default function HomePageContent() {
                         {hasAccess ? (
                             <ChatInterface onClose={() => setIsChatOpen(false)} />
                         ) : (
-                            <div className="w-full h-full bg-white dark:bg-neutral-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-neutral-800 flex flex-col items-center justify-center p-8 text-center space-y-6">
-                                <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-full text-indigo-600">
-                                    <Lock size={48} />
+                            <div className="relative flex h-full w-full flex-col items-center justify-center space-y-6 overflow-hidden rounded-[1.75rem] border border-lp-line bg-lp-card p-8 text-center text-lp-fg lp-shadow">
+                                <div className="lp-grid-dots pointer-events-none absolute inset-x-0 top-0 h-48 opacity-[0.25] [mask-image:linear-gradient(black,transparent)]" aria-hidden="true" />
+                                <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-lp-navy text-[#8FCDAF]">
+                                    <Lock size={34} />
                                 </div>
-                                <div className="space-y-2">
-                                    <h3 className="text-2xl font-black text-slate-900 dark:text-white">Pro Feature</h3>
-                                    <p className="text-slate-500 dark:text-slate-400 font-medium">
+                                <div className="relative space-y-2">
+                                    <span className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-azure">Elora AI Assistant</span>
+                                    <h3 className="font-display text-2xl font-semibold tracking-[-0.04em]">Pro Feature</h3>
+                                    <p className="text-lp-muted">
                                         The AI Assistant Elora is only available to Pro and Full Features members.
                                     </p>
                                 </div>
-                                <Link href="/dashboard/subscription" className="w-full">
-                                    <button 
-                                        className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold shadow-lg shadow-indigo-300 hover:bg-indigo-700 transition-all"
-                                        onClick={() => setIsChatOpen(false)}
-                                    >
-                                        Upgrade to Pro
-                                    </button>
+                                <Link
+                                    href="/dashboard/subscription"
+                                    onClick={() => setIsChatOpen(false)}
+                                    className="relative flex h-12 w-full items-center justify-center rounded-full bg-lp-navy font-semibold text-white transition-[background-color,transform] hover:bg-lp-navy-2 motion-safe:hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-azure focus-visible:ring-offset-2 focus-visible:ring-offset-lp-card"
+                                >
+                                    Upgrade to Pro
                                 </Link>
                                 <button 
                                     onClick={() => setIsChatOpen(false)}
-                                    className="text-sm font-bold text-slate-400 hover:text-slate-600"
+                                    className="relative text-sm font-semibold text-lp-muted transition-colors hover:text-lp-fg"
                                 >
                                     Maybe later
                                 </button>
@@ -80,14 +84,14 @@ export default function HomePageContent() {
                 ) : (
                     <button
                         onClick={() => setIsChatOpen(true)}
-                        className="group flex items-center gap-3 px-5 py-4 bg-indigo-600 text-white rounded-full shadow-xl shadow-indigo-300 hover:bg-indigo-700 hover:scale-105 transition-all duration-200"
+                        className="group flex h-14 items-center gap-3 rounded-full bg-lp-navy py-2 pl-5 pr-2 text-white shadow-[0_16px_40px_-12px_rgba(8,32,26,0.55)] ring-1 ring-white/10 transition-[background-color,transform] duration-200 hover:bg-lp-navy-2 motion-safe:hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-azure focus-visible:ring-offset-2 focus-visible:ring-offset-lp-page"
                     >
-                        <span className="font-medium pr-1">Ask Elora</span>
-                        <div className="relative">
-                            <MessageCircle size={24} />
-                            {!hasAccess && <Lock size={12} className="absolute -top-1 -left-1 text-white bg-indigo-800 rounded-full p-0.5" />}
-                            {hasAccess && <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-indigo-600 animate-pulse"></span>}
-                        </div>
+                        <span className="font-semibold">Ask Elora</span>
+                        <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-[#8FCDAF]">
+                            <MessageCircle size={20} />
+                            {!hasAccess && <Lock size={12} className="absolute -left-1 -top-1 rounded-full bg-lp-azure p-0.5 text-white" />}
+                            {hasAccess && <span className="absolute -right-0.5 -top-0.5 h-3 w-3 animate-pulse rounded-full border-2 border-lp-navy bg-[#8FCDAF]"></span>}
+                        </span>
                     </button>
                 )}
             </div>

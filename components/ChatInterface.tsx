@@ -152,63 +152,64 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
     };
 
     return (
-        <div className="flex flex-col h-full w-full bg-white dark:bg-neutral-800 text-slate-800 rounded-2xl shadow-2xl overflow-hidden border border-slate-200 font-sans">
+        <div className="flex h-full w-full flex-col overflow-hidden rounded-[1.75rem] border border-lp-line bg-lp-card font-sans text-lp-fg lp-shadow">
 
             {/* Header */}
-            <div className="flex items-center justify-between p-4 bg-indigo-600 text-white shrink-0">
-                <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center border-2 border-indigo-400">
-                        <Bot size={24} className="text-white" />
+            <div className="relative flex shrink-0 items-center justify-between overflow-hidden bg-lp-navy p-4 text-white">
+                <div className="lp-grid-dots pointer-events-none absolute inset-0 opacity-[0.15]" aria-hidden="true" />
+                <div className="relative flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-[#8FCDAF] ring-1 ring-white/15">
+                        <Bot size={20} />
                     </div>
                     <div>
-                        <h2 className="font-semibold text-lg leading-tight">Elora</h2>
-                        <div className="flex items-center gap-1.5 opacity-90 text-xs">
-                            <span className={`w-2 h-2 rounded-full ${mode === ChatMode.VOICE && isConnected ? 'bg-green-400 animate-pulse' : 'bg-indigo-300'}`}></span>
+                        <h2 className="font-display text-lg font-semibold leading-tight tracking-[-0.03em]">Elora</h2>
+                        <div className="flex items-center gap-1.5 font-display text-[10px] font-medium uppercase tracking-[0.16em] text-white/65">
+                            <span className={`h-1.5 w-1.5 rounded-full ${mode === ChatMode.VOICE && isConnected ? 'bg-[#8FCDAF] animate-pulse' : 'bg-white/40'}`}></span>
                             {mode === ChatMode.VOICE ? 'Voice Active' : 'Visa Assistant'}
                         </div>
                     </div>
                 </div>
-                <button onClick={closeChat} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-                    <X size={20} />
+                <button onClick={closeChat} aria-label="Close chat" className="relative flex h-9 w-9 items-center justify-center rounded-full text-white/80 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8FCDAF]">
+                    <X size={18} />
                 </button>
             </div>
 
             {/* Main Content Area */}
-            <div className="flex-1 overflow-hidden relative bg-slate-50 ">
+            <div className="relative flex-1 overflow-hidden bg-lp-card-2">
 
                 {/* TEXT MODE */}
                 <div className={`absolute inset-0 flex flex-col transition-opacity duration-300 ${mode === ChatMode.TEXT ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
-                    <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
+                    <div className="scrollbar-hide flex-1 space-y-4 overflow-y-auto p-4">
                         {messages.map((msg) => (
                             <div
                                 key={msg.id}
-                                className={`flex gap-3 max-w-[85%] ${msg.role === MessageRole.USER ? 'ml-auto flex-row-reverse' : ''}`}
+                                className={`flex max-w-[85%] gap-2.5 ${msg.role === MessageRole.USER ? 'ml-auto flex-row-reverse' : ''}`}
                             >
                                 {msg.role !== MessageRole.SYSTEM && (
-                                    <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center ${msg.role === MessageRole.USER ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-200 text-slate-600'}`}>
-                                        {msg.role === MessageRole.USER ? <User size={16} /> : <Bot size={16} />}
+                                    <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full ${msg.role === MessageRole.USER ? 'bg-lp-sky text-lp-azure' : 'bg-lp-navy text-[#8FCDAF]'}`}>
+                                        {msg.role === MessageRole.USER ? <User size={15} /> : <Bot size={15} />}
                                     </div>
                                 )}
 
-                                <div className={`p-3 rounded-2xl text-sm leading-relaxed shadow-sm
-                    ${msg.role === MessageRole.USER ? 'bg-indigo-600 text-white rounded-br-none' :
-                                    msg.role === MessageRole.SYSTEM ? 'bg-red-50 text-red-600 border border-red-100 w-full text-center' :
-                                        'bg-white text-slate-800 border border-slate-100 rounded-bl-none'}`}
+                                <div className={`rounded-2xl p-3 text-sm leading-relaxed
+                    ${msg.role === MessageRole.USER ? 'rounded-br-md bg-lp-navy text-white' :
+                                    msg.role === MessageRole.SYSTEM ? 'w-full border border-red-200 bg-red-50 text-center text-red-700 dark:border-red-400/20 dark:bg-red-400/10 dark:text-red-300' :
+                                        'rounded-bl-md border border-lp-line bg-lp-card text-lp-fg'}`}
                                 >
                                     {msg.text}
                                 </div>
                             </div>
                         ))}
                         {isLoading && (
-                            <div className="flex gap-3 max-w-[85%]">
-                                <div className="w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex-shrink-0 flex items-center justify-center">
-                                    <Bot size={16} />
+                            <div className="flex max-w-[85%] gap-2.5">
+                                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-lp-navy text-[#8FCDAF]">
+                                    <Bot size={15} />
                                 </div>
-                                <div className="bg-white p-4 rounded-2xl rounded-bl-none border border-slate-100 shadow-sm">
+                                <div className="rounded-2xl rounded-bl-md border border-lp-line bg-lp-card p-4">
                                     <div className="flex gap-1">
-                                        <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{animationDelay: '0ms'}}></span>
-                                        <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{animationDelay: '150ms'}}></span>
-                                        <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{animationDelay: '300ms'}}></span>
+                                        <span className="h-2 w-2 animate-bounce rounded-full bg-lp-azure/60" style={{animationDelay: '0ms'}}></span>
+                                        <span className="h-2 w-2 animate-bounce rounded-full bg-lp-azure/60" style={{animationDelay: '150ms'}}></span>
+                                        <span className="h-2 w-2 animate-bounce rounded-full bg-lp-azure/60" style={{animationDelay: '300ms'}}></span>
                                     </div>
                                 </div>
                             </div>
@@ -217,41 +218,46 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
                     </div>
 
                     {/* Input Area */}
-                    <div className="p-4 bg-white border-t border-slate-100 shrink-0">
-                        <div className="flex gap-2 items-end">
+                    <div className="shrink-0 border-t border-lp-line bg-lp-card p-3">
+                        <div className="flex items-end gap-2">
                             <button
                                 onClick={toggleMode}
-                                className="p-3 bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-colors"
+                                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-lp-sky text-lp-azure transition-colors hover:bg-lp-azure hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-azure"
                                 title="Switch to Voice Mode"
+                                aria-label="Switch to Voice Mode"
                             >
-                                <Mic size={20} />
+                                <Mic size={19} />
                             </button>
-                            <div className="flex-1 relative">
+                            <div className="relative flex-1">
                 <textarea
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder="Type a message..."
-                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 pr-10 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent resize-none h-[48px] max-h-[120px]"
+                    aria-label="Message Elora"
+                    className="h-[48px] max-h-[120px] w-full resize-none rounded-3xl border border-lp-line bg-lp-card-2 px-4 py-3 text-lp-fg placeholder:text-lp-muted/70 focus:border-lp-azure focus:outline-none focus:ring-2 focus:ring-lp-azure/20"
                     rows={1}
                 />
                             </div>
                             <button
                                 onClick={handleSend}
                                 disabled={!input.trim() || isLoading}
-                                className="p-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-md shadow-indigo-200"
+                                aria-label="Send message"
+                                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-lp-navy text-white transition-colors hover:bg-lp-navy-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-azure disabled:cursor-not-allowed disabled:opacity-40"
                             >
-                                <Send size={20} />
+                                <Send size={18} />
                             </button>
                         </div>
                     </div>
                 </div>
 
                 {/* VOICE MODE */}
-                <div className={`absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-indigo-900 via-purple-900 to-slate-900 transition-opacity duration-300 ${mode === ChatMode.VOICE ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
+                <div className={`absolute inset-0 flex flex-col items-center justify-center overflow-hidden bg-lp-navy transition-opacity duration-300 ${mode === ChatMode.VOICE ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
+                    <div className="lp-grid-dots pointer-events-none absolute inset-0 opacity-[0.12]" aria-hidden="true" />
+                    <div className="pointer-events-none absolute -top-24 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full bg-[#5DBF95]/20 blur-3xl" aria-hidden="true" />
 
                     {liveError && (
-                        <div className="absolute top-4 left-4 right-4 bg-red-500/20 text-red-100 border border-red-500/50 p-3 rounded-lg flex items-center justify-center gap-2 text-sm backdrop-blur-sm">
+                        <div className="absolute left-4 right-4 top-4 z-10 flex items-center justify-center gap-2 rounded-xl border border-red-400/40 bg-red-500/15 p-3 text-sm text-red-100 backdrop-blur-sm">
                             <AlertCircle size={16} />
                             {liveError}
                         </div>
@@ -259,52 +265,53 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
 
                     <div className="relative">
                         {/* Visualizer Circle */}
-                        <div className="relative w-48 h-48 flex items-center justify-center">
+                        <div className="relative flex h-48 w-48 items-center justify-center">
                             {/* Pulse Rings */}
                             <div
-                                className="absolute inset-0 rounded-full bg-indigo-500/30 blur-xl transition-transform duration-100"
+                                className="absolute inset-0 rounded-full bg-[#5DBF95]/25 blur-xl transition-transform duration-100"
                                 style={{ transform: `scale(${1 + Math.min(volume * 2, 0.5)})` }}
                             />
                             <div
-                                className="absolute inset-0 rounded-full border border-indigo-400/50 transition-transform duration-75"
+                                className="absolute inset-0 rounded-full border border-[#8FCDAF]/40 transition-transform duration-75"
                                 style={{ transform: `scale(${1 + volume})` }}
                             />
 
                             {/* Core Circle */}
-                            <div className="w-32 h-32 rounded-full bg-indigo-600 shadow-lg shadow-indigo-500/50 flex items-center justify-center relative overflow-hidden">
-                                <div className="absolute inset-0 bg-gradient-to-tr from-indigo-600 to-purple-500 opacity-80" />
+                            <div className="relative flex h-32 w-32 items-center justify-center overflow-hidden rounded-full bg-lp-azure ring-1 ring-white/20">
+                                <div className="absolute inset-0 bg-gradient-to-tr from-lp-azure-2 to-[#5DBF95] opacity-80" />
                                 {isSpeaking ? (
-                                    <AudioWaveform className="text-white relative z-10 w-12 h-12 animate-pulse" />
+                                    <AudioWaveform className="relative z-10 h-12 w-12 animate-pulse text-white" />
                                 ) : (
-                                    <Mic className="text-white relative z-10 w-12 h-12" />
+                                    <Mic className="relative z-10 h-12 w-12 text-white" />
                                 )}
                             </div>
                         </div>
                     </div>
 
-                    <div className="mt-8 text-center space-y-2">
-                        <h3 className="text-2xl font-medium text-white">
+                    <div className="relative mt-8 space-y-2 text-center">
+                        <h3 className="font-display text-2xl font-semibold tracking-[-0.03em] text-white">
                             {isConnected ? (isSpeaking ? "Elora is speaking..." : "Listening...") : "Connecting..."}
                         </h3>
-                        <p className="text-indigo-200 text-sm">
+                        <p className="text-sm text-white/60">
                             {isConnected ? "Go ahead, I'm listening." : "Establishing secure connection..."}
                         </p>
                     </div>
 
-                    <div className="absolute bottom-8 flex items-center gap-4">
+                    <div className="absolute bottom-8 flex items-center gap-3">
                         <button
                             onClick={toggleMode}
-                            className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-full backdrop-blur-md transition-all border border-white/10"
+                            className="flex h-12 items-center gap-2 rounded-full border border-white/15 bg-white/10 px-6 text-sm font-semibold text-white backdrop-blur-md transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8FCDAF]"
                         >
-                            <Keyboard size={18} />
+                            <Keyboard size={17} />
                             <span>Switch to Text</span>
                         </button>
                         <button
                             onClick={() => { disconnect(); onClose(); }}
-                            className="w-12 h-12 flex items-center justify-center bg-red-500/80 hover:bg-red-500 text-white rounded-full transition-colors backdrop-blur-md"
+                            className="flex h-12 w-12 items-center justify-center rounded-full bg-red-500/85 text-white backdrop-blur-md transition-colors hover:bg-red-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-300"
                             title="End Chat"
+                            aria-label="End Chat"
                         >
-                            <X size={24} />
+                            <X size={22} />
                         </button>
                     </div>
                 </div>

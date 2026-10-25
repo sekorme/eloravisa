@@ -113,15 +113,15 @@ export default function ProfileForm() {
     }
 
     if (loading) {
-        return <div className="h-96 bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse" />
+        return <div className="h-96 animate-pulse rounded-[1.5rem] border border-lp-line bg-lp-card-2" />
     }
 
     return (
         <div className="grid gap-8">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Personal Information</CardTitle>
-                    <CardDescription>Update your personal details and avatar.</CardDescription>
+            <Card className="rounded-[1.5rem] border-lp-line bg-lp-card text-lp-fg shadow-none lp-shadow">
+                <CardHeader className="border-b border-lp-line pb-6">
+                    <CardTitle className="font-display text-xl font-semibold tracking-[-0.03em]">Personal Information</CardTitle>
+                    <CardDescription className="text-lp-muted">Update your personal details and avatar.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <div className="flex flex-col md:flex-row gap-8">
@@ -135,25 +135,25 @@ export default function ProfileForm() {
                         
                         <form onSubmit={handleSubmit} className="flex-1 space-y-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="fullName">Full Name</Label>
-                                <Input id="fullName" value={formData.fullName} onChange={handleInputChange} />
+                                <Label className="font-display text-[10px] font-medium uppercase tracking-[0.16em] text-lp-muted" htmlFor="fullName">Full Name</Label>
+                                <Input className="h-11 rounded-xl border-lp-line bg-lp-card focus-visible:ring-lp-azure" id="fullName" value={formData.fullName} onChange={handleInputChange} />
                             </div>
                             
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="email">Email</Label>
-                                    <Input id="email" value={formData.email} disabled className="bg-slate-50 dark:bg-slate-900" />
+                                    <Label className="font-display text-[10px] font-medium uppercase tracking-[0.16em] text-lp-muted" htmlFor="email">Email</Label>
+                                    <Input id="email" value={formData.email} disabled className="h-11 rounded-xl border-lp-line bg-lp-card-2" />
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="phone">Phone Number</Label>
-                                    <Input id="phone" value={formData.phone} onChange={handleInputChange} />
+                                    <Label className="font-display text-[10px] font-medium uppercase tracking-[0.16em] text-lp-muted" htmlFor="phone">Phone Number</Label>
+                                    <Input className="h-11 rounded-xl border-lp-line bg-lp-card focus-visible:ring-lp-azure" id="phone" value={formData.phone} onChange={handleInputChange} />
                                 </div>
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="country">Citizenship</Label>
+                                <Label className="font-display text-[10px] font-medium uppercase tracking-[0.16em] text-lp-muted" htmlFor="country">Citizenship</Label>
                                 <Select value={formData.country} onValueChange={(v) => handleSelectChange("country", v)}>
-                                    <SelectTrigger>
+                                    <SelectTrigger className="!h-11 w-full rounded-xl border-lp-line bg-lp-card">
                                         <SelectValue placeholder="Select country" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -168,18 +168,18 @@ export default function ProfileForm() {
                 </CardContent>
             </Card>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Application Details</CardTitle>
-                    <CardDescription>Manage your visa application preferences.</CardDescription>
+            <Card className="rounded-[1.5rem] border-lp-line bg-lp-card text-lp-fg shadow-none lp-shadow">
+                <CardHeader className="border-b border-lp-line pb-6">
+                    <CardTitle className="font-display text-xl font-semibold tracking-[-0.03em]">Application Details</CardTitle>
+                    <CardDescription className="text-lp-muted">Manage your visa application preferences.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="residence">Country of Residence</Label>
+                                <Label className="font-display text-[10px] font-medium uppercase tracking-[0.16em] text-lp-muted" htmlFor="residence">Country of Residence</Label>
                                 <Select value={formData.residence} onValueChange={(v) => handleSelectChange("residence", v)}>
-                                    <SelectTrigger><SelectValue placeholder="Select residence" /></SelectTrigger>
+                                    <SelectTrigger className="!h-11 w-full rounded-xl border-lp-line bg-lp-card"><SelectValue placeholder="Select residence" /></SelectTrigger>
                                     <SelectContent>
                                         {countryList.map((c) => (
                                             <SelectItem key={c.code + "res"} value={c.name}>{c.name}</SelectItem>
@@ -189,9 +189,9 @@ export default function ProfileForm() {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="destination">Destination Country</Label>
+                                <Label className="font-display text-[10px] font-medium uppercase tracking-[0.16em] text-lp-muted" htmlFor="destination">Destination Country</Label>
                                 <Select value={formData.destination} onValueChange={(v) => handleSelectChange("destination", v)}>
-                                    <SelectTrigger><SelectValue placeholder="Select destination" /></SelectTrigger>
+                                    <SelectTrigger className="!h-11 w-full rounded-xl border-lp-line bg-lp-card"><SelectValue placeholder="Select destination" /></SelectTrigger>
                                     <SelectContent>
                                         {countryList.map((c) => (
                                             <SelectItem key={c.code + "dest"} value={c.name}>{c.name}</SelectItem>
@@ -203,9 +203,9 @@ export default function ProfileForm() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="grid gap-2">
-                                <Label htmlFor="visaType">Visa Type</Label>
+                                <Label className="font-display text-[10px] font-medium uppercase tracking-[0.16em] text-lp-muted" htmlFor="visaType">Visa Type</Label>
                                 <Select value={formData.visaType} onValueChange={(v) => handleSelectChange("visaType", v)}>
-                                    <SelectTrigger><SelectValue placeholder="Select visa type" /></SelectTrigger>
+                                    <SelectTrigger className="!h-11 w-full rounded-xl border-lp-line bg-lp-card"><SelectValue placeholder="Select visa type" /></SelectTrigger>
                                     <SelectContent>
                                         {["Study", "Visit", "Work", "Family"].map((v) => (
                                             <SelectItem key={v} value={v}>{v}</SelectItem>
@@ -215,9 +215,9 @@ export default function ProfileForm() {
                             </div>
 
                             <div className="grid gap-2">
-                                <Label htmlFor="appStatus">Application Status</Label>
+                                <Label className="font-display text-[10px] font-medium uppercase tracking-[0.16em] text-lp-muted" htmlFor="appStatus">Application Status</Label>
                                 <Select value={formData.appStatus} onValueChange={(v) => handleSelectChange("appStatus", v)}>
-                                    <SelectTrigger><SelectValue placeholder="Current status" /></SelectTrigger>
+                                    <SelectTrigger className="!h-11 w-full rounded-xl border-lp-line bg-lp-card"><SelectValue placeholder="Current status" /></SelectTrigger>
                                     <SelectContent>
                                         {["Not started", "In progress", "Appointment booked", "Previously refused"].map((s) => (
                                             <SelectItem key={s} value={s}>{s}</SelectItem>
@@ -228,7 +228,7 @@ export default function ProfileForm() {
                         </div>
 
                         <div className="flex justify-end pt-4">
-                            <Button type="submit" disabled={saving} className="w-full md:w-auto bg-primary hover:bg-primary/90">
+                            <Button type="submit" disabled={saving} className="h-12 w-full rounded-full bg-lp-navy px-7 font-semibold text-white hover:bg-lp-navy-2 md:w-auto">
                                 {saving ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />

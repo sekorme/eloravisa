@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
 
     const ai = new GoogleGenAI({ apiKey });
     const chat = ai.chats.create({
-        model: "gemini-2.5-flash",
+        model: "gemini-3.8-flash",
         config: { systemInstruction: SYSTEM_INSTRUCTION },
         history: history
             .filter((m: any) => (m?.role === "user" || m?.role === "model") && typeof m?.text === "string")

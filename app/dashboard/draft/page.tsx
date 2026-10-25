@@ -13,7 +13,6 @@ import {FileText, Download, Printer, Coins, Loader2, Sparkles, Wand2, Info, Book
 import { toast } from "sonner"
 import { TOKEN_COSTS } from '@/lib/subscriptions'
 import Link from 'next/link'
-import { Badge } from "@/components/ui/badge"
 
 export default function DraftPage() {
   const [user, setUser] = useState<any>(null)
@@ -126,51 +125,51 @@ export default function DraftPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#050505] text-slate-900 dark:text-white flex flex-col font-sans py-4">
-        <div className=" w-full px-4 md:px-8 space-y-8">
-            <header className="flex flex-col sm:flex-row items-center justify-between shrink-0 gap-4">
+    <div className="flex min-h-screen flex-col bg-lp-page py-6 text-lp-fg">
+        <div className="mx-auto w-full max-w-[1400px] space-y-6 px-4 md:px-8">
+            <header className="flex shrink-0 flex-col items-center justify-between gap-4 sm:flex-row">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-primary via-primary to-lp-azure-2 rounded-xl flex items-center justify-center font-bold text-xl shadow-[0_0_20px_rgba(30,122,88,0.45)] border border-white/20">
-                        <Wand2 className="w-5 h-5 text-white animate-pulse" />
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-lp-navy text-[#8FCDAF]">
+                        <Wand2 className="h-5 w-5" />
                     </div>
                     <div>
-                        <h1 className="text-lg md:text-2xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 dark:from-white dark:via-white dark:to-white/60">
-                            DOCUMENT DRAFTER
+                        <h1 className="font-display text-lg font-semibold tracking-[-0.04em] md:text-2xl">
+                            Document Drafter
                         </h1>
-                        <p className="text-[10px] text-primary font-bold uppercase tracking-[0.2em] opacity-80">
+                        <p className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-azure">
                             AI-Powered Professional Drafts
                         </p>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20 px-3 py-1">
-                        <Coins className="w-3 h-3 mr-1.5" />
+                    <span className="inline-flex items-center rounded-full border border-lp-line bg-lp-card px-3.5 py-1.5 text-xs font-semibold">
+                        <Coins className="mr-1.5 h-3.5 w-3.5 text-lp-azure" />
                         {TOKEN_COSTS.DOCUMENT_DRAFT} Tokens per draft
-                    </Badge>
+                    </span>
                 </div>
             </header>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-12">
+            <div className="grid grid-cols-1 gap-6 pb-12 lg:grid-cols-3">
                 {/* Input Section */}
-                <div className="lg:col-span-1 h-fit glass-panel rounded-3xl overflow-hidden border border-slate-200 dark:border-white/10">
-                    <div className="p-6 border-b border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-white/5">
-                        <h3 className="text-sm font-bold uppercase tracking-widest text-slate-900 dark:text-white/80">Configuration</h3>
-                        <p className="text-xs text-slate-500 dark:text-white/40 mt-1">Select document type and add details.</p>
+                <div className="h-fit overflow-hidden lg:col-span-1 rounded-[1.5rem] border border-lp-line bg-lp-card text-lp-fg lp-shadow">
+                    <div className="border-b border-lp-line p-6">
+                        <h3 className="font-display text-lg font-semibold tracking-[-0.03em]">Configuration</h3>
+                        <p className="mt-1 text-xs text-lp-muted">Select document type and add details.</p>
                     </div>
                     <div className="p-6">
                         <form onSubmit={handleGenerate} className="space-y-6">
                             <div className="space-y-3">
-                                <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-white/40">Document Type</Label>
+                                <Label className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-muted">Document Type</Label>
                                 <Select value={docType} onValueChange={setDocType}>
-                                    <SelectTrigger className="bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 rounded-xl h-11">
+                                    <SelectTrigger className="!h-11 w-full rounded-xl border-lp-line bg-lp-card">
                                         <SelectValue />
                                     </SelectTrigger>
-                                    <SelectContent className="bg-white dark:bg-[#0c0c0e] border-slate-200 dark:border-white/10 rounded-xl">
+                                    <SelectContent className="rounded-xl border-lp-line bg-lp-card">
                                         {docTypes.map((type) => (
-                                            <SelectItem key={type.value} value={type.value} className="focus:bg-primary/10">
+                                            <SelectItem key={type.value} value={type.value} className="rounded-lg focus:bg-lp-sky">
                                                 <div className="flex items-center gap-2">
-                                                    <type.icon className="w-4 h-4 text-primary" />
+                                                    <type.icon className="h-4 w-4 text-lp-azure" />
                                                     <span>{type.label}</span>
                                                 </div>
                                             </SelectItem>
@@ -181,10 +180,10 @@ export default function DraftPage() {
 
                             <div className="space-y-3">
                                 <div className="flex items-center justify-between">
-                                    <Label className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-white/40">Additional Details</Label>
+                                    <Label className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-muted">Additional Details</Label>
                                     <div className="group relative">
-                                        <Info className="w-3.5 h-3.5 text-slate-400 cursor-help" />
-                                        <div className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-slate-900 text-white text-[10px] rounded shadow-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                                        <Info className="h-3.5 w-3.5 cursor-help text-lp-muted" />
+                                        <div className="pointer-events-none absolute bottom-full right-0 z-50 mb-2 w-48 rounded-lg bg-lp-navy p-2 text-[10px] text-white opacity-0 shadow-xl transition-opacity group-hover:opacity-100">
                                             The AI uses your profile (name, nationality, destination) automatically.
                                         </div>
                                     </div>
@@ -193,16 +192,16 @@ export default function DraftPage() {
                                     value={extra}
                                     onChange={(e) => setExtra(e.target.value)}
                                     placeholder="E.g., University name, course details, host's relationship, travel dates..."
-                                    className="min-h-[180px] bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 rounded-xl resize-none focus-visible:ring-primary/50"
+                                    className="min-h-[180px] resize-none rounded-xl border-lp-line bg-lp-card focus-visible:ring-lp-azure/40"
                                 />
-                                <p className="text-[10px] text-slate-400 dark:text-white/30 italic">
+                                <p className="text-[11px] text-lp-muted">
                                     Pro tip: More details lead to better drafts.
                                 </p>
                             </div>
 
                             <Button 
                                 type="submit" 
-                                className="w-full h-12 bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:hover:bg-primary/10 rounded-xl font-bold tracking-tight transition-all active:scale-[0.98] shadow-lg" 
+                                className="h-12 w-full rounded-full bg-lp-navy font-semibold text-white transition-[background-color,transform] hover:bg-lp-navy-2 motion-safe:active:scale-[0.98]" 
                                 disabled={loading || !user}
                             >
                                 {loading ? (
@@ -212,7 +211,7 @@ export default function DraftPage() {
                                     </>
                                 ) : (
                                     <>
-                                        <Sparkles className="mr-2 h-4 w-4 text-primary" /> 
+                                        <Sparkles className="mr-2 h-4 w-4 text-[#8FCDAF]" /> 
                                         <span>GENERATE DRAFT</span>
                                     </>
                                 )}
@@ -222,36 +221,36 @@ export default function DraftPage() {
                 </div>
 
                 {/* Preview Section */}
-                <div className="lg:col-span-2 min-h-[600px] flex flex-col glass-panel rounded-3xl overflow-hidden border border-slate-200 dark:border-white/10">
-                    <div className="p-6 border-b border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-white/5 flex flex-row items-center justify-between shrink-0">
+                <div className="flex min-h-[600px] flex-col overflow-hidden lg:col-span-2 rounded-[1.5rem] border border-lp-line bg-lp-card text-lp-fg lp-shadow">
+                    <div className="flex shrink-0 flex-row items-center justify-between border-b border-lp-line p-6">
                         <div>
-                            <h3 className="text-sm font-bold uppercase tracking-widest text-slate-900 dark:text-white/80">Document Preview</h3>
-                            <p className="text-xs text-slate-500 dark:text-white/40 mt-1">Review and download your generated document.</p>
+                            <h3 className="font-display text-lg font-semibold tracking-[-0.03em]">Document Preview</h3>
+                            <p className="mt-1 text-xs text-lp-muted">Review and download your generated document.</p>
                         </div>
                         {generated && (
                             <Button 
                                 variant="outline" 
                                 size="sm" 
                                 onClick={handlePrint}
-                                className="rounded-xl border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 text-xs"
+                                className="h-9 rounded-full border-lp-line bg-lp-card px-4 text-xs font-semibold hover:bg-lp-card-2"
                             >
                                 <Printer className="mr-2 h-3.5 w-3.5" /> Print / PDF
                             </Button>
                         )}
                     </div>
-                    <div className="flex-1 bg-white/30 dark:bg-black/20 p-0 overflow-hidden relative">
+                    <div className="relative flex-1 overflow-hidden bg-lp-card-2 p-0">
                         {generated ? (
-                            <div className="h-full overflow-y-auto p-8 sm:p-12 font-serif text-slate-800 dark:text-slate-200 whitespace-pre-wrap leading-relaxed text-base custom-scrollbar" ref={printRef}>
+                            <div className="custom-scrollbar m-4 h-[calc(100%-2rem)] overflow-y-auto whitespace-pre-wrap rounded-2xl border border-lp-line bg-lp-card p-8 font-serif text-base leading-relaxed text-lp-fg sm:m-6 sm:h-[calc(100%-3rem)] sm:p-12" ref={printRef}>
                                 {generated}
                             </div>
                         ) : (
-                            <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-white/20 p-8 text-center space-y-4">
-                                <div className="w-20 h-20 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center border border-slate-200 dark:border-white/5">
-                                    <FileText className="w-10 h-10 opacity-20" />
+                            <div className="flex h-full flex-col items-center justify-center space-y-4 p-8 text-center text-lp-muted">
+                                <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-lp-line bg-lp-card">
+                                    <FileText className="h-9 w-9 text-lp-azure/60" />
                                 </div>
                                 <div className="max-w-[260px]">
-                                    <p className="text-sm font-medium">Ready to assist</p>
-                                    <p className="text-xs opacity-60 mt-1">Configure your document on the left and click generate to see the magic happen.</p>
+                                    <p className="font-display text-sm font-semibold text-lp-fg">Ready to assist</p>
+                                    <p className="mt-1 text-xs">Configure your document on the left and click generate to see the magic happen.</p>
                                 </div>
                             </div>
                         )}

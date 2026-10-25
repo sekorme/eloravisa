@@ -14,7 +14,12 @@ export default function VisaCheckList() {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
+        // onAuthStateChanged ignores the callback's return value, so the
+        // Firestore listeners are torn down by hand on user change/unmount.
+        let unsubData: (() => void) | undefined
         const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+            unsubData?.()
+            unsubData = undefined
             if (user) {
                 // Listen to user document for uploads and visaType
                 const userDocRef = doc(db, "users", user.uid)
@@ -37,7 +42,7 @@ export default function VisaCheckList() {
                     setLoading(false)
                 })
 
-                return () => {
+                unsubData = () => {
                     unsubUser()
                     unsubReviews()
                 }
@@ -46,55 +51,61 @@ export default function VisaCheckList() {
             }
         })
 
-        return () => unsubscribeAuth()
+        return () => {
+            unsubData?.()
+            unsubscribeAuth()
+        }
     }, [])
 
     if (loading) {
-        return <div className="space-y-4 animate-pulse">
+        return <div className="space-y-3 animate-pulse">
             {[1, 2, 3].map(i => (
-                <div key={i} className="h-24 bg-gray-100 dark:bg-gray-800 rounded-xl" />
+                <div key={i} className="h-[84px] rounded-[1.25rem] border border-lp-line bg-lp-card-2" />
             ))}
         </div>
     }
 
     const checklistData = getRequiredDocuments(visaType)
     const uploadedCount = checklistData.filter(item => !!documents[item.key]).length;
+    const completion = Math.round(checklistData.length > 0 ? (uploadedCount / checklistData.length) * 100 : 0)
 
     return (
-        <section className="space-y-8">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 px-2">
+        <section className="space-y-5">
+            <div className="flex flex-col justify-between gap-5 rounded-[1.5rem] border border-lp-line bg-lp-card p-5 text-lp-fg md:flex-row md:items-center md:p-6 lp-shadow">
                 <div>
-                    <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mb-2">
+                    <h3 className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-azure">
                         Requirements Masterlist
                     </h3>
-                    <div className="flex items-baseline gap-2">
-                        <p className="text-4xl font-black text-slate-900 dark:text-white">
+                    <div className="mt-2 flex items-baseline gap-2">
+                        <p className="font-display text-4xl font-semibold tracking-[-0.05em]">
                             {uploadedCount}
                         </p>
-                        <p className="text-lg font-bold text-slate-400">
-                            / {checklistData.length} <span className="text-xs font-medium ml-1">Documents Uploaded</span>
+                        <p className="font-display text-lg font-semibold text-lp-muted">
+                            / {checklistData.length}
                         </p>
+                        <span className="ml-1 text-sm text-lp-muted">Documents Uploaded</span>
                     </div>
                 </div>
-                
-                <div className="flex flex-col items-start md:items-end gap-2">
-                    <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Completion Status</span>
-                        <span className="text-sm font-black text-primary">
-                            {Math.round(checklistData.length > 0 ? (uploadedCount / checklistData.length) * 100 : 0)}%
-                        </span>
+
+                <div className="w-full md:w-64">
+                    <div className="mb-2 flex items-center justify-between">
+                        <span className="font-display text-[10px] font-medium uppercase tracking-[0.16em] text-lp-muted">Completion Status</span>
+                        <span className="font-display text-sm font-semibold">{completion}%</span>
                     </div>
-                    <div className="w-48 h-3 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-200/50 dark:border-slate-700/50 p-0.5">
-                        <div 
-                            className="h-full bg-gradient-to-r from-primary to-lp-azure-2 rounded-full transition-all duration-1000 ease-out shadow-sm" 
-                            style={{ width: `${checklistData.length > 0 ? (uploadedCount / checklistData.length) * 100 : 0}%` }}
-                        />
+                    {/* One segment per required document */}
+                    <div className="flex gap-1" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={completion} aria-label="Documents uploaded">
+                        {checklistData.map((item) => (
+                            <span
+                                key={item.key}
+                                className={`h-2 flex-1 rounded-full transition-colors duration-500 ${documents[item.key] ? "bg-lp-azure" : "bg-lp-sky"}`}
+                            />
+                        ))}
                     </div>
                 </div>
             </div>
 
-            <div className="grid gap-4">
-                {checklistData.map((item) => {
+            <div className="grid gap-3">
+                {checklistData.map((item, index) => {
                     const docData = documents[item.key]
                     const isUploaded = !!docData
                     const docUrl = typeof docData === 'string' ? docData : docData?.url
@@ -103,6 +114,7 @@ export default function VisaCheckList() {
                     return (
                         <ChecklistItem
                             key={item.key}
+                            index={index}
                             docKey={item.key}
                             title={item.title}
                             explanation={item.explanation || ""}

@@ -20,9 +20,29 @@ import { onAuthStateChanged } from "firebase/auth"
 import { getRequiredDocuments } from "@/utils/documentConfig"
 import { useDropzone } from "react-dropzone"
 import { toast } from "sonner"
+import { cn } from "@/lib/utils"
 
+type TriggerVariant = "navy" | "white" | "tile"
 
-export function UploadDocumentsModal() {
+const triggerBase = "group cursor-pointer border-none font-semibold transition-[background-color,box-shadow,transform] duration-200 motion-safe:hover:-translate-y-0.5 motion-safe:active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-azure focus-visible:ring-offset-2 focus-visible:ring-offset-lp-page"
+
+const triggerVariants: Record<TriggerVariant, { button: string; chip: string }> = {
+    navy: {
+        button: "inline-flex h-12 w-full items-center justify-center gap-3 rounded-full bg-lp-navy pl-1.5 pr-6 text-sm text-white hover:bg-lp-navy-2 hover:shadow-[0_16px_40px_-12px_rgba(8,32,26,0.55)]",
+        chip: "h-9 w-9 rounded-full bg-white/10 text-[#8FCDAF]",
+    },
+    white: {
+        button: "inline-flex h-12 w-full items-center justify-center gap-3 rounded-full bg-white pl-1.5 pr-6 text-sm text-lp-navy hover:bg-lp-sky-2 hover:shadow-[0_16px_40px_-12px_rgba(8,32,26,0.35)]",
+        chip: "h-9 w-9 rounded-full bg-lp-sky text-lp-azure",
+    },
+    // Large card-style trigger for action grids (dashboard Quick Actions)
+    tile: {
+        button: "relative flex h-full min-h-[168px] w-full flex-col items-start justify-between rounded-[1.25rem] bg-lp-navy p-5 text-left font-display text-base tracking-[-0.02em] text-white hover:bg-lp-navy-2 md:p-6",
+        chip: "h-12 w-12 rounded-xl bg-white/10 text-[#8FCDAF] transition-transform duration-300 group-hover:-rotate-6",
+    },
+}
+
+export function UploadDocumentsModal({ variant = "navy", className }: { variant?: TriggerVariant; className?: string } = {}) {
     const [user, setUser] = useState<any>(null)
     const [currentStep, setCurrentStep] = useState(0)
     const [availableSteps, setAvailableSteps] = useState<any[]>([])
@@ -155,75 +175,98 @@ export function UploadDocumentsModal() {
         )
     }
 
+    // A picked file belongs to the step it was picked on — drop it when moving
+    // so it can't be uploaded under a different document.
     const nextStep = () => {
+        setFile(null)
+        setError(null)
         setCurrentStep((prev) => Math.min(prev + 1, availableSteps.length - 1))
     }
 
     const prevStep = () => {
+        setFile(null)
+        setError(null)
         setCurrentStep((prev) => Math.max(prev - 1, 0))
     }
+
+    const trigger = triggerVariants[variant]
 
     const currentDocument = availableSteps[currentStep]
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <button className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-semibold py-3 rounded-lg flex items-center justify-center border-none cursor-pointer transition-colors">
-                    <Upload className="mr-2 w-5 h-5" />
+                <button type="button" className={cn(triggerBase, trigger.button, className)}>
+                    <span className={cn("flex shrink-0 items-center justify-center", trigger.chip)} aria-hidden="true">
+                        <Upload className={cn("transition-transform duration-300 group-hover:-translate-y-0.5", variant === "tile" ? "h-6 w-6" : "h-4 w-4")} />
+                    </span>
                     Upload Document
                 </button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="rounded-[1.5rem] border-lp-line bg-lp-card text-lp-fg sm:max-w-[460px]">
                 {availableSteps.length > 0 && currentDocument ? (
                     <>
                         <DialogHeader>
-                            <DialogTitle>Upload Documents</DialogTitle>
-                            <DialogDescription>
+                            <span className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-azure">
+                                Step {currentStep + 1} of {availableSteps.length}
+                            </span>
+                            <DialogTitle className="font-display text-xl font-semibold tracking-[-0.03em]">{currentDocument.title}</DialogTitle>
+                            <DialogDescription className="sr-only">
                                 Step {currentStep + 1} of {availableSteps.length}: {currentDocument.title}
                             </DialogDescription>
+                            <div className="flex gap-1 pt-2" aria-hidden="true">
+                                {availableSteps.map((step, i) => (
+                                    <span key={step.key} className={cn("h-1 flex-1 rounded-full", i === currentStep ? "bg-lp-azure" : "bg-lp-sky")} />
+                                ))}
+                            </div>
                         </DialogHeader>
                         <div className="grid gap-4 py-4">
                             <div
                                 {...getRootProps()}
-                                className={`p-10 border-2 border-dashed rounded-lg text-center cursor-pointer transition-colors ${isDragActive ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-300 dark:border-gray-700 hover:border-blue-400'}`}
+                                className={cn(
+                                    "cursor-pointer rounded-2xl border-2 border-dashed p-10 text-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-azure",
+                                    isDragActive ? "border-lp-azure bg-lp-sky" : "border-lp-line bg-lp-card-2 hover:border-lp-azure/50 hover:bg-lp-sky/60"
+                                )}
                             >
                                 <input {...getInputProps()} />
-                                <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                                    <Upload className="w-8 h-8" />
+                                <div className="flex flex-col items-center gap-3 text-lp-muted">
+                                    <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-lp-card text-lp-azure ring-1 ring-lp-line">
+                                        <Upload className="h-5 w-5" />
+                                    </span>
                                     {isDragActive ? (
-                                        <p>Drop the file here...</p>
+                                        <p className="font-semibold text-lp-fg">Drop the file here...</p>
                                     ) : (
-                                        <p>Drag & drop a file here, or click to select</p>
+                                        <p><span className="font-semibold text-lp-fg">Drag & drop a file here</span>, or click to select</p>
                                     )}
-                                    <p className="text-xs">PDF, JPG, PNG</p>
+                                    <p className="font-display text-[10px] font-medium uppercase tracking-[0.16em]">PDF, JPG, PNG</p>
                                 </div>
                             </div>
 
                             {file && !uploading && (
-                                <div className="flex items-center p-2 bg-gray-100 dark:bg-gray-800 rounded-md text-sm">
-                                    <File className="w-4 h-4 mr-2 flex-shrink-0" />
+                                <div className="flex items-center rounded-xl border border-lp-line bg-lp-card-2 p-3 text-sm">
+                                    <File className="mr-2 h-4 w-4 flex-shrink-0 text-lp-azure" />
                                     <span className="truncate">{file.name}</span>
                                 </div>
                             )}
                             {uploading && (
                                 <div className="space-y-2">
                                     <Progress value={uploadProgress} />
-                                    <p className="text-xs text-muted-foreground text-center">{Math.round(uploadProgress)}% uploaded</p>
+                                    <p className="text-center text-xs text-lp-muted">{Math.round(uploadProgress)}% uploaded</p>
                                 </div>
                             )}
                             {error && (
-                                <div className="flex items-center p-2 bg-red-100 dark:bg-red-900/30 rounded-md text-sm text-red-600">
+                                <div className="flex items-center rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-400/20 dark:bg-red-400/[0.06] dark:text-red-300">
                                     <AlertCircle className="w-4 h-4 mr-2" />
                                     <span>{error}</span>
                                 </div>
                             )}
                         </div>
                         <DialogFooter className="flex-col sm:flex-col sm:space-x-0 gap-2">
-                            <div className="flex justify-between w-full">
-                                <Button variant="ghost" onClick={prevStep} disabled={currentStep === 0 || uploading}>
+                            <div className="flex w-full items-center justify-between gap-2">
+                                <Button variant="ghost" className="rounded-full text-lp-muted hover:bg-lp-card-2 hover:text-lp-fg" onClick={prevStep} disabled={currentStep === 0 || uploading}>
                                     <ArrowLeft className="mr-2 h-4 w-4" /> Back
                                 </Button>
-                                <Button onClick={handleUpload} disabled={!file || uploading} className="bg-blue-600 hover:bg-blue-700">
+                                <Button onClick={handleUpload} disabled={!file || uploading} className="h-11 rounded-full bg-lp-navy px-6 font-semibold text-white hover:bg-lp-navy-2">
                                     {uploading ? (
                                         <>
                                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -233,7 +276,7 @@ export function UploadDocumentsModal() {
                                         "Upload & Continue"
                                     )}
                                 </Button>
-                                <Button variant="ghost" onClick={nextStep} disabled={currentStep === availableSteps.length - 1 || uploading}>
+                                <Button variant="ghost" className="rounded-full text-lp-muted hover:bg-lp-card-2 hover:text-lp-fg" onClick={nextStep} disabled={currentStep === availableSteps.length - 1 || uploading}>
                                     Skip <ArrowRight className="ml-2 h-4 w-4" />
                                 </Button>
                             </div>
@@ -242,16 +285,16 @@ export function UploadDocumentsModal() {
                 ) : (
                     <>
                         <DialogHeader>
-                            <DialogTitle className="flex items-center gap-2">
-                                <CheckCircle className="w-6 h-6 text-green-500" />
+                            <DialogTitle className="flex items-center gap-2 font-display text-xl font-semibold tracking-[-0.03em]">
+                                <CheckCircle className="h-6 w-6 text-lp-azure" />
                                 All Documents Uploaded
                             </DialogTitle>
-                            <DialogDescription>
+                            <DialogDescription className="text-lp-muted">
                                 You have successfully uploaded all required documents.
                             </DialogDescription>
                         </DialogHeader>
                         <DialogFooter>
-                            <Button onClick={() => setIsOpen(false)}>Close</Button>
+                            <Button className="h-11 rounded-full bg-lp-navy px-6 font-semibold text-white hover:bg-lp-navy-2" onClick={() => setIsOpen(false)}>Close</Button>
                         </DialogFooter>
                     </>
                 )}

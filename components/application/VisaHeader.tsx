@@ -1,40 +1,44 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card } from "@/components/ui/card"
 import { Lock, FileText, MapPin, Plane } from "lucide-react"
 import { UploadDocumentsModal } from "@/components/UploadDocumentsModal"
 import { auth, db } from "@/firebase/client"
 import { doc, onSnapshot } from "firebase/firestore"
 import { onAuthStateChanged } from "firebase/auth"
-import { cn } from "@/lib/utils"
 
 export default function VisaHeader() {
     const [userData, setUserData] = useState<any>(null)
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
+        // onAuthStateChanged ignores the callback's return value — clean up by hand.
+        let unsubscribeSnapshot: (() => void) | undefined
         const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+            unsubscribeSnapshot?.()
+            unsubscribeSnapshot = undefined
             if (user) {
                 const userDocRef = doc(db, "users", user.uid)
-                const unsubscribeSnapshot = onSnapshot(userDocRef, (docSnap) => {
+                unsubscribeSnapshot = onSnapshot(userDocRef, (docSnap) => {
                     if (docSnap.exists()) {
                         setUserData(docSnap.data())
                     }
                     setLoading(false)
                 })
-                return () => unsubscribeSnapshot()
             } else {
                 setLoading(false)
             }
         })
 
-        return () => unsubscribeAuth()
+        return () => {
+            unsubscribeSnapshot?.()
+            unsubscribeAuth()
+        }
     }, [])
 
     if (loading) {
         return (
-            <Card className="p-6 md:p-8 h-[160px] animate-pulse bg-gray-100 dark:bg-gray-800 border-none shadow-sm rounded-3xl"></Card>
+            <div className="h-[200px] animate-pulse rounded-[2rem] bg-lp-card-2"></div>
         )
     }
 
@@ -42,50 +46,43 @@ export default function VisaHeader() {
     const visaType = userData?.onboarding?.visaType || "Visa Type"
 
     return (
-        <Card className="relative overflow-hidden border-none shadow-2xl rounded-3xl bg-white dark:bg-slate-950">
-            {/* Multi-step Vibrant Gradient Background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-lp-azure-2/5 to-purple-600/10 dark:from-primary/20 dark:via-primary/10 dark:to-purple-500/20" />
-            
-            {/* Animated Glow Elements */}
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/3 animate-pulse" />
-            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/3" />
-            
-            <div className="relative z-10 p-6 md:p-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
-                <div className="flex flex-col sm:flex-row gap-6 items-start">
-                    <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-lp-azure-2 text-white shadow-xl shadow-primary/30 transform transition-transform hover:rotate-3 duration-300 shrink-0">
-                        <FileText size={32} strokeWidth={1.5} />
+        <div className="relative overflow-hidden rounded-[2rem] bg-lp-navy text-white lp-shadow">
+            <div className="lp-grid-dots pointer-events-none absolute inset-0 opacity-[0.18] [mask-image:radial-gradient(ellipse_at_top_right,black,transparent_70%)]" aria-hidden="true" />
+            <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-[#5DBF95]/20 blur-3xl" aria-hidden="true" />
+
+            <div className="relative z-10 flex flex-col items-start justify-between gap-8 p-6 md:p-10 lg:flex-row lg:items-center">
+                <div className="flex flex-col items-start gap-6 sm:flex-row">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/10 text-[#8FCDAF] ring-1 ring-white/10">
+                        <FileText size={26} strokeWidth={1.75} />
                     </div>
-                    
+
                     <div className="space-y-4">
-                        <div className="flex items-center gap-3 flex-wrap">
-                            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 backdrop-blur-md">
-                                <MapPin size={12} className="animate-bounce" />
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Live Application</span>
-                            </div>
-                            
-                            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 backdrop-blur-md">
-                                <Lock size={12} />
-                                <span className="text-[10px] font-black uppercase tracking-[0.2em]">Encryption Active</span>
-                            </div>
+                        <div className="flex flex-wrap items-center gap-2">
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1 font-display text-[10px] font-medium uppercase tracking-[0.18em] text-white/85">
+                                <MapPin size={12} className="text-[#8FCDAF]" />
+                                Live Application
+                            </span>
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1 font-display text-[10px] font-medium uppercase tracking-[0.18em] text-white/85">
+                                <Lock size={12} className="text-[#8FCDAF]" />
+                                Encryption Active
+                            </span>
                         </div>
-                        
+
                         <div>
-                            <h1 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-none mb-3">
-                                {destination} <span className="text-primary/40 dark:text-primary/30 font-light">/</span> {visaType}
+                            <h1 className="mb-3 font-display text-3xl font-semibold leading-[1.05] tracking-[-0.045em] md:text-5xl">
+                                {destination} <span className="font-normal text-white/30">/</span> <span className="text-[#8FCDAF]">{visaType}</span>
                             </h1>
-                            <p className="text-base md:text-lg text-slate-500 dark:text-slate-400 max-w-xl leading-relaxed font-medium">
-                                Your path to <span className="text-slate-900 dark:text-white font-bold">{destination}</span> starts here. Complete each step to maximize your approval odds.
+                            <p className="max-w-xl text-base leading-relaxed text-white/70 md:text-lg">
+                                Your path to <span className="font-semibold text-white">{destination}</span> starts here. Complete each step to maximize your approval odds.
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <div className="flex lg:justify-end w-full lg:w-auto">
-                    <div className="bg-white/40 dark:bg-white/5 backdrop-blur-xl p-2 rounded-2xl border border-white/20 dark:border-white/10 shadow-xl shadow-black/5">
-                        <UploadDocumentsModal />
-                    </div>
+                <div className="w-full lg:w-auto">
+                    <UploadDocumentsModal variant="white" className="sm:min-w-[220px]" />
                 </div>
             </div>
-        </Card>
+        </div>
     );
 }

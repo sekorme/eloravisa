@@ -1,5 +1,6 @@
 "use client";
 
+import { Bell } from "lucide-react";
 import { useEffect, useState, Fragment } from "react";
 import { db } from "@/firebase/client";
 import {
@@ -76,11 +77,13 @@ export function NotificationBell({ userId }: { userId: any }) {
             {/* Bell */}
             <button
                 onClick={() => setDropdownOpen(!dropdownOpen)}
-                className="relative p-2 rounded-full hover:bg-gray-100 dark:hover:bg-neutral-800 transition"
+                aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : "Notifications"}
+                aria-expanded={dropdownOpen}
+                className="relative flex h-10 w-10 items-center justify-center rounded-full border border-lp-line bg-lp-card text-lp-fg transition-colors hover:border-lp-fg/30 hover:bg-lp-card-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-azure"
             >
-                🔔
+                <Bell className="h-[1.1rem] w-[1.1rem]" />
                 {unreadCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                    <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-lp-azure px-1 text-[10px] font-semibold text-white ring-2 ring-lp-page">
             {unreadCount}
           </span>
                 )}
@@ -94,25 +97,25 @@ export function NotificationBell({ userId }: { userId: any }) {
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }}
                         exit={{ opacity: 0, y: -10, transition: { duration: 0.15 } }}
-                        className="fixed sm:absolute right-4 sm:right-0 top-14 sm:top-auto sm:mt-2 w-[92vw] sm:w-80 max-w-sm max-h-[70vh] overflow-y-auto bg-white dark:bg-neutral-900 border border-gray-200 dark:border-neutral-700 shadow-xl rounded-xl z-50 p-4"
+                        className="fixed sm:absolute right-4 sm:right-0 top-16 sm:top-auto sm:mt-3 w-[92vw] sm:w-80 max-w-sm max-h-[70vh] overflow-y-auto rounded-2xl border border-lp-line bg-lp-card p-2 text-lp-fg shadow-xl z-50 lp-shadow"
                     >
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-neutral-100 mb-2">Notifications</h3>
+                        <h3 className="px-2 pb-2 pt-1.5 font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-muted">Notifications</h3>
 
                         {notifications.length === 0 && (
-                            <p className="text-sm text-gray-500 dark:text-neutral-400">No notifications</p>
+                            <p className="px-2 pb-3 text-sm text-lp-muted">No notifications</p>
                         )}
 
                         {notifications.map((n) => (
                             <div
                                 key={n.id}
-                                className={`p-3 mb-2 rounded-lg transition flex justify-between items-start ${
-                                    n.read ? "bg-gray-50 dark:bg-neutral-800" : "bg-blue-50 dark:bg-blue-900"
+                                className={`p-3 mb-1 rounded-xl transition-colors flex justify-between items-start ${
+                                    n.read ? "hover:bg-lp-card-2" : "bg-lp-sky"
                                 }`}
                             >
                                 <div className="flex-1 mr-2">
-                                    <div className="font-medium text-gray-800 dark:text-neutral-100 line-clamp-1">{n.title}</div>
-                                    <div className="text-sm text-gray-600 dark:text-neutral-300 line-clamp-2">{n.body.split(" ").slice(0, 5).join(" ")} ...</div>
-                                    <div className="text-xs text-gray-400 mt-1">
+                                    <div className="font-medium text-lp-fg line-clamp-1">{n.title}</div>
+                                    <div className="text-sm text-lp-muted line-clamp-2">{n.body.split(" ").slice(0, 5).join(" ")} ...</div>
+                                    <div className="mt-1 text-xs text-lp-muted/70">
                                         {n.createdAt &&
                                             (typeof n.createdAt === "object" && "toDate" in n.createdAt
                                                 ? n.createdAt.toDate().toLocaleString()
@@ -121,7 +124,7 @@ export function NotificationBell({ userId }: { userId: any }) {
                                 </div>
                                 <button
                                     onClick={() => openModal(n)}
-                                    className="shrink-0 text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline"
+                                    className="shrink-0 rounded-full bg-lp-card px-3 py-1 text-xs font-semibold text-lp-azure ring-1 ring-lp-line transition-colors hover:bg-lp-azure hover:text-white"
                                 >
                                     Read
                                 </button>
@@ -149,15 +152,15 @@ export function NotificationBell({ userId }: { userId: any }) {
                                 enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100"
                                 leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95"
                             >
-                                <Dialog.Panel className="w-full max-w-lg transform overflow-hidden rounded-2xl bg-white dark:bg-neutral-900 p-6 text-left align-middle shadow-xl transition-all">
+                                <Dialog.Panel className="w-full max-w-lg transform overflow-hidden rounded-2xl bg-lp-card p-6 text-left align-middle shadow-xl transition-all">
                                     <Dialog.Title
                                         as="h3"
-                                        className="text-lg font-medium leading-6 text-gray-900 dark:text-neutral-100"
+                                        className="text-lg font-medium leading-6 text-lp-fg"
                                     >
                                         {activeNotification?.title}
                                     </Dialog.Title>
                                     <div className="mt-2">
-                                        <p className="text-sm text-gray-600 dark:text-neutral-300 whitespace-pre-line">
+                                        <p className="text-sm text-lp-muted whitespace-pre-line">
                                             {activeNotification?.body}
                                         </p>
                                     </div>
@@ -172,7 +175,7 @@ export function NotificationBell({ userId }: { userId: any }) {
                                         </button>
                                         <button
                                             type="button"
-                                            className="rounded-md border border-gray-300 dark:border-neutral-700 px-4 py-2 text-sm font-medium text-gray-700 dark:text-neutral-200 hover:bg-gray-100 dark:hover:bg-neutral-800 focus:outline-none"
+                                            className="rounded-md border border-lp-line px-4 py-2 text-sm font-medium text-lp-fg  hover:bg-lp-card-2  focus:outline-none"
                                             onClick={closeModal}
                                         >
                                             Close

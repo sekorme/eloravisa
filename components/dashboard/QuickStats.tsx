@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useMemo, useRef } from "react"
-import { FileText, Bot, Mic, Loader2, TrendingUp, Award, Clock } from "lucide-react"
+import { FileText, Bot, Mic, ArrowRight } from "lucide-react"
+import { cn } from "@/lib/utils"
 import Link from "next/link"
 import gsap from "gsap"
 import { getRequiredDocuments } from "@/utils/documentConfig"
@@ -42,9 +43,9 @@ export function QuickStats() {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {[1, 2, 3].map(i => (
-            <div key={i} className="bg-white dark:bg-card rounded-2xl shadow-sm border border-gray-200 dark:border-border p-4 md:p-6 h-40 animate-pulse" />
+            <div key={i} className="h-48 animate-pulse rounded-[1.5rem] border border-lp-line bg-lp-card-2" />
         ))}
       </div>
     )
@@ -65,77 +66,79 @@ export function QuickStats() {
         progress: docsProgress,
         icon: FileText,
         color: "blue",
-        gradient: "from-primary/10 to-primary/5",
-        iconColor: "text-primary",
-        barColor: "bg-primary"
     },
     {
         title: "AI Review Score",
         value: metrics.reviewsCount > 0 ? `${metrics.reviewScore}%` : '--',
         label: metrics.reviewsCount > 0 ? `${metrics.reviewsCount} documents reviewed` : 'Pending review',
         link: "/dashboard/application",
-        linkText: metrics.reviewsCount > 0 ? 'View Details →' : 'Start Review →',
+        linkText: metrics.reviewsCount > 0 ? 'View Details' : 'Start Review',
         icon: Bot,
         color: "purple",
-        gradient: "from-purple-500/10 to-purple-600/5",
-        iconColor: "text-purple-600",
-        barColor: "bg-purple-600"
     },
     {
         title: "Interview Readiness",
         value: metrics.interviewsCount > 0 ? `${readinessScore}%` : '0%',
         label: metrics.interviewsCount > 0 ? `${metrics.interviewsCount} sessions completed` : 'Not started',
         link: "/dashboard/ai-mock-interview",
-        linkText: metrics.interviewsCount > 0 ? 'Practice Again →' : 'Begin Practice →',
+        linkText: metrics.interviewsCount > 0 ? 'Practice Again' : 'Begin Practice',
         icon: Mic,
         color: "emerald",
-        gradient: "from-emerald-500/10 to-emerald-600/5",
-        iconColor: "text-emerald-600",
-        barColor: "bg-emerald-600"
     }
   ]
 
   return (
-    <div ref={containerRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-      {stats.map((stat, idx) => (
+    <div ref={containerRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {stats.map((stat, idx) => {
+        // The last card is the dark accent block, echoing the home page's navy panels
+        const dark = stat.color === 'emerald'
+        return (
         <div 
           key={idx} 
-          className={`stat-card group bg-white dark:bg-card rounded-2xl shadow-sm border border-gray-100 dark:border-border p-4 md:p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 overflow-hidden relative ${stat.color === 'emerald' && 'sm:col-span-2 lg:col-span-1'}`}
+          className={cn(
+            "stat-card group relative overflow-hidden rounded-[1.5rem] border p-6 transition-[transform,box-shadow] duration-300 motion-safe:hover:-translate-y-1 lp-shadow",
+            dark ? "border-transparent bg-lp-navy text-white sm:col-span-2 lg:col-span-1" : "border-lp-line bg-lp-card text-lp-fg"
+          )}
         >
-          <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${stat.gradient} rounded-full -mr-16 -mt-16 transition-transform duration-500 group-hover:scale-110`} />
-          
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-gray-700 dark:text-foreground">{stat.title}</h3>
-              <div className={`p-2 rounded-xl bg-white dark:bg-secondary shadow-sm ${stat.iconColor}`}>
-                <stat.icon className="w-5 h-5" />
+          <div className="relative z-10 flex h-full flex-col">
+            <div className="mb-6 flex items-center justify-between">
+              <h3 className={cn("font-display text-[11px] font-medium uppercase tracking-[0.18em]", dark ? "text-white/60" : "text-lp-muted")}>{stat.title}</h3>
+              <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl transition-transform duration-300 group-hover:-rotate-6", dark ? "bg-white/10 text-[#8FCDAF]" : "bg-lp-sky text-lp-azure")}>
+                <stat.icon className="h-5 w-5" />
               </div>
             </div>
 
-            <div className="text-4xl font-extrabold text-gray-900 dark:text-white mb-1">
+            <div className="mb-1 font-display text-4xl font-semibold tracking-[-0.045em] md:text-5xl">
               {stat.value}
             </div>
             
-            <p className="text-sm text-gray-500 dark:text-muted-foreground mb-4 font-medium">{stat.label}</p>
+            <p className={cn("mb-6 text-sm", dark ? "text-white/65" : "text-lp-muted")}>{stat.label}</p>
             
+            <div className="mt-auto">
             {stat.progress !== undefined ? (
-              <div className="w-full bg-gray-100 dark:bg-secondary rounded-full h-2.5 overflow-hidden">
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-lp-sky">
                 <div 
-                    className={`${stat.barColor} h-full rounded-full transition-all duration-1000 ease-out`} 
+                    className="h-full rounded-full bg-lp-azure transition-all duration-1000 ease-out" 
                     style={{ width: `${stat.progress}%` }} 
                 />
               </div>
             ) : (
               <Link 
                 href={stat.link!} 
-                className={`text-sm font-bold ${stat.iconColor} hover:underline inline-flex items-center gap-1`}
+                className={cn(
+                  "group/link inline-flex items-center gap-2 rounded-sm font-display text-[11px] font-medium uppercase tracking-[0.18em] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-azure",
+                  dark ? "text-white/85 hover:text-white" : "text-lp-azure hover:text-lp-azure-2"
+                )}
               >
                 {stat.linkText}
+                <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover/link:translate-x-1" aria-hidden="true" />
               </Link>
             )}
+            </div>
           </div>
         </div>
-      ))}
+        )
+      })}
     </div>
   )
 }

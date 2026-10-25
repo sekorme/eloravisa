@@ -159,44 +159,44 @@ export default function App() {
     }, [transcripts]);
 
     return (
-        <div className="min-h-screen bg-white dark:bg-[#050505] text-slate-900 dark:text-white flex flex-col font-sans py-4">
+        <div className="flex min-h-screen flex-col bg-lp-page py-4 text-lp-fg">
             <SystemErrorModal error={error} onClose={() => setError(null)} />
 
-            <header className="px-4 md:px-8 h-auto mb-4 flex flex-col sm:flex-row items-center justify-between shrink-0 gap-4">
+            <header className="mx-auto mb-4 flex h-auto w-full max-w-[1600px] shrink-0 flex-col items-center justify-between gap-4 px-4 sm:flex-row md:px-8">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 via-blue-600 to-indigo-700 rounded-xl flex items-center justify-center font-bold text-xl shadow-[0_0_20px_rgba(6,182,212,0.5)] border border-white/20 dark:border-white/20">
-                        <Globe className="w-5 h-5 text-white animate-[spin_10s_linear_infinite]" />
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-lp-navy text-[#8FCDAF]">
+                        <Globe className="h-5 w-5 animate-[spin_10s_linear_infinite]" />
                     </div>
                     <div>
-                        <h1 className="text-lg md:text-2xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-slate-800 to-slate-600 dark:from-white dark:via-white dark:to-white/60">CONSULAR AI</h1>
-                        <p className="text-[10px] text-cyan-400 font-bold uppercase tracking-[0.2em] opacity-80">Next-Gen Visa Preparation</p>
+                        <h1 className="font-display text-lg font-semibold tracking-[-0.04em] md:text-2xl">Consular AI</h1>
+                        <p className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-azure">Next-Gen Visa Preparation</p>
                     </div>
                 </div>
 
                 {(!isSecure && !error) && (
-                    <div className="flex-1 max-w-xl mx-4 px-4 py-2 bg-yellow-500/10 border border-yellow-500/50 rounded-lg text-yellow-400 text-xs animate-in fade-in zoom-in duration-300">
-                        <p className="font-bold uppercase tracking-widest mb-1 text-[10px]">Security Warning</p>
+                    <div className="mx-4 max-w-xl flex-1 rounded-xl border border-amber-300 bg-amber-50 px-4 py-2 text-xs text-amber-800 animate-in fade-in zoom-in duration-300 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-200">
+                        <p className="mb-1 font-display text-[10px] font-semibold uppercase tracking-[0.16em]">Security Warning</p>
                         <p>You are using an insecure connection. Camera and microphone access will likely be blocked by your browser.</p>
                     </div>
                 )}
 
 
-                <div className="flex items-center gap-2 sm:gap-4 shrink-0 self-end sm:self-center">
+                <div className="flex shrink-0 items-center gap-2 self-end sm:gap-4 sm:self-center">
                     {status === 'connected' ? (
-                        <span className="flex items-center gap-2 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-mono text-slate-700 dark:text-white uppercase shadow-[0_0_10px_rgba(239,68,68,0.2)]">
-                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                        <span className="flex items-center gap-2 rounded-full bg-lp-navy px-3.5 py-1.5 font-display text-[10px] font-medium uppercase tracking-[0.16em] text-white sm:text-[11px]">
+                <span className="h-2 w-2 rounded-full bg-[#8FCDAF] animate-pulse" />
                 <span className="hidden xs:inline">Live Session Active</span>
                 <span className="xs:hidden">Live</span>
               </span>
                     ) : status === 'connecting' ? (
-                        <span className="flex items-center gap-2 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-mono text-slate-700 dark:text-white uppercase shadow-[0_0_10px_rgba(34,211,238,0.2)]">
-                <Loader2 className="w-4 h-4 animate-spin text-cyan-400" />
+                        <span className="flex items-center gap-2 rounded-full border border-lp-line bg-lp-card px-3.5 py-1.5 font-display text-[10px] font-medium uppercase tracking-[0.16em] text-lp-fg sm:text-[11px]">
+                <Loader2 className="h-4 w-4 animate-spin text-lp-azure" />
                 <span className="hidden xs:inline">Connecting...</span>
                 <span className="xs:hidden">Wait...</span>
               </span>
                     ) : (
-                        <span className="flex items-center gap-2 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 px-3 py-1.5 rounded-full text-[10px] sm:text-xs font-mono text-slate-400 dark:text-white/50 uppercase">
-                <span className="w-2 h-2 rounded-full bg-slate-300 dark:bg-white/30" />
+                        <span className="flex items-center gap-2 rounded-full border border-lp-line bg-lp-card px-3.5 py-1.5 font-display text-[10px] font-medium uppercase tracking-[0.16em] text-lp-muted sm:text-[11px]">
+                <span className="h-2 w-2 rounded-full bg-lp-fg/25" />
                 <span className="hidden xs:inline">Ready to Practice</span>
                 <span className="xs:hidden">Ready</span>
               </span>
@@ -204,11 +204,12 @@ export default function App() {
                 </div>
             </header>
 
-            <main className="flex-1 w-full max-w-[1600px] mx-auto px-4 md:px-8 pb-4 grid grid-cols-1 lg:grid-cols-[2fr_1fr] xl:grid-cols-[2.5fr_1fr] gap-6 lg:h-[calc(100vh-120px)] min-h-0">
+            <main className="mx-auto grid min-h-0 w-full max-w-[1600px] flex-1 grid-cols-1 gap-6 px-4 pb-4 md:px-8 lg:h-[calc(100vh-120px)] lg:grid-cols-[2fr_1fr] xl:grid-cols-[2.5fr_1fr]">
 
                 {/* Left Col - Video and Controls */}
-                <section className="flex flex-col gap-4 md:gap-6 h-full min-h-0">
-                    <div className={`relative flex-1 min-h-[300px] glass-panel rounded-3xl overflow-hidden flex items-center justify-center flex-col transition-all duration-700 ${status === 'connected' ? 'ring-2 ring-cyan-500/50 shadow-[0_0_40px_rgba(6,182,212,0.2)]' : ''}`}>
+                <section className="flex h-full min-h-0 flex-col gap-4 md:gap-6">
+                    <div className={`relative flex min-h-[300px] flex-1 flex-col items-center justify-center overflow-hidden rounded-[2rem] bg-lp-navy text-white transition-all duration-700 lp-shadow ${status === 'connected' ? 'ring-2 ring-[#5DBF95]/60' : ''}`}>
+                        <div className="lp-grid-dots pointer-events-none absolute inset-0 opacity-[0.12]" aria-hidden="true" />
                         <video
                             ref={videoRef}
                             className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 grayscale-[0.2] ${status !== 'disconnected' && isCameraVisible ? 'opacity-100' : 'opacity-0'}`}
@@ -216,40 +217,45 @@ export default function App() {
                             playsInline
                         />
                         {status !== 'disconnected' && isCameraVisible && (
-                            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 dark:from-black/80 via-transparent to-transparent pointer-events-none"></div>
+                            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-lp-navy/80 via-transparent to-transparent"></div>
                         )}
 
                         {status === 'disconnected' && (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 dark:text-white/40 pointer-events-none">
-                                <CameraOff className="w-12 h-12 mb-4 opacity-50" />
-                                <p className="font-mono text-sm uppercase tracking-widest">Camera is off</p>
-                                <p className="text-xs opacity-60 mt-2">Click Start Interview to begin</p>
+                            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-white/60">
+                                <span className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-[#8FCDAF]">
+                                    <CameraOff className="h-7 w-7" />
+                                </span>
+                                <p className="font-display text-sm font-medium uppercase tracking-[0.18em] text-white/80">Camera is off</p>
+                                <p className="mt-2 text-xs text-white/50">Click Start Interview to begin</p>
                             </div>
                         )}
 
                         {status !== 'disconnected' && !isCameraVisible && (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400 dark:text-white/40 pointer-events-none">
-                                <EyeOff className="w-12 h-12 mb-4 opacity-50" />
-                                <p className="font-mono text-sm uppercase tracking-widest text-center">Camera feed hidden</p>
-                                <p className="text-[10px] font-mono text-cyan-600 dark:text-cyan-400 opacity-80 mt-2 uppercase text-center max-w-[200px]">Emotion analysis active in background</p>
+                            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-white/60">
+                                <span className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-[#8FCDAF]">
+                                    <EyeOff className="h-7 w-7" />
+                                </span>
+                                <p className="text-center font-display text-sm font-medium uppercase tracking-[0.18em] text-white/80">Camera feed hidden</p>
+                                <p className="mt-2 max-w-[220px] text-center font-display text-[10px] uppercase tracking-[0.14em] text-[#8FCDAF]">Emotion analysis active in background</p>
                             </div>
                         )}
 
                         {/* Visualizer overlay (faux) */}
                         {status === 'connected' && (
-                            <div className="absolute top-6 left-6 right-6 flex justify-between items-start pointer-events-none">
+                            <div className="pointer-events-none absolute left-6 right-6 top-6 flex items-start justify-between">
                                 <div className="flex flex-col gap-2">
-                                    <div className="px-2 py-1 bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 text-[9px] sm:text-[10px] font-mono border border-cyan-400/30 rounded uppercase whitespace-nowrap">Emotion Tracking: Active</div>
-                                    <div className="px-2 py-1 bg-slate-900/10 dark:bg-white/5 border border-slate-900/10 dark:border-white/10 text-slate-600 dark:text-white/50 text-[9px] sm:text-[10px] font-mono rounded uppercase flex items-center gap-2">
-                                        <Mic className="w-3 h-3 text-red-500 animate-pulse" /> Recording
+                                    <div className="whitespace-nowrap rounded-full border border-white/15 bg-lp-navy/70 px-3 py-1 font-display text-[9px] font-medium uppercase tracking-[0.14em] text-[#8FCDAF] backdrop-blur sm:text-[10px]">Emotion Tracking: Active</div>
+                                    <div className="flex items-center gap-2 rounded-full border border-white/15 bg-lp-navy/70 px-3 py-1 font-display text-[9px] font-medium uppercase tracking-[0.14em] text-white/80 backdrop-blur sm:text-[10px]">
+                                        <Mic className="h-3 w-3 text-red-400 animate-pulse" /> Recording
                                     </div>
                                 </div>
                                 <button
                                     onClick={() => setIsCameraVisible(!isCameraVisible)}
-                                    className="pointer-events-auto w-10 h-10 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-white/20 border border-slate-200 dark:border-white/10 transition-colors"
+                                    className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-lp-navy/70 text-white/80 backdrop-blur transition-colors hover:bg-lp-navy hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8FCDAF]"
                                     title={isCameraVisible ? "Hide Self View" : "Show Self View"}
+                                    aria-label={isCameraVisible ? "Hide Self View" : "Show Self View"}
                                 >
-                                    {isCameraVisible ? <Eye className="w-5 h-5 text-slate-600 dark:text-white/70" /> : <EyeOff className="w-5 h-5 text-slate-600 dark:text-white/70" />}
+                                    {isCameraVisible ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
                                 </button>
                             </div>
                         )}
@@ -257,98 +263,99 @@ export default function App() {
                         {/* Live Overlay for disappearing preview removed per request */}
                     </div>
 
-                    <div className="flex items-center justify-center gap-4 shrink-0 py-2 sm:py-4">
+                    <div className="flex shrink-0 items-center justify-center gap-4 py-2 sm:py-3">
                         {status === 'disconnected' ? (
                             <button
                                 onClick={handleStart}
-                                className="group relative flex items-center gap-3 px-6 sm:px-10 py-4 sm:py-5 bg-slate-900 dark:bg-white text-white dark:text-black hover:bg-slate-800 dark:hover:bg-cyan-50 rounded-2xl font-black tracking-tighter text-xs sm:text-sm transition-all active:scale-95 shadow-[0_20px_40px_rgba(0,0,0,0.3)]"
+                                className="group flex h-14 items-center gap-3 rounded-full bg-lp-navy pl-2 pr-8 text-sm font-semibold text-white transition-[background-color,box-shadow,transform] hover:bg-lp-navy-2 hover:shadow-[0_16px_40px_-12px_rgba(8,32,26,0.55)] motion-safe:hover:-translate-y-0.5 motion-safe:active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-azure focus-visible:ring-offset-2 focus-visible:ring-offset-lp-page sm:h-16 sm:text-base"
                             >
-                                <PhoneCall className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-600" />
-                                START INTERVIEW
-                                <div className="absolute inset-0 rounded-2xl bg-cyan-400 opacity-0 group-hover:opacity-20 blur-xl transition-opacity"></div>
+                                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-[#8FCDAF] sm:h-12 sm:w-12">
+                                    <PhoneCall className="h-4 w-4 sm:h-5 sm:w-5" />
+                                </span>
+                                Start Interview
                             </button>
                         ) : (
                             <button
                                 onClick={handleStop}
-                                className="group flex items-center gap-3 px-6 sm:px-10 py-4 sm:py-5 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black tracking-tighter text-xs sm:text-sm transition-all active:scale-95 shadow-[0_20px_40px_rgba(220,38,38,0.2)]"
+                                className="group flex h-14 items-center gap-3 rounded-full bg-red-600 pl-2 pr-8 text-sm font-semibold text-white transition-[background-color,transform] hover:bg-red-700 motion-safe:hover:-translate-y-0.5 motion-safe:active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-lp-page sm:h-16 sm:text-base"
                             >
-                                <Phone className="w-4 h-4 sm:w-5 sm:h-5 rotate-[135deg]" />
-                                TERMINATE SESSION
+                                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15 sm:h-12 sm:w-12">
+                                    <Phone className="h-4 w-4 rotate-[135deg] sm:h-5 sm:w-5" />
+                                </span>
+                                Terminate Session
                             </button>
                         )}
                     </div>
                 </section>
 
                 {/* Right Col - Info and Status */}
-                <section className="flex flex-col gap-6 h-full min-h-0 overflow-y-auto lg:overflow-hidden pr-1">
+                <section className="flex h-full min-h-0 flex-col gap-6 overflow-y-auto pr-1 lg:overflow-hidden">
 
-                    <div className="glass-panel rounded-3xl p-6 shrink-0 hidden lg:block">
-                        <div className="flex items-center justify-between mb-6">
-                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-white/60">Destination</h3>
+                    <div className="hidden shrink-0 p-6 lg:block rounded-[1.5rem] border border-lp-line bg-lp-card text-lp-fg lp-shadow">
+                        <div className="mb-5 flex items-center justify-between">
+                            <h3 className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-muted">Destination</h3>
                         </div>
 
                         {selectedCountry && (
-                            <div className="flex flex-col gap-3 p-4 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10 mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                            <div className="mb-6 flex flex-col gap-3 rounded-2xl border border-lp-line bg-lp-card-2 p-4 animate-in fade-in slide-in-from-top-2 duration-300">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-cyan-500/20 flex items-center justify-center">
-                                        <Globe className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+                                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-lp-sky">
+                                        <Globe className="h-4 w-4 text-lp-azure" />
                                     </div>
                                     <div>
-                                        <p className="text-[10px] uppercase tracking-widest text-slate-400 dark:text-white/40 font-bold">Target Country</p>
-                                        <p className="text-sm font-bold text-slate-900 dark:text-white">{selectedCountry.name}</p>
+                                        <p className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-muted">Target Country</p>
+                                        <p className="font-display text-sm font-semibold">{selectedCountry.name}</p>
                                     </div>
                                 </div>
-                                <div className="h-px bg-slate-200 dark:bg-white/5 w-full"></div>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-[10px] uppercase tracking-widest text-slate-400 dark:text-white/40 font-bold">Consulate</span>
-                                    <span className="text-[10px] font-mono text-cyan-600 dark:text-cyan-400 font-bold">{selectedCountry.consulateName}</span>
+                                <div className="h-px w-full bg-lp-line"></div>
+                                <div className="flex items-center justify-between gap-3">
+                                    <span className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-muted">Consulate</span>
+                                    <span className="text-right text-xs font-semibold text-lp-azure">{selectedCountry.consulateName}</span>
                                 </div>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-[10px] uppercase tracking-widest text-slate-400 dark:text-white/40">Interview Policy</span>
-                                    <span className={`text-[10px] font-bold uppercase tracking-widest ${selectedCountry.requiresInterview ? 'text-amber-600 dark:text-yellow-500' : 'text-emerald-600 dark:text-green-500'}`}>
+                                <div className="flex items-center justify-between gap-3">
+                                    <span className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-muted">Interview Policy</span>
+                                    <span className={`font-display text-[10px] font-semibold uppercase tracking-[0.14em] ${selectedCountry.requiresInterview ? 'text-amber-700 dark:text-amber-300' : 'text-lp-azure'}`}>
                                         {selectedCountry.requiresInterview ? 'In-Person Required' : 'No Interview Needed'}
                                     </span>
                                 </div>
                             </div>
                         )}
 
-                        <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-white/60 mb-6">Instructions</h3>
-                        <ul className="text-xs text-slate-600 dark:text-white/70 space-y-4">
-                            <li className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-white/5 rounded-lg border border-slate-200 dark:border-white/5">
-                                <div className="w-2 h-2 rounded-full bg-cyan-500 dark:bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.4)] shrink-0"></div>
-                                <span>Answer questions naturally, just like a real visa interview.</span>
-                            </li>
-                            <li className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-white/5 rounded-lg border border-slate-200 dark:border-white/5">
-                                <div className="w-2 h-2 rounded-full bg-cyan-500 dark:bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.4)] shrink-0"></div>
-                                <span>The AI evaluates both your verbal answers and facial expressions.</span>
-                            </li>
-                            <li className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-white/5 rounded-lg border border-slate-200 dark:border-white/5">
-                                <div className="w-2 h-2 rounded-full bg-cyan-500 dark:bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.4)] shrink-0"></div>
-                                <span>Ensure your face is well-lit and clearly visible in the camera.</span>
-                            </li>
-                        </ul>
+                        <h3 className="mb-4 font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-muted">Instructions</h3>
+                        <ol className="space-y-2.5 text-sm text-lp-fg/85">
+                            {[
+                                "Answer questions naturally, just like a real visa interview.",
+                                "The AI evaluates both your verbal answers and facial expressions.",
+                                "Ensure your face is well-lit and clearly visible in the camera.",
+                            ].map((tip, i) => (
+                                <li key={tip} className="flex items-start gap-3 rounded-xl border border-lp-line bg-lp-card-2 p-3">
+                                    <span className="mt-0.5 font-display text-[10px] font-semibold text-lp-azure">0{i + 1}</span>
+                                    <span className="leading-snug">{tip}</span>
+                                </li>
+                            ))}
+                        </ol>
                     </div>
 
-                    <div className="glass-panel rounded-3xl p-6 flex-1 flex flex-col justify-center min-h-[120px] lg:min-h-[150px] shrink-0 hidden lg:flex">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-white/60">Live Intelligence</h3>
-                            <Sparkles className="w-3.5 h-3.5 text-cyan-500 dark:text-cyan-400" />
+                    <div className="hidden min-h-[120px] shrink-0 flex-1 flex-col justify-center p-6 lg:flex lg:min-h-[150px] rounded-[1.5rem] border border-lp-line bg-lp-card text-lp-fg lp-shadow">
+                        <div className="mb-4 flex items-center justify-between">
+                            <h3 className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-muted">Live Intelligence</h3>
+                            <Sparkles className="h-3.5 w-3.5 text-lp-azure" />
                         </div>
-                        <div className="flex-1 flex items-center justify-center p-4">
+                        <div className="flex flex-1 items-center justify-center p-4">
                             {status === 'disconnected' ? (
-                                <div className="text-center space-y-1">
-                                    <p className="text-sm text-slate-400 dark:text-white/40 italic">
+                                <div className="space-y-1.5 text-center">
+                                    <p className="text-sm text-lp-muted">
                                         Agent is ready to analyze your performance.
                                     </p>
-                                    <p className="text-[10px] text-slate-300 dark:text-white/20 uppercase tracking-tighter">facial cues • tone • content quality</p>
+                                    <p className="font-display text-[10px] uppercase tracking-[0.14em] text-lp-muted/60">facial cues • tone • content quality</p>
                                 </div>
                             ) : (
-                                <div className="flex flex-col items-center gap-5 text-center w-full">
-                                    <div className="w-full flex justify-around items-end h-8 gap-1">
+                                <div className="flex w-full flex-col items-center gap-5 text-center">
+                                    <div className="flex h-8 w-full items-end justify-around gap-1">
                                         {[...Array(12)].map((_, i) => (
                                             <div
                                                 key={i}
-                                                className="w-1 bg-cyan-500/40 rounded-full animate-pulse"
+                                                className="w-1 rounded-full bg-lp-azure/50 animate-pulse"
                                                 style={{
                                                     height: `${20 + Math.random() * 80}%`,
                                                     animationDelay: `${i * 100}ms`
@@ -357,8 +364,8 @@ export default function App() {
                                         ))}
                                     </div>
                                     <div>
-                                        <p className="text-sm text-cyan-600 dark:text-cyan-300 font-bold uppercase tracking-wider mb-1">Analyzing Responses</p>
-                                        <p className="text-[10px] uppercase tracking-widest text-slate-400 dark:text-white/40 font-mono">Multimodal Processing Active</p>
+                                        <p className="mb-1 font-display text-sm font-semibold uppercase tracking-[0.12em] text-lp-azure">Analyzing Responses</p>
+                                        <p className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-muted">Multimodal Processing Active</p>
                                     </div>
                                 </div>
                             )}
@@ -366,42 +373,44 @@ export default function App() {
                     </div>
 
                     {/* Transcript Block */}
-                    <div className="glass-panel rounded-3xl p-6 flex-1 flex flex-col min-h-[300px] lg:min-h-0 overflow-hidden">
-                        <div className="flex items-center justify-between mb-4 shrink-0">
-                            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-white/60">Session Log</h3>
+                    <div className="flex min-h-[300px] flex-1 flex-col overflow-hidden p-6 lg:min-h-0 rounded-[1.5rem] border border-lp-line bg-lp-card text-lp-fg lp-shadow">
+                        <div className="mb-4 flex shrink-0 items-center justify-between">
+                            <h3 className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-muted">Session Log</h3>
                             <div className="flex items-center gap-2">
-                                <div className="w-1.5 h-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400 animate-pulse"></div>
-                                <span className="text-[10px] font-mono text-cyan-600/70 dark:text-cyan-400/70 uppercase">Live Recording</span>
+                                <div className="h-1.5 w-1.5 rounded-full bg-lp-azure animate-pulse"></div>
+                                <span className="font-display text-[10px] uppercase tracking-[0.14em] text-lp-azure">Live Recording</span>
                             </div>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
+                        <div className="custom-scrollbar flex-1 space-y-4 overflow-y-auto pr-2">
                             {transcripts.length === 0 ? (
-                                <div className="h-full flex flex-col items-center justify-center opacity-30">
-                                    <BotMessageSquare className="w-8 h-8 mb-2 text-slate-400 dark:text-white" />
-                                    <p className="text-center text-xs italic text-slate-500 dark:text-white">Transcript will appear here once the interview starts.</p>
+                                <div className="flex h-full flex-col items-center justify-center text-lp-muted">
+                                    <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-lp-sky text-lp-azure">
+                                        <BotMessageSquare className="h-5 w-5" />
+                                    </span>
+                                    <p className="max-w-[220px] text-center text-xs">Transcript will appear here once the interview starts.</p>
                                 </div>
                             ) : (
                                 transcripts.map((t) => (
                                     <div key={t.id} className={`flex flex-col gap-1 ${t.role === 'user' ? 'items-end' : 'items-start'} animate-in fade-in slide-in-from-bottom-2 duration-500`}>
-                                        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-white/40">
+                                        <div className="flex items-center gap-1.5 font-display text-[10px] font-medium uppercase tracking-[0.16em] text-lp-muted">
                                             {t.role === 'user' ? (
-                                                <><span className="text-cyan-600/70 dark:text-cyan-400/70">You</span> <User className="w-3 h-3 text-cyan-600/70 dark:text-cyan-400/70" /></>
+                                                <><span>You</span> <User className="h-3 w-3" /></>
                                             ) : (
-                                                <><BotMessageSquare className="w-3 h-3 text-purple-600/70 dark:text-purple-400/70" /> <span className="text-purple-600/70 dark:text-purple-400/70">Officer</span></>
+                                                <><BotMessageSquare className="h-3 w-3 text-lp-azure" /> <span className="text-lp-azure">Officer</span></>
                                             )}
                                         </div>
-                                        <div className={`px-4 py-3 rounded-2xl max-w-[95%] sm:max-w-[92%] text-sm leading-relaxed transition-all duration-300 ${
+                                        <div className={`max-w-[95%] rounded-2xl px-4 py-3 text-sm leading-relaxed transition-all duration-300 sm:max-w-[92%] ${
                                             t.role === 'user'
-                                                ? 'bg-cyan-50 dark:bg-cyan-900/20 border border-cyan-100 dark:border-cyan-400/10 text-cyan-900 dark:text-cyan-100 rounded-tr-none'
-                                                : 'bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white/90 rounded-tl-none'
+                                                ? 'rounded-tr-md bg-lp-navy text-white'
+                                                : 'rounded-tl-md border border-lp-line bg-lp-card-2 text-lp-fg'
                                         }`}>
                                             {t.text}
                                             {!t.isFinal && (
-                                                <span className="inline-flex items-center ml-2 gap-1">
-                                                    <span className="w-1 h-1 rounded-full bg-cyan-500 dark:bg-cyan-400 animate-[bounce_1s_infinite_0ms]"></span>
-                                                    <span className="w-1 h-1 rounded-full bg-cyan-500 dark:bg-cyan-400 animate-[bounce_1s_infinite_200ms]"></span>
-                                                    <span className="w-1 h-1 rounded-full bg-cyan-500 dark:bg-cyan-400 animate-[bounce_1s_infinite_400ms]"></span>
+                                                <span className="ml-2 inline-flex items-center gap-1">
+                                                    <span className="h-1 w-1 rounded-full bg-current opacity-70 animate-[bounce_1s_infinite_0ms]"></span>
+                                                    <span className="h-1 w-1 rounded-full bg-current opacity-70 animate-[bounce_1s_infinite_200ms]"></span>
+                                                    <span className="h-1 w-1 rounded-full bg-current opacity-70 animate-[bounce_1s_infinite_400ms]"></span>
                                                 </span>
                                             )}
                                         </div>

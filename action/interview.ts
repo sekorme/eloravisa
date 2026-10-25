@@ -30,7 +30,7 @@ export async function generateInterviewQuestions(idToken: string, userData: any,
     }
     chargedUid = user.uid;
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.8-flash" });
 
     const prompt = `
       Generate ${count} visa interview questions for a user with the following profile:
@@ -113,7 +113,7 @@ export async function generateInterviewFeedback(idToken: string, transcript: any
       return { success: false, error: "Too many requests. Please slow down and try again shortly." };
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.8-flash" });
 
     // Format transcript for the prompt
     const conversation = transcript.map(t => `${t.role.toUpperCase()}: ${t.text}`).join("\n");

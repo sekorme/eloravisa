@@ -1,50 +1,45 @@
 // components/visa/EmbassyTips.tsx
-import { Card } from "@/components/ui/card";
 import { Lightbulb, Info } from "lucide-react";
 
 export default function EmbassyTips({ country }: { country: string }) {
+    const tips = [
+        "Clearly explain source of funds with verified documentation",
+        "Avoid generic SOP templates; personalize your motivation",
+        "Ensure sponsor documents match bank statements perfectly"
+    ];
     return (
-        <Card className="p-8 bg-white dark:bg-slate-950 border-none shadow-2xl relative overflow-hidden rounded-3xl group">
-            {/* Animated background accent */}
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl transition-transform duration-1000 group-hover:scale-125" />
-            
-            <div className="relative z-10">
-                <div className="flex items-center gap-3 mb-8">
-                    <div className="p-3 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shadow-inner">
-                        <Lightbulb size={24} className="animate-pulse" />
-                    </div>
-                    <div>
-                        <h3 className="font-black text-slate-900 dark:text-white tracking-tight">
-                            Embassy Insider
-                        </h3>
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 dark:text-emerald-500">
-                            Target: {country}
-                        </p>
-                    </div>
+        <div className="rounded-[1.5rem] border border-lp-line bg-lp-card text-lp-fg lp-shadow p-6 md:p-7">
+            <div className="mb-6 flex items-center gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-lp-sky text-lp-azure">
+                    <Lightbulb size={20} />
                 </div>
-
-                <div className="space-y-4 mb-8">
-                    {[
-                        "Clearly explain source of funds with verified documentation",
-                        "Avoid generic SOP templates; personalize your motivation",
-                        "Ensure sponsor documents match bank statements perfectly"
-                    ].map((tip, i) => (
-                        <div key={i} className="flex items-start gap-4 group/tip">
-                            <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-emerald-500 group-hover/tip:scale-150 transition-transform shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                            <p className="text-sm font-medium text-slate-600 dark:text-slate-400 leading-relaxed group-hover/tip:text-slate-900 dark:group-hover/tip:text-white transition-colors">
-                                {tip}
-                            </p>
-                        </div>
-                    ))}
-                </div>
-
-                <div className="flex items-start gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/10">
-                    <Info size={16} className="text-primary shrink-0 mt-0.5" />
-                    <p className="text-[11px] leading-relaxed text-slate-500 dark:text-slate-400 font-medium italic">
-                        Based on common refusal patterns and successful applications. Not an official guarantee.
+                <div>
+                    <h3 className="font-display text-lg font-semibold tracking-[-0.03em]">
+                        Embassy Insider
+                    </h3>
+                    <p className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-azure">
+                        Target: {country}
                     </p>
                 </div>
             </div>
-        </Card>
+
+            <ol className="mb-6 space-y-4">
+                {tips.map((tip, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                        <span className="mt-0.5 font-display text-[10px] font-semibold text-lp-muted/70">0{i + 1}</span>
+                        <p className="text-sm leading-relaxed text-lp-fg/85">
+                            {tip}
+                        </p>
+                    </li>
+                ))}
+            </ol>
+
+            <div className="flex items-start gap-3 rounded-xl border border-lp-line bg-lp-card-2 p-4">
+                <Info size={16} className="mt-0.5 shrink-0 text-lp-azure" />
+                <p className="text-xs leading-relaxed text-lp-muted">
+                    Based on common refusal patterns and successful applications. Not an official guarantee.
+                </p>
+            </div>
+        </div>
     );
 }

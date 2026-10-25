@@ -17,10 +17,10 @@ const Layout = async({children}:{children: React.ReactNode}) =>{
     const cookieStore = await cookies()
     const defaultOpen = cookieStore.get("sidebar_state")?.value === "true"
     return (
-        <div>
+        <div className="dashboard-theme min-h-screen bg-lp-page text-lp-fg">
             <SidebarProvider defaultOpen={defaultOpen}>
                 <AppSidebar />
-                <main className=" w-full">
+                <main className="w-full min-w-0 bg-lp-page">
                     <Navbar />
                     <div className="">
                         <RegisterSW/>

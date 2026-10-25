@@ -61,25 +61,25 @@ export function AlertsSection() {
 
   if (loading) {
     return (
-      <div className=" rounded-2xl shadow-md border border-neutral-200 dark:border-neutral-800 p-4 md:p-6 h-[300px] animate-pulse"></div>
+      <div className="h-[300px] animate-pulse rounded-[1.5rem] border border-lp-line bg-lp-card-2"></div>
     )
   }
 
   return (
-    <div id="alerts-warnings-card" className="bg-white dark:bg-neutral-900 rounded-3xl shadow-xl border border-neutral-100 dark:border-neutral-800 p-6 transition-all duration-300 hover:shadow-2xl group">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center">
-          <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center mr-4 group-hover:rotate-12 transition-transform duration-300">
-            <AlertTriangle className="text-amber-600 dark:text-amber-400 w-6 h-6" />
+    <div id="alerts-warnings-card" className="group rounded-[1.5rem] border border-lp-line bg-lp-card p-6 text-lp-fg lp-shadow">
+      <div className="mb-5 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-4">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-100 transition-transform duration-300 group-hover:-rotate-6 dark:bg-amber-400/10">
+            <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-300" />
           </div>
           <div>
-            <h2 className="text-xl font-black text-neutral-800 dark:text-neutral-100 tracking-tight">Alerts & Warnings</h2>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">Potential issues in your profile</p>
+            <h2 className="font-display text-xl font-semibold tracking-[-0.03em]">Alerts & Warnings</h2>
+            <p className="text-xs text-lp-muted">Potential issues in your profile</p>
           </div>
         </div>
         {alerts.length > 0 && (
-          <div className="bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400 text-xs font-black px-3 py-1 rounded-full animate-bounce">
-            {alerts.length} NEW
+          <div className="shrink-0 rounded-full bg-lp-navy px-3 py-1 font-display text-[10px] font-medium uppercase tracking-[0.16em] text-white">
+            {alerts.length} New
           </div>
         )}
       </div>
@@ -92,40 +92,28 @@ export function AlertsSection() {
                 key={alert.id} 
                 value={alert.id} 
                 className={cn(
-                  "border-l-4 rounded-lg",
+                  "rounded-xl border !border-b",
                   {
-                    "bg-red-50/50 dark:bg-red-900/20 border-l-red-500": alert.type === "critical",
-                    "bg-amber-50/50 dark:bg-amber-900/20 border-l-amber-500": alert.type === "warning",
+                    "border-red-200 bg-red-50/60 dark:border-red-400/20 dark:bg-red-400/[0.06]": alert.type === "critical",
+                    "border-amber-200 bg-amber-50/60 dark:border-amber-400/20 dark:bg-amber-400/[0.06]": alert.type === "warning",
                   }
                 )}
               >
-                <AccordionTrigger className="hover:no-underline p-3">
-                  <div className="flex items-center text-left gap-3">
+                <AccordionTrigger className="p-3 hover:no-underline">
+                  <div className="flex items-center gap-3 text-left">
                     <alert.icon className={cn(
-                      "w-5 h-5 flex-shrink-0",
+                      "h-4 w-4 flex-shrink-0",
                       {
-                        "text-red-500": alert.type === "critical",
-                        "text-amber-500": alert.type === "warning",
+                        "text-red-600 dark:text-red-300": alert.type === "critical",
+                        "text-amber-600 dark:text-amber-300": alert.type === "warning",
                       }
                     )} />
-                    <p className={cn(
-                        "text-sm font-semibold",
-                        {
-                          "text-red-800 dark:text-red-300": alert.type === "critical",
-                          "text-amber-800 dark:text-amber-300": alert.type === "warning",
-                        }
-                      )}>{alert.title}</p>
+                    <p className="text-sm font-semibold text-lp-fg">{alert.title}</p>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
-                  <div className="pt-1 pb-2 px-4 pl-11">
-                    <ul className={cn(
-                      "list-disc space-y-1 text-xs",
-                      {
-                        "text-red-700 dark:text-red-300/80": alert.type === "critical",
-                        "text-amber-700 dark:text-amber-300/80": alert.type === "warning",
-                      }
-                    )}>
+                  <div className="px-4 pb-2 pl-10 pt-0">
+                    <ul className="list-disc space-y-1 text-xs leading-relaxed text-lp-muted marker:text-lp-fg/30">
                       {alert.details.map((detail: string, i: number) => (
                         <li key={i}>{detail}</li>
                       ))}
@@ -136,12 +124,14 @@ export function AlertsSection() {
             ))}
           </Accordion>
         ) : (
-          <div className="bg-primary/10 border-l-4 border-primary p-4 rounded-lg">
-            <div className="flex items-start">
-              <Info className="text-primary dark:text-primary mr-3 mt-0.5 w-5 h-5" />
+          <div className="rounded-xl border border-lp-line bg-lp-sky-2 p-4">
+            <div className="flex items-start gap-3">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-lp-sky">
+                <Info className="h-4 w-4 text-lp-azure" />
+              </div>
               <div>
-                <p className="text-sm font-semibold text-primary dark:text-primary mb-1">No Critical Alerts</p>
-                <p className="text-xs text-primary dark:text-primary/80">Great job! Your documents look good so far.</p>
+                <p className="mb-0.5 text-sm font-semibold text-lp-fg">No Critical Alerts</p>
+                <p className="text-xs text-lp-muted">Great job! Your documents look good so far.</p>
               </div>
             </div>
           </div>

@@ -94,7 +94,7 @@ export function InterviewSession({ questions, context, onComplete }: InterviewSe
     }
 
     const scoreColor = (score: number) =>
-        score >= 70 ? "text-emerald-500" : score >= 40 ? "text-amber-500" : "text-red-500"
+        score >= 70 ? "text-lp-azure" : score >= 40 ? "text-amber-500" : "text-red-500"
 
     return (
         <div className="max-w-3xl mx-auto space-y-6">
@@ -106,10 +106,10 @@ export function InterviewSession({ questions, context, onComplete }: InterviewSe
                             <Landmark size={20} />
                         </div>
                         <div>
-                            <h1 className="text-xl font-black tracking-tight text-slate-900 dark:text-white">
+                            <h1 className="text-xl font-black tracking-tight text-lp-fg">
                                 {context?.destination ? `${context.destination} Visa Interview` : "Visa Interview"}
                             </h1>
-                            <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                            <p className="text-xs font-bold uppercase tracking-widest text-lp-muted">
                                 {context?.visaType ? `${context.visaType} Visa · ` : ""}Question {currentIndex + 1} of {questions.length}
                             </p>
                         </div>
@@ -122,13 +122,13 @@ export function InterviewSession({ questions, context, onComplete }: InterviewSe
             </div>
 
             {/* Question card */}
-            <Card className="border-none shadow-xl bg-white dark:bg-card overflow-hidden">
-                <CardHeader className="pb-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800">
+            <Card className="border-none shadow-xl bg-lp-card overflow-hidden">
+                <CardHeader className="pb-4 bg-lp-card-2 border-b border-lp-line">
                     <div className="flex items-start gap-4">
                         <div className="p-3 rounded-xl bg-primary/15 text-primary shrink-0">
                             <MessageSquareQuote size={22} />
                         </div>
-                        <p className="text-lg md:text-xl font-bold leading-relaxed text-slate-900 dark:text-white pt-1">
+                        <p className="text-lg md:text-xl font-bold leading-relaxed text-lp-fg pt-1">
                             {question}
                         </p>
                     </div>
@@ -143,7 +143,7 @@ export function InterviewSession({ questions, context, onComplete }: InterviewSe
                                 placeholder="Answer as you would in front of the visa officer…"
                                 disabled={submitting}
                                 rows={6}
-                                className="rounded-2xl bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 text-base p-4 resize-none focus-visible:ring-2 focus-visible:ring-primary/30"
+                                className="rounded-2xl bg-lp-card-2 border-lp-line text-base p-4 resize-none focus-visible:ring-2 focus-visible:ring-primary/30"
                             />
                             <Button
                                 onClick={handleSubmit}
@@ -164,9 +164,9 @@ export function InterviewSession({ questions, context, onComplete }: InterviewSe
                     ) : (
                         <div className="space-y-5">
                             {/* The applicant's answer */}
-                            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Your answer</p>
-                                <p className="text-sm text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                            <div className="p-4 rounded-2xl bg-lp-card-2 border border-lp-line">
+                                <p className="text-[10px] font-black uppercase tracking-widest text-lp-muted mb-2">Your answer</p>
+                                <p className="text-sm text-lp-fg font-medium leading-relaxed">
                                     {results[results.length - 1]?.answer}
                                 </p>
                             </div>
@@ -177,9 +177,9 @@ export function InterviewSession({ questions, context, onComplete }: InterviewSe
                                         <div className={`text-4xl font-black tabular-nums ${scoreColor(currentAnalysis.score)}`}>
                                             {currentAnalysis.score}%
                                         </div>
-                                        <div className="flex-1 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                        <div className="flex-1 h-2 bg-lp-card-2 rounded-full overflow-hidden">
                                             <div
-                                                className={`h-full rounded-full ${currentAnalysis.score >= 70 ? "bg-emerald-500" : currentAnalysis.score >= 40 ? "bg-amber-500" : "bg-red-500"}`}
+                                                className={`h-full rounded-full ${currentAnalysis.score >= 70 ? "bg-lp-azure" : currentAnalysis.score >= 40 ? "bg-amber-500" : "bg-red-500"}`}
                                                 style={{ width: `${Math.min(100, Math.max(0, currentAnalysis.score))}%` }}
                                             />
                                         </div>
@@ -190,18 +190,18 @@ export function InterviewSession({ questions, context, onComplete }: InterviewSe
                                             <Sparkles size={14} className="text-primary" />
                                             <p className="text-[10px] font-black uppercase tracking-widest text-primary">Officer&apos;s read</p>
                                         </div>
-                                        <p className="text-sm text-slate-700 dark:text-slate-300 font-medium leading-relaxed">
+                                        <p className="text-sm text-lp-fg font-medium leading-relaxed">
                                             {currentAnalysis.feedback}
                                         </p>
                                     </div>
 
                                     {currentAnalysis.better_answer && (
-                                        <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30">
+                                        <div className="p-4 rounded-2xl bg-lp-sky border border-lp-azure/30">
                                             <div className="flex items-center gap-2 mb-2">
-                                                <CheckCircle2 size={14} className="text-emerald-600 dark:text-emerald-400" />
-                                                <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">A stronger answer</p>
+                                                <CheckCircle2 size={14} className="text-lp-azure" />
+                                                <p className="text-[10px] font-black uppercase tracking-widest text-lp-azure">A stronger answer</p>
                                             </div>
-                                            <p className="text-sm text-slate-700 dark:text-slate-300 font-medium leading-relaxed italic">
+                                            <p className="text-sm text-lp-fg font-medium leading-relaxed italic">
                                                 {currentAnalysis.better_answer}
                                             </p>
                                         </div>
@@ -220,7 +220,7 @@ export function InterviewSession({ questions, context, onComplete }: InterviewSe
                 </CardContent>
             </Card>
 
-            <p className="text-center text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-[0.2em]">
+            <p className="text-center text-[10px] text-lp-muted font-bold uppercase tracking-[0.2em]">
                 Answer every question — the session is scored at the end
             </p>
         </div>

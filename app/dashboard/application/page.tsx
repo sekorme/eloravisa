@@ -29,21 +29,21 @@ export default function MyVisaApplicationPage() {
     }, []);
 
     return (
-        <main ref={pageRef} className="min-h-screen p-2 md:p-6 w-full ">
-            <div className="space-y-8">
+        <main ref={pageRef} className="min-h-screen w-full bg-lp-page text-lp-fg">
+            <div className="mx-auto w-full max-w-[1400px] space-y-6 px-4 py-6 md:px-6 md:py-8 lg:px-8">
                 <div className="app-section">
                     <VisaHeader />
                 </div>
                 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <div className="lg:col-span-2 space-y-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div className="lg:col-span-2 space-y-6">
                         <div className="app-section">
                             <ApplicationProgress />
                         </div>
                         <div className="app-section">
-                            <div className="flex items-center justify-between mb-4 px-1">
-                                <h2 className="text-xl font-bold text-slate-900 dark:text-white">Requirements Checklist</h2>
-                                <span className="text-xs font-medium text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-full">
+                            <div className="mb-4 flex items-end justify-between gap-3 px-1">
+                                <h2 className="font-display text-2xl font-semibold tracking-[-0.04em] md:text-3xl">Requirements Checklist</h2>
+                                <span className="shrink-0 rounded-full border border-lp-line bg-lp-card px-3 py-1 font-display text-[10px] font-medium uppercase tracking-[0.16em] text-lp-muted">
                                     Step-by-step guidance
                                 </span>
                             </div>
@@ -52,7 +52,7 @@ export default function MyVisaApplicationPage() {
 
                     </div>
 
-                    <div className="space-y-8">
+                    <div className="space-y-6">
                         <div className="app-section">
                             <EmbassyTips country="Ghana" />
                         </div>

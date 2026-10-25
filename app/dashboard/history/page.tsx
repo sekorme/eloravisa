@@ -283,15 +283,15 @@ export default function HistoryPage() {
 
     if (isLoading) {
         return <div className="p-6 max-w-7xl mx-auto space-y-8 animate-pulse">
-            <div className="h-20 bg-gray-100 dark:bg-gray-800 rounded-xl" />
+            <div className="h-20 bg-lp-card-2 rounded-xl" />
             <div className="grid gap-4 md:grid-cols-3">
-                {[1,2,3].map(i => <div key={i} className="h-32 bg-gray-100 dark:bg-gray-800 rounded-xl" />)}
+                {[1,2,3].map(i => <div key={i} className="h-32 bg-lp-card-2 rounded-xl" />)}
             </div>
         </div>
     }
 
     return (
-        <div ref={containerRef} className="p-2 w-full space-y-8">
+        <div ref={containerRef} className="mx-auto w-full max-w-[1400px] space-y-8 px-4 py-6 md:px-6 md:py-8 lg:px-8">
 
             {/* Header */}
             <div className="page-header flex flex-col gap-2">
@@ -321,7 +321,7 @@ export default function HistoryPage() {
                 <Card className="metric-card overflow-hidden">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Interview Attempts</CardTitle>
-                        <div className="p-2 rounded-full bg-purple-500/10 text-purple-500">
+                        <div className="p-2 rounded-full bg-lp-azure/10 text-lp-azure">
                             <Mic className="h-4 w-4" />
                         </div>
                     </CardHeader>
@@ -336,14 +336,14 @@ export default function HistoryPage() {
                 <Card className="metric-card overflow-hidden">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Readiness Score</CardTitle>
-                        <div className="p-2 rounded-full bg-green-500/10 text-green-500">
+                        <div className="p-2 rounded-full bg-lp-azure/10 text-lp-azure">
                             <TrendingUp className="h-4 w-4" />
                         </div>
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{metrics.readinessScore}% <span className="text-sm text-muted-foreground font-normal">/ 100%</span></div>
                         <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
-                            {metrics.readinessScore > 0 ? <ArrowUpRight className="h-3 w-3 text-green-500" /> : null}
+                            {metrics.readinessScore > 0 ? <ArrowUpRight className="h-3 w-3 text-lp-azure" /> : null}
                             Combined AI analysis
                         </p>
                     </CardContent>
@@ -437,7 +437,7 @@ export default function HistoryPage() {
                             {timeline.map((item) => (
                                 <div key={item.id} className="timeline-item relative flex gap-4 pb-2">
                                     <div className={`absolute left-0 mt-1 h-2.5 w-2.5 rounded-full border ring-4 ring-background ${
-                                        item.status === 'completed' ? 'bg-green-500 border-green-500' :
+                                        item.status === 'completed' ? 'bg-lp-azure border-lp-azure/30' :
                                             item.status === 'warning' ? 'bg-yellow-500 border-yellow-500' : 'bg-muted-foreground'
                                     } md:left-[0.6rem]`} />
 

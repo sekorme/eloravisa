@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { getRequiredDocuments } from "@/utils/documentConfig";
 import { doc, onSnapshot, collection } from "firebase/firestore";
@@ -15,7 +14,11 @@ export default function ApplicationProgress() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        // onAuthStateChanged ignores the callback's return value — clean up by hand.
+        let unsubData: (() => void) | undefined;
         const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+            unsubData?.();
+            unsubData = undefined;
             if (user) {
                 // Listen to user document for visaType
                 const userDocRef = doc(db, "users", user.uid)
@@ -44,10 +47,10 @@ export default function ApplicationProgress() {
                     setLoading(false);
                 });
 
-                return () => {
+                unsubData = () => {
                     unsubUser();
                     unsubscribeReviews();
-                }
+                };
             } else {
                 setReviewedCount(0);
                 setTotalScore(0);
@@ -55,7 +58,10 @@ export default function ApplicationProgress() {
             }
         });
 
-        return () => unsubscribeAuth();
+        return () => {
+            unsubData?.();
+            unsubscribeAuth();
+        };
     }, [visaType]);
 
     const checklistData = getRequiredDocuments(visaType);
@@ -63,39 +69,26 @@ export default function ApplicationProgress() {
     const maxScore = totalDocs * 100;
     const percentage = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0;
 
-    const getProgressColor = () => {
-        if (percentage >= 80) return "[&_[data-slot=progress-indicator]]:bg-green-500";
-        if (percentage >= 40) return "[&_[data-slot=progress-indicator]]:bg-yellow-500";
-        return "[&_[data-slot=progress-indicator]]:bg-primary";
-    };
-
-    const getTextColor = () => {
-        if (percentage >= 80) return "text-green-500";
-        if (percentage >= 40) return "text-yellow-500";
-        return "text-primary";
-    };
-
     if (loading) {
         return (
-            <Card className="p-6 space-y-4 bg-white dark:bg-card border-slate-200 dark:border-border shadow-sm animate-pulse">
-                <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-1/3 mb-2"></div>
-                <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded w-full"></div>
-            </Card>
+            <div className="h-[132px] animate-pulse rounded-[1.5rem] border border-lp-line bg-lp-card-2"></div>
         );
     }
 
     return (
-        <Card className="p-6 space-y-4 bg-white dark:bg-card border-slate-200 dark:border-border shadow-sm">
-            <div className="flex justify-between items-end mb-1">
+        <div className="rounded-[1.5rem] border border-lp-line bg-lp-card text-lp-fg lp-shadow p-6">
+            <div className="mb-5 flex items-end justify-between gap-4">
                 <div className="space-y-1">
-                    <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Overall Progress</h3>
-                    <p className="text-xs text-slate-500 dark:text-muted-foreground">
-                        {reviewedCount} out of {totalDocs} documents reviewed.
+                    <h3 className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-muted">Overall Progress</h3>
+                    <p className="text-sm text-lp-muted">
+                        <span className="font-semibold text-lp-fg">{reviewedCount}</span> out of {totalDocs} documents reviewed.
                     </p>
                 </div>
-                <span className={`text-2xl font-bold ${getTextColor()}`}>{percentage}%</span>
+                <span className="font-display text-4xl font-semibold tracking-[-0.05em]">
+                    {percentage}<span className="text-xl text-lp-muted">%</span>
+                </span>
             </div>
-            <Progress value={percentage} className={`h-2 bg-slate-100 dark:bg-slate-800 ${getProgressColor()}`} />
-        </Card>
+            <Progress value={percentage} className="h-2 bg-lp-sky [&_[data-slot=progress-indicator]]:bg-lp-azure [&_[data-slot=progress-indicator]]:rounded-full" />
+        </div>
     );
 }

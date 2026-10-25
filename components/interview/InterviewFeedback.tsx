@@ -40,7 +40,8 @@ export function InterviewFeedback({ onRestart, interview }: InterviewFeedbackPro
   return (
     <div className="space-y-8">
       {/* Hero Score Card */}
-      <Card className="border-none shadow-xl bg-gradient-to-br from-primary to-lp-azure-2 text-white overflow-hidden relative">
+      <Card className="border-none bg-lp-navy text-white overflow-hidden relative lp-shadow">
+        <div className="lp-grid-dots pointer-events-none absolute inset-0 opacity-[0.15]" aria-hidden="true" />
         <div className="absolute top-0 right-0 -mr-8 -mt-8 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-0 -ml-12 -mb-12 w-48 h-48 bg-black/10 rounded-full blur-2xl" />
         
@@ -62,7 +63,7 @@ export function InterviewFeedback({ onRestart, interview }: InterviewFeedbackPro
                   {[
                       { label: "Clarity", key: 'clarity', color: "bg-primary" },
                       { label: "Consistency", key: 'consistency', color: "bg-primary" },
-                      { label: "Confidence", key: 'confidence', color: "bg-emerald-400" },
+                      { label: "Confidence", key: 'confidence', color: "bg-lp-azure" },
                   ].map((stat) => {
                       const value = scores[stat.key] ?? 0
                       return (
@@ -82,29 +83,29 @@ export function InterviewFeedback({ onRestart, interview }: InterviewFeedbackPro
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Strengths */}
-        <Card className="border-none shadow-lg bg-white dark:bg-card overflow-hidden h-full">
-            <CardHeader className="pb-4 bg-emerald-50 dark:bg-emerald-900/20 border-b border-emerald-100 dark:border-emerald-900/30">
+        <Card className="border-none shadow-lg bg-lp-card overflow-hidden h-full">
+            <CardHeader className="pb-4 bg-lp-sky border-b border-lp-azure/30">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400">
+                    <div className="p-2 rounded-lg bg-lp-sky text-lp-azure">
                         <ThumbsUp size={20} />
                     </div>
-                    <h3 className="font-black text-emerald-900 dark:text-emerald-100 uppercase text-xs tracking-widest">Key Strengths</h3>
+                    <h3 className="font-black text-lp-azure uppercase text-xs tracking-widest">Key Strengths</h3>
                 </div>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
                 {strengths.length > 0 ? strengths.map((item, i) => (
                      <div key={i} className="flex items-start gap-3">
-                         <CheckCircle2 className="w-5 h-5 text-emerald-500 mt-0.5 shrink-0" />
-                         <p className="text-sm text-slate-700 dark:text-slate-300 font-medium leading-relaxed">{item}</p>
+                         <CheckCircle2 className="w-5 h-5 text-lp-azure mt-0.5 shrink-0" />
+                         <p className="text-sm text-lp-fg font-medium leading-relaxed">{item}</p>
                      </div>
                  )) : (
-                    <p className="text-sm text-slate-500 italic">No specific strengths highlighted.</p>
+                    <p className="text-sm text-lp-muted italic">No specific strengths highlighted.</p>
                  )}
             </CardContent>
         </Card>
 
         {/* Weaknesses */}
-        <Card className="border-none shadow-lg bg-white dark:bg-card overflow-hidden h-full">
+        <Card className="border-none shadow-lg bg-lp-card overflow-hidden h-full">
             <CardHeader className="pb-4 bg-amber-50 dark:bg-amber-900/20 border-b border-amber-100 dark:border-amber-900/30">
                 <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400">
@@ -117,37 +118,37 @@ export function InterviewFeedback({ onRestart, interview }: InterviewFeedbackPro
                 {weaknesses.length > 0 ? weaknesses.map((item, i) => (
                      <div key={i} className="flex items-start gap-3">
                          <span className="mt-2 w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
-                         <p className="text-sm text-slate-700 dark:text-slate-300 font-medium leading-relaxed">{item}</p>
+                         <p className="text-sm text-lp-fg font-medium leading-relaxed">{item}</p>
                      </div>
                  )) : (
-                    <p className="text-sm text-slate-500 italic">No major weaknesses detected.</p>
+                    <p className="text-sm text-lp-muted italic">No major weaknesses detected.</p>
                  )}
             </CardContent>
         </Card>
       </div>
 
       {/* Recommendations */}
-      <Card className="border-none shadow-xl bg-white dark:bg-card overflow-hidden">
+      <Card className="border-none shadow-xl bg-lp-card overflow-hidden">
             <CardHeader className="pb-4 bg-primary/10 border-b border-primary/20">
                 <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-primary/15 dark:bg-primary/25 text-primary">
                         <Lightbulb size={20} />
                     </div>
-                    <h3 className="font-black text-primary dark:text-foreground uppercase text-xs tracking-widest">Actionable Recommendations</h3>
+                    <h3 className="font-black text-primary uppercase text-xs tracking-widest">Actionable Recommendations</h3>
                 </div>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
                 {recommendations.length > 0 ? recommendations.map((item, i) => (
-                    <div key={i} className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 flex gap-4">
+                    <div key={i} className="p-4 rounded-2xl bg-lp-card-2 border border-lp-line flex gap-4">
                         <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/15 flex items-center justify-center text-primary font-bold text-xs">
                             {i + 1}
                         </div>
-                        <p className="text-sm text-slate-700 dark:text-slate-300 font-medium leading-relaxed pt-1.5">
+                        <p className="text-sm text-lp-fg font-medium leading-relaxed pt-1.5">
                             {item}
                         </p>
                     </div>
                 )) : (
-                    <p className="text-sm text-slate-500 italic">No specific recommendations provided.</p>
+                    <p className="text-sm text-lp-muted italic">No specific recommendations provided.</p>
                 )}
             </CardContent>
         </Card>
@@ -155,7 +156,7 @@ export function InterviewFeedback({ onRestart, interview }: InterviewFeedbackPro
       <div className="flex flex-col sm:flex-row gap-4 pt-4 max-w-2xl mx-auto w-full">
         <Button 
             variant="outline" 
-            className="flex-1 h-16 font-black border-slate-200 dark:border-slate-800 gap-3 active:scale-95 transition-all rounded-2xl text-lg shadow-sm hover:shadow-md"
+            className="flex-1 h-16 font-black border-lp-line gap-3 active:scale-95 transition-all rounded-2xl text-lg shadow-sm hover:shadow-md"
             onClick={onRestart}
         >
             <RefreshCcw size={22} className="text-primary" />
@@ -172,7 +173,7 @@ export function InterviewFeedback({ onRestart, interview }: InterviewFeedbackPro
         </Button>
       </div>
 
-      <p className="text-center text-[10px] md:text-xs text-slate-400 dark:text-slate-500 font-bold uppercase tracking-[0.2em] px-6 py-4">
+      <p className="text-center text-[10px] md:text-xs text-lp-muted font-bold uppercase tracking-[0.2em] px-6 py-4">
         Educational practice only. Final decisions are made exclusively by embassy officers.
       </p>
     </div>

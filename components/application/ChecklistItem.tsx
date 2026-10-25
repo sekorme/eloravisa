@@ -1,16 +1,16 @@
 "use client";
 
-import { useRef, useState } from "react";
-import { Card } from "@/components/ui/card";
+import { useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, CheckCircle2, Circle, AlertCircle, Sparkles, Upload } from "lucide-react";
+import { ChevronDown, Check, AlertCircle, Sparkles, Quote } from "lucide-react";
 import { gsap } from "gsap";
-import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { ReviewDetails } from "./ReviewDetails";
 import { DocumentReviewModal } from "@/components/dashboard/DocumentReviewModal";
 import { UploadDocumentsModal } from "@/components/UploadDocumentsModal";
 
 interface ChecklistItemProps {
+    index: number;
     docKey: string;
     title: string;
     explanation: string;
@@ -23,6 +23,7 @@ interface ChecklistItemProps {
 }
 
 export default function ChecklistItem({
+    index,
     docKey,
     title,
     explanation,
@@ -36,6 +37,7 @@ export default function ChecklistItem({
     const [open, setOpen] = useState(false);
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
     const contentRef = useRef<HTMLDivElement>(null);
+    const panelId = useId();
 
     const toggle = () => {
         setOpen(!open);
@@ -57,28 +59,6 @@ export default function ChecklistItem({
         }
     }
 
-    const getStatusIcon = () => {
-        switch (status) {
-            case "completed":
-                return <CheckCircle2 className="w-5 h-5 text-emerald-500" />;
-            case "in-progress":
-                return <AlertCircle className="w-5 h-5 text-amber-500" />;
-            default:
-                return <Circle className="w-5 h-5 text-slate-300 dark:text-slate-600" />;
-        }
-    };
-
-    const getStatusStyles = () => {
-        switch (status) {
-            case "completed":
-                return "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800";
-            case "in-progress":
-                return "bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 border-amber-100 dark:border-amber-800";
-            default:
-                return "bg-slate-50 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border-slate-100 dark:border-slate-700";
-        }
-    };
-
     const getStatusLabel = () => {
         if (status === "completed") return "Completed";
         if (status === "in-progress") {
@@ -88,105 +68,135 @@ export default function ChecklistItem({
         return "Not Started";
     }
 
+    const statusPill = {
+        "completed": "bg-lp-sky text-lp-azure",
+        "in-progress": reviewData
+            ? "bg-amber-100 text-amber-800 dark:bg-amber-400/10 dark:text-amber-300"
+            : "bg-lp-navy text-white dark:bg-lp-navy-2",
+        "not-started": "border border-lp-line text-lp-muted",
+    }[status];
+
+    const number = String(index + 1).padStart(2, "0");
+
     return (
         <>
-            <Card className={`overflow-hidden border-l-4 transition-all duration-500 group ${
-                status === 'completed' ? 'border-l-emerald-500 shadow-emerald-500/5' : 
-                status === 'in-progress' ? 'border-l-amber-500 shadow-amber-500/5' : 
-                'border-l-slate-300 dark:border-l-slate-700'
-            } bg-white dark:bg-slate-900 hover:shadow-xl hover:shadow-primary/5 border border-slate-200 dark:border-slate-800 rounded-2xl`}>
+            <div
+                className={cn(
+                    "group overflow-hidden rounded-[1.25rem] border bg-lp-card text-lp-fg transition-[border-color,box-shadow] duration-300",
+                    open ? "border-lp-azure/30 lp-shadow" : "border-lp-line hover:border-lp-fg/20"
+                )}
+            >
                 <button
+                    type="button"
                     onClick={toggle}
-                    className="flex items-center justify-between w-full p-6 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                    aria-expanded={open}
+                    aria-controls={panelId}
+                    className="flex w-full items-center gap-4 p-4 text-left transition-colors hover:bg-lp-card-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-lp-azure md:gap-5 md:p-5"
                 >
-                    <div className="flex items-center gap-5">
-                        <div className={`transition-transform duration-500 ${open ? 'scale-110' : 'group-hover:scale-110'}`}>
-                            {getStatusIcon()}
-                        </div>
-                        <div>
-                            <h4 className="font-bold text-slate-900 dark:text-white leading-tight text-lg tracking-tight">{title}</h4>
-                            <div className="flex items-center gap-2 mt-2">
-                                <Badge variant="outline" className={`text-[9px] uppercase font-black tracking-[0.15em] px-2 py-0.5 rounded-md ${getStatusStyles()}`}>
-                                    {getStatusLabel()}
-                                </Badge>
-                                {isUploaded && !reviewData && (
-                                    <Badge variant="secondary" className="text-[9px] uppercase font-black tracking-[0.15em] bg-primary/15 text-primary border-none">
-                                        Ready for AI
-                                    </Badge>
-                                )}
-                            </div>
+                    {/* Step marker: number until uploaded, then a check (green when approved) */}
+                    <div
+                        className={cn(
+                            "flex h-11 w-11 shrink-0 items-center justify-center rounded-full font-display text-sm font-semibold transition-colors duration-300",
+                            status === "completed" && "bg-lp-azure text-white",
+                            status === "in-progress" && "bg-lp-navy text-[#8FCDAF] dark:bg-lp-navy-2",
+                            status === "not-started" && "border border-lp-line bg-lp-card-2 text-lp-muted"
+                        )}
+                    >
+                        {isUploaded ? <Check className="h-5 w-5 stroke-[2.5]" /> : number}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                        <h4 className="font-display text-base font-semibold leading-tight tracking-[-0.02em] md:text-lg">{title}</h4>
+                        <div className="mt-2 flex flex-wrap items-center gap-2">
+                            <span className={cn("rounded-full px-2.5 py-0.5 font-display text-[10px] font-medium uppercase tracking-[0.14em]", statusPill)}>
+                                {getStatusLabel()}
+                            </span>
+                            {isUploaded && !reviewData && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-lp-sky px-2.5 py-0.5 font-display text-[10px] font-medium uppercase tracking-[0.14em] text-lp-azure">
+                                    <Sparkles className="h-3 w-3" aria-hidden="true" />
+                                    Ready for AI
+                                </span>
+                            )}
+                            {reviewData && typeof reviewData.score === "number" && (
+                                <span className="font-display text-[11px] font-semibold text-lp-muted">
+                                    Score <span className="text-lp-fg">{reviewData.score}</span>/100
+                                </span>
+                            )}
                         </div>
                     </div>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${open ? 'bg-primary text-white rotate-180' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:bg-slate-200 dark:group-hover:bg-slate-700'}`}>
+
+                    <div
+                        className={cn(
+                            "flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-[transform,background-color,color] duration-300",
+                            open ? "rotate-180 bg-lp-navy text-white" : "border border-lp-line text-lp-muted group-hover:text-lp-fg"
+                        )}
+                        aria-hidden="true"
+                    >
                         <ChevronDown size={16} />
                     </div>
                 </button>
 
-                <div ref={contentRef} className="overflow-hidden h-0 opacity-0">
-                    <div className="p-8 pt-2 space-y-8 border-t border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-900/10">
-                        
+                <div ref={contentRef} id={panelId} className="h-0 overflow-hidden opacity-0">
+                    <div className="space-y-6 border-t border-lp-line p-5 md:p-6 md:pl-[5.25rem]">
+
                         {reviewData ? (
                             <ReviewDetails reviewData={reviewData} />
                         ) : (
-                            <div className="grid gap-6">
-                                <div className="space-y-3">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 dark:text-slate-500">Why it matters</p>
-                                    </div>
-                                    <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-medium pl-3.5">{explanation}</p>
-                                </div>
-                                
-                                <div className="p-5 rounded-2xl bg-gradient-to-br from-primary/10 to-lp-sky dark:from-primary/10 dark:to-primary/10 border border-primary/10 dark:border-primary/30 relative overflow-hidden group/example">
-                                    <div className="absolute top-0 right-0 p-3 opacity-10 group-hover/example:scale-110 transition-transform">
-                                        <Sparkles size={24} className="text-primary" />
-                                    </div>
-                                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-3 flex items-center gap-2">
-                                        <CheckCircle2 size={12} />
-                                        Pro Example
-                                    </p>
-                                    <p className="text-sm text-slate-700 dark:text-slate-300 italic font-medium leading-relaxed leading-snug">"{example}"</p>
+                            <div className="grid gap-5">
+                                <div className="space-y-2">
+                                    <p className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-azure">Why it matters</p>
+                                    <p className="text-sm leading-relaxed text-lp-muted">{explanation}</p>
                                 </div>
 
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-2">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-red-500" />
-                                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-red-500 dark:text-red-400">Common Pitfalls</p>
+                                {example && (
+                                    <figure className="relative overflow-hidden rounded-2xl bg-lp-navy p-5 text-white">
+                                        <div className="lp-grid-dots pointer-events-none absolute inset-0 opacity-[0.12]" aria-hidden="true" />
+                                        <Quote className="relative mb-3 h-5 w-5 text-[#8FCDAF]" aria-hidden="true" />
+                                        <figcaption className="relative mb-2 font-display text-[10px] font-medium uppercase tracking-[0.18em] text-white/55">
+                                            Pro Example
+                                        </figcaption>
+                                        <blockquote className="relative text-sm leading-relaxed text-white/85">{example}</blockquote>
+                                    </figure>
+                                )}
+
+                                {mistakes.length > 0 && (
+                                    <div className="space-y-3">
+                                        <p className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-red-600 dark:text-red-300">Common Pitfalls</p>
+                                        <ul className="grid gap-2 sm:grid-cols-2">
+                                            {mistakes.map((m: string) => (
+                                                <li key={m} className="flex items-start gap-2.5 rounded-xl border border-lp-line bg-lp-card-2 p-3 text-sm text-lp-muted">
+                                                    <AlertCircle size={14} className="mt-0.5 shrink-0 text-red-500 dark:text-red-300" aria-hidden="true" />
+                                                    <span className="leading-snug">{m}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
                                     </div>
-                                    <div className="grid sm:grid-cols-2 gap-3 pl-3.5">
-                                        {mistakes.map((m: string) => (
-                                            <div key={m} className="flex items-start gap-3 p-3 rounded-xl bg-red-500/5 border border-red-500/10 text-sm text-slate-600 dark:text-slate-400 group/pitfall">
-                                                <AlertCircle size={14} className="text-red-500 mt-0.5 shrink-0 group-hover/pitfall:scale-110 transition-transform" />
-                                                <span className="font-medium leading-tight">{m}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
+                                )}
                             </div>
                         )}
 
-                        <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-slate-100 dark:border-slate-800">
-                            {!isUploaded ? (
-                                <div className="w-full">
-                                    <UploadDocumentsModal /> 
-                                </div>
-                            ) : (
-                                <>
-                                    {!reviewData && (
-                                        <Button 
-                                            onClick={() => setIsReviewModalOpen(true)}
-                                            className="flex-1 h-12 bg-gradient-to-r from-primary to-lp-azure-2 hover:from-primary/90 hover:to-lp-azure-2 text-white border-none gap-3 shadow-xl shadow-primary/25 rounded-xl transition-all hover:-translate-y-0.5 active:translate-y-0"
-                                        >
-                                            <Sparkles size={18} />
-                                            <span className="font-bold tracking-tight">Review with AI Analysis</span>
-                                        </Button>
-                                    )}
-                                </>
-                            )}
-                        </div>
+                        {(!isUploaded || !reviewData) && (
+                            <div className="flex flex-col gap-3 border-t border-lp-line pt-5 sm:flex-row">
+                                {!isUploaded ? (
+                                    <div className="w-full sm:w-auto sm:min-w-[240px]">
+                                        <UploadDocumentsModal />
+                                    </div>
+                                ) : (
+                                    <Button
+                                        onClick={() => setIsReviewModalOpen(true)}
+                                        className="h-12 gap-3 rounded-full bg-lp-azure pl-1.5 pr-6 font-semibold text-white transition-[background-color,transform] hover:bg-lp-azure-2 motion-safe:hover:-translate-y-0.5 sm:w-auto"
+                                    >
+                                        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15" aria-hidden="true">
+                                            <Sparkles size={16} />
+                                        </span>
+                                        Review with AI Analysis
+                                    </Button>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
-            </Card>
+            </div>
 
             {isUploaded && documentUrl && (
                 <DocumentReviewModal

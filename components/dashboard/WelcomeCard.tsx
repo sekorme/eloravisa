@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef } from "react"
 import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { pillClass } from "@/components/landing/ui"
 import { ArrowRight, CheckCircle2 } from "lucide-react"
 import Link from "next/link"
 import { gsap } from "gsap"
@@ -111,58 +111,61 @@ export function WelcomeCard() {
   const currentStage = getCurrentStage();
 
   return (
-    <Card ref={cardRef} className="bg-gradient-to-br mb-10 from-indigo-600 via-blue-600 to-violet-700 text-white shadow-2xl border-none overflow-hidden relative p-6 md:p-8 group">
-      <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-15 pointer-events-none mix-blend-overlay"></div>
-      <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-white/10 rounded-full blur-3xl group-hover:bg-white/20 transition-colors duration-700"></div>
-      <div className="absolute -top-24 -left-24 w-64 h-64 bg-indigo-400/20 rounded-full blur-3xl group-hover:bg-indigo-400/30 transition-colors duration-700"></div>
-      
-      <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-        <div className="flex-1 w-full">
+    <Card ref={cardRef} className="relative overflow-hidden rounded-[2rem] border-none bg-lp-navy p-6 text-white md:p-10 lp-shadow">
+      <div className="lp-grid-dots pointer-events-none absolute inset-0 opacity-[0.18] [mask-image:radial-gradient(ellipse_at_top_right,black,transparent_70%)]" aria-hidden="true"></div>
+      <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-[#5DBF95]/20 blur-3xl" aria-hidden="true"></div>
+      <div className="pointer-events-none absolute -bottom-40 left-1/3 h-80 w-80 rounded-full bg-lp-navy-2 blur-3xl" aria-hidden="true"></div>
+
+      <div className="relative z-10 flex flex-col items-center justify-between gap-10 md:flex-row">
+        <div className="w-full flex-1">
           <div className="welcome-text">
-            <h2 className="text-4xl md:text-5xl font-black tracking-tight leading-tight">Welcome back, {getFirstName()}!</h2>
-            <p className="text-blue-50/80 max-w-lg mt-3 text-base md:text-lg font-medium">
-              You're making great progress on your <span className="text-white font-bold underline decoration-blue-400 underline-offset-4">{userData?.onboarding?.destination || '...'} {userData?.onboarding?.visaType || '...'} Visa</span>.
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 font-display text-[10px] font-medium uppercase tracking-[0.18em] text-white/85 backdrop-blur">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#8FCDAF]"></span>
+              Your visa journey
+            </span>
+            <h2 className="mt-5 font-display text-4xl font-semibold leading-[1.05] tracking-[-0.045em] text-balance md:text-5xl lg:text-6xl">
+              Welcome back, <span className="text-[#8FCDAF]">{getFirstName()}</span>
+            </h2>
+            <p className="mt-4 max-w-lg text-base text-white/70 md:text-lg">
+              You're making great progress on your <span className="font-semibold text-white">{userData?.onboarding?.destination || '...'} {userData?.onboarding?.visaType || '...'} Visa</span>.
             </p>
           </div>
 
-          <div className="mt-8 flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="flex items-center gap-4 bg-white/10 backdrop-blur-md rounded-2xl p-4 shadow-inner border border-white/10 flex-1">
-              <div className="p-3 bg-white/20 rounded-xl shadow-sm">
-                <CheckCircle2 className="w-6 h-6 text-white" />
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-stretch">
+            <div className="flex flex-1 items-center gap-4 rounded-2xl border border-white/10 bg-white/[0.06] p-4 backdrop-blur-md">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#8FCDAF]/15">
+                <CheckCircle2 className="h-5 w-5 text-[#8FCDAF]" />
               </div>
-              <div>
-                <div className="text-xs uppercase tracking-wider text-blue-200 font-bold">Next Step</div>
-                <div className="font-bold text-lg">{currentStage.title}</div>
+              <div className="min-w-0">
+                <div className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-white/55">Next Step</div>
+                <div className="truncate font-display text-lg font-semibold tracking-tight">{currentStage.title}</div>
               </div>
             </div>
 
-            <Link href={currentStage.link} className="shrink-0">
-              <Button variant="secondary" size="lg" className="w-full sm:w-auto h-16 px-8 rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all flex items-center gap-3 bg-white text-blue-600 hover:bg-blue-50" aria-label={`Go to ${currentStage.title}`}>
-                Continue
-                <ArrowRight className="w-5 h-5" />
-              </Button>
+            <Link href={currentStage.link} className={pillClass("white", "lg", "w-full sm:w-auto h-auto min-h-14")} aria-label={`Go to ${currentStage.title}`}>
+              Continue
+              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
           </div>
-          
-          <div className="mt-6 flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-2 bg-black/10 px-4 py-2 rounded-full backdrop-blur-sm border border-white/5">
-              <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></div>
-              <div className="text-sm font-semibold text-blue-100">{reviewsCount} Reviews</div>
+
+          <div className="mt-6 flex flex-wrap items-center gap-2.5">
+            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2">
+              <div className="h-1.5 w-1.5 rounded-full bg-[#8FCDAF]"></div>
+              <div className="text-sm font-medium text-white/80"><span className="font-semibold text-white">{reviewsCount}</span> Reviews</div>
             </div>
-            <div className="flex items-center gap-2 bg-black/10 px-4 py-2 rounded-full backdrop-blur-sm border border-white/5">
-              <div className="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></div>
-              <div className="text-sm font-semibold text-blue-100">{interviewsCount} Interviews</div>
+            <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2">
+              <div className="h-1.5 w-1.5 rounded-full bg-white/60"></div>
+              <div className="text-sm font-medium text-white/80"><span className="font-semibold text-white">{interviewsCount}</span> Interviews</div>
             </div>
           </div>
         </div>
 
-          <div className="stat-badge relative w-56 h-56 md:w-72 md:h-72 flex items-center justify-center flex-shrink-0 group/score">
-              <div className="absolute inset-0 bg-white/5 rounded-full blur-2xl group-hover/score:bg-white/10 transition-colors"></div>
-              <svg className="absolute inset-0 w-full h-full drop-shadow-2xl" viewBox="0 0 100 100">
+          <div className="stat-badge relative flex h-56 w-56 flex-shrink-0 items-center justify-center md:h-64 md:w-64">
+              <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" aria-hidden="true">
                   <circle
                       className="text-white/10"
                       stroke="currentColor"
-                      strokeWidth="6"
+                      strokeWidth="5"
                       cx="50"
                       cy="50"
                       r="42"
@@ -170,9 +173,9 @@ export function WelcomeCard() {
                   />
                   <circle
                       ref={progressCircleRef}
-                      className="text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]"
+                      className="text-[#8FCDAF]"
                       stroke="currentColor"
-                      strokeWidth="7"
+                      strokeWidth="5"
                       strokeLinecap="round"
                       cx="50"
                       cy="50"
@@ -183,12 +186,12 @@ export function WelcomeCard() {
                       transform="rotate(-90 50 50)"
                   />
               </svg>
-              <div className="text-center relative z-10 bg-white/5 backdrop-blur-sm w-40 h-40 md:w-52 md:h-52 rounded-full flex flex-col items-center justify-center border border-white/10 shadow-2xl">
-                  <div className="text-5xl md:text-7xl font-black drop-shadow-2xl flex items-baseline">
+              <div className="relative z-10 flex h-40 w-40 flex-col items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-center md:h-48 md:w-48">
+                  <div className="flex items-baseline font-display text-5xl font-semibold tracking-[-0.05em] md:text-6xl">
                     <NumberTicker className="text-white" value={readinessScore}/>
-                    <span className="text-2xl md:text-3xl ml-1 opacity-80">%</span>
+                    <span className="ml-0.5 text-xl text-white/60 md:text-2xl">%</span>
                   </div>
-                  <div className="text-xs md:text-sm font-black text-blue-200 tracking-[0.2em] uppercase mt-1">Readiness</div>
+                  <div className="mt-1.5 font-display text-[10px] font-medium uppercase tracking-[0.2em] text-white/55">Readiness</div>
               </div>
           </div>
       </div>

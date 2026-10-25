@@ -19,12 +19,9 @@ export function DashboardContent() {
         const ctx = gsap.context(() => {
             gsap.from(".dashboard-section", {
                 opacity: 0,
-                y: 50,
-                duration: 1,
-                stagger: {
-                    each: 0.15,
-                    ease: "power2.inOut"
-                },
+                y: 24,
+                duration: 0.8,
+                stagger: 0.1,
                 ease: "expo.out"
             })
         }, containerRef)
@@ -34,14 +31,15 @@ export function DashboardContent() {
 
     return (
         <DashboardDataProvider>
-            <div ref={containerRef} className="relative p-2 md:p-4 w-full min-h-screen">
+            <div ref={containerRef} className="relative w-full min-h-screen bg-lp-page text-lp-fg">
+                <div className="mx-auto w-full max-w-[1400px] space-y-6 px-4 py-6 md:px-6 md:py-8 lg:px-8">
 
                 {/* Dashboard Sections */}
                 <div className="dashboard-section">
                     <WelcomeCard />
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2 dashboard-section">
                         <ProgressTracker />
                     </div>
@@ -57,6 +55,7 @@ export function DashboardContent() {
 
                 <div className="dashboard-section">
                     <ResourcesSection />
+                </div>
                 </div>
             </div>
         </DashboardDataProvider>

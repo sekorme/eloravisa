@@ -111,7 +111,7 @@ export function InterviewHistory() {
   return (
     <div className="space-y-4 mt-12">
       <div className="flex items-center justify-between px-1">
-        <h2 className="text-xl font-black tracking-tight text-slate-900 dark:text-white">Past Sessions</h2>
+        <h2 className="text-xl font-black tracking-tight text-lp-fg">Past Sessions</h2>
         <Badge variant="secondary" className="font-bold">History</Badge>
       </div>
 
@@ -123,10 +123,10 @@ export function InterviewHistory() {
         ) : history.map((item) => (
           <Card
             key={item.id} 
-            className="group relative cursor-pointer hover:border-primary/50 transition-all border-slate-200 dark:border-slate-800 bg-white dark:bg-card/50 shadow-sm hover:shadow-md overflow-hidden"
+            className="group relative cursor-pointer hover:border-primary/50 transition-all border-lp-line bg-lp-card shadow-sm hover:shadow-md overflow-hidden"
             onClick={() => setSelectedInterview(item)}
           >
-            <div className="absolute top-2 right-2 z-10 ">
+            <div className="absolute top-2 right-2 z-10">
                 <Button 
                     variant="ghost" 
                     size="icon" 
@@ -143,7 +143,7 @@ export function InterviewHistory() {
             <CardContent className="p-4 flex flex-col gap-4 h-full justify-between">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-primary group-hover:text-white transition-colors">
+                  <div className="p-2.5 rounded-xl bg-lp-card-2 text-lp-muted group-hover:bg-primary group-hover:text-white transition-colors">
                     <Mic size={18} />
                   </div>
                   <div className="text-right">
@@ -151,7 +151,7 @@ export function InterviewHistory() {
                         {item.feedback?.overallScore ? `${item.feedback.overallScore}%` : '—'}
                     </div>
                     {item.status && (
-                        <div className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-lp-muted">
                             {item.status}
                         </div>
                     )}
@@ -159,15 +159,15 @@ export function InterviewHistory() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <h3 className="font-bold text-sm text-slate-900 dark:text-white line-clamp-1">
+                  <h3 className="font-bold text-sm text-lp-fg line-clamp-1">
                     {item.destination || 'Unknown'} – {item.visaType || 'N/A'}
                   </h3>
                   <div className="flex flex-col gap-1">
-                    <div className="flex items-center gap-2 text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">
+                    <div className="flex items-center gap-2 text-[10px] text-lp-muted font-bold uppercase tracking-wider">
                         <Calendar size={12} className="shrink-0" />
                         {item.date ? format(new Date(item.date), 'MMM d, yyyy') : 'Unknown Date'}
                     </div>
-                    <div className="flex items-center gap-2 text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">
+                    <div className="flex items-center gap-2 text-[10px] text-lp-muted font-bold uppercase tracking-wider">
                         <Clock size={12} className="shrink-0" />
                         {item.date ? format(new Date(item.date), 'h:mm a') : ''}
                     </div>
@@ -175,9 +175,9 @@ export function InterviewHistory() {
                 </div>
               </div>
 
-              <div className="pt-2 flex items-center justify-between border-t border-slate-100 dark:border-slate-800/50">
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">View Details</span>
-                <ChevronRight size={14} className="text-slate-300 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+              <div className="pt-2 flex items-center justify-between border-t border-lp-line">
+                <span className="text-[10px] font-black uppercase tracking-widest text-lp-muted">View Details</span>
+                <ChevronRight size={14} className="text-lp-muted/60 group-hover:text-primary group-hover:translate-x-1 transition-all" />
               </div>
             </CardContent>
           </Card>
@@ -191,27 +191,27 @@ export function InterviewHistory() {
             <DialogTitle>Interview Feedback</DialogTitle>
           </DialogHeader>
           {selectedInterview && (
-             <div className="p-4 md:p-6 bg-white dark:bg-slate-950 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 space-y-6">
-                <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+             <div className="p-4 md:p-6 bg-lp-card rounded-2xl shadow-2xl border border-lp-line space-y-6">
+                <div className="flex items-center justify-between border-b border-lp-line pb-4">
                     <div>
                         <div className="flex items-center gap-3 mb-1">
-                            <h3 className="font-bold text-lg text-slate-900 dark:text-white">Session Details</h3>
+                            <h3 className="font-bold text-lg text-lp-fg">Session Details</h3>
                             {selectedInterview.status === 'completed' && (
-                                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200 text-[10px] uppercase">
+                                <Badge variant="outline" className="bg-lp-sky text-lp-azure border-lp-azure/30 text-[10px] uppercase">
                                     Completed
                                 </Badge>
                             )}
                         </div>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">
+                        <p className="text-sm text-lp-muted">
                             {selectedInterview.destination} – {selectedInterview.visaType}
                         </p>
                     </div>
                     <div className="text-right">
-                        <div className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+                        <div className="flex items-center gap-2 text-xs font-medium text-lp-muted">
                             <Calendar size={14} />
                             {selectedInterview.date ? format(new Date(selectedInterview.date), 'MMM d, yyyy') : ''}
                         </div>
-                        <div className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">
+                        <div className="flex items-center gap-2 text-xs font-medium text-lp-muted mt-1">
                             <Clock size={14} />
                             {selectedInterview.date ? format(new Date(selectedInterview.date), 'h:mm a') : ''}
                         </div>
