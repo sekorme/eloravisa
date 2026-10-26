@@ -5,11 +5,10 @@ import { InterviewSetup } from "@/components/interview/InterviewSetup"
 import { InterviewSession, QAResult } from "@/components/interview/InterviewSession"
 import { InterviewFeedback, Feedback } from "@/components/interview/InterviewFeedback"
 import { InterviewHistory } from "@/components/interview/InterviewHistory"
-import { generateInterviewFeedback } from "@/action/interview"
+import { saveInterviewSession } from "@/action/interviewSessions"
 import { gsap } from "gsap"
 import { Mic } from "lucide-react"
-import { auth, db } from "@/firebase/client"
-import { collection, addDoc } from "firebase/firestore"
+import { auth } from "@/firebase/client"
 import { toast } from "sonner"
 
 export default function MockVisaInterviewPage() {
@@ -79,15 +78,25 @@ export default function MockVisaInterviewPage() {
             { id: `a-${i}`, role: "user", text: r.answer, timestamp: Date.now() },
         ])
 
+        // Scored and saved to history server-side (action/interviewSessions.ts).
+        // A failed save or score shouldn't block showing feedback.
         let feedback: any = null
         try {
             const idToken = await auth.currentUser?.getIdToken()
             if (idToken) {
-                const response = await generateInterviewFeedback(idToken, transcript)
-                if (response.success) feedback = response.data
+                const result = await saveInterviewSession(idToken, {
+                    mode: "text",
+                    transcript: transcript.map(({ role, text, timestamp }) => ({ role: role as "user" | "model", text, timestamp })),
+                    destination: interviewContext?.destination || "",
+                    visaType: interviewContext?.visaType || "",
+                    endedBy: "completed",
+                })
+                if (result.success) feedback = result.feedback
+                else toast.error(result.error || "Couldn't save this session to your history.")
             }
         } catch (err) {
-            console.warn("Feedback generation failed:", err)
+            console.warn("Failed to save interview session:", err)
+            toast.error("Couldn't save this session to your history.")
         }
 
         if (!feedback) {
@@ -110,25 +119,6 @@ export default function MockVisaInterviewPage() {
                     .slice(0, 5)
                     .map(r => `For "${r.question}" — try: ${r.analysis!.better_answer}`),
             }
-        }
-
-        // Save to history (same collection/shape the voice flows use, so it
-        // shows up in InterviewHistory). A failed save shouldn't block feedback.
-        try {
-            if (auth.currentUser) {
-                await addDoc(collection(db, "users", auth.currentUser.uid, "interview_sessions"), {
-                    date: new Date().toISOString(),
-                    transcript,
-                    destination: interviewContext?.destination || "",
-                    visaType: interviewContext?.visaType || "",
-                    feedback,
-                    status: "completed",
-                    mode: "text",
-                })
-            }
-        } catch (err) {
-            console.warn("Failed to save interview session:", err)
-            toast.error("Couldn't save this session to your history.")
         }
 
         setSessionFeedback({

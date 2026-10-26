@@ -10,9 +10,8 @@ import { Camera, CameraOff, Loader2, Mic, MicOff, PhoneCall, Phone, Eye, EyeOff,
 import { getCountryByName, Country } from "@/components/countries";
 import { SystemErrorModal } from "@/components/SystemErrorModal";
 import {useLiveAPI} from "@/hooks/useLiveAPI";
-import { generateInterviewFeedback } from "@/action/interview";
-import { auth, db } from "@/firebase/client";
-import { collection, addDoc } from "firebase/firestore";
+import { saveInterviewSession } from "@/action/interviewSessions";
+import { auth } from "@/firebase/client";
 import { toast } from "sonner";
 
 export default function App() {
@@ -20,8 +19,7 @@ export default function App() {
     const transcriptEndRef = useRef<HTMLDivElement>(null);
     const [isCameraVisible, setIsCameraVisible] = useState(true);
     const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
-    const { status, transcripts, error, connect, disconnect, setTranscripts, setError, destination, visaType } = useLiveAPI();
-    const [fullHistory, setFullHistory] = useState<any[]>([]);
+    const { status, transcripts, error, connect, disconnect, setTranscripts, setError, destination, visaType, getSessionRecord } = useLiveAPI();
     const [isSecure, setIsSecure] = useState(true);
 
     // Update selectedCountry when destination changes
@@ -33,22 +31,6 @@ export default function App() {
             }
         }
     }, [destination]);
-
-    // Sync full history
-    useEffect(() => {
-        if (transcripts.length > 0) {
-            setFullHistory(prev => {
-                const lastTranscript = transcripts[transcripts.length - 1];
-                const existingIndex = prev.findIndex(t => t.id === lastTranscript.id);
-                if (existingIndex >= 0) {
-                    const next = [...prev];
-                    next[existingIndex] = lastTranscript;
-                    return next;
-                }
-                return [...prev, lastTranscript];
-            });
-        }
-    }, [transcripts]);
 
     // Handle disappearing transcripts (expiresAt)
     useEffect(() => {
@@ -73,7 +55,6 @@ export default function App() {
     const handleStart = async () => {
         if (videoRef.current && selectedCountry) {
             try {
-                setFullHistory([]);
                 await connect(videoRef.current, selectedCountry);
             } catch (err: any) {
                 if (err.message === "Insufficient tokens") {
@@ -92,43 +73,40 @@ export default function App() {
         // }
     };
 
-    // After hangup: extract the interview performance/scores from the full
-    // transcript and save the session to interview history — same collection
-    // and shape the other interview flows use, so it shows up in Past Sessions.
-    const saveSessionResults = async (history: any[]) => {
-        if (!auth.currentUser || history.length === 0) return;
-
-        // fullHistory items are TranscriptItem { role: 'user' | 'ai', ... };
-        // history docs store the officer's side as "model".
-        const transcript = history
-            .filter(t => t.text)
-            .map(t => ({
-                id: t.id,
-                role: t.role === "ai" ? "model" : "user",
-                text: t.text,
-                timestamp: t.timestamp,
-            }));
+    // After hangup: score the full session server-side and save it to
+    // interview history (action/interviewSessions.ts). Uses the hook's
+    // append-only session record, not the on-screen captions, which expire.
+    const saveSessionResults = async () => {
+        const record = getSessionRecord();
+        if (!auth.currentUser || record.turns.length === 0) return;
 
         const toastId = toast.loading("Scoring your interview...");
         try {
             const idToken = await auth.currentUser.getIdToken();
-            const feedbackResponse = await generateInterviewFeedback(idToken, transcript);
-            const feedback = feedbackResponse.success ? feedbackResponse.data : null;
-
-            await addDoc(collection(db, "users", auth.currentUser.uid, "interview_sessions"), {
-                date: new Date().toISOString(),
-                transcript,
+            const result = await saveInterviewSession(idToken, {
+                mode: "consular",
+                transcript: record.turns.map(({ role, text, timestamp }) => ({ role, text, timestamp })),
                 destination: selectedCountry?.name || destination || "",
                 visaType: visaType || "",
-                feedback,
-                status: "completed",
-                mode: "consular",
+                consulate: selectedCountry?.consulateName || "",
+                startedAt: record.startedAt ?? undefined,
+                endedAt: record.endedAt ?? undefined,
+                endedBy: record.endedBy,
             });
 
-            toast.success(
-                feedback ? "Interview scored and saved to your history!" : "Interview saved to your history.",
-                { id: toastId },
-            );
+            if (!result.success) {
+                toast.error(result.error, { id: toastId });
+            } else if (result.scoringStatus === "scored") {
+                const decision = result.feedback?.decision;
+                toast.success(
+                    decision === "approved" ? "Visa approved! Interview scored and saved to your history."
+                        : decision === "refused" ? "Visa refused this time. See your history for why and how to improve."
+                        : "Interview scored and saved to your history!",
+                    { id: toastId },
+                );
+            } else {
+                toast.success("Interview saved to your history. You can score it from there.", { id: toastId });
+            }
         } catch (err) {
             console.warn("Failed to save interview session:", err);
             toast.error("Couldn't save this interview to your history.", { id: toastId });
@@ -147,10 +125,10 @@ export default function App() {
         const prev = prevStatusRef.current;
         prevStatusRef.current = status;
         if (prev === "connected" && status === "disconnected") {
-            saveSessionResults(fullHistory);
+            saveSessionResults();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [status, fullHistory]);
+    }, [status]);
 
     useEffect(() => {
         if (transcriptEndRef.current) {

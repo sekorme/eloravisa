@@ -6,10 +6,9 @@ import { createBlob, decode, decodeAudioData } from '@/services/audioUtils';
 import Visualizer from '@/components/Visualizer';
 import Transcript from '@/components/Transcript';
 import {getCurrentUserDetails} from "@/action/user";
-import { generateInterviewFeedback } from "@/action/interview";
+import { saveInterviewSession } from "@/action/interviewSessions";
 import {PhoneCall} from "lucide-react";
-import { auth, db } from "@/firebase/client";
-import { collection, addDoc } from "firebase/firestore";
+import { auth } from "@/firebase/client";
 import { toast } from "sonner";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import {useRouter} from "next/navigation";
@@ -126,23 +125,20 @@ const InterviewDash = () => {
         const toastId = toast.loading("Saving interview session...");
 
         try {
-            // Generate AI Feedback
-            console.log("Generating feedback...");
-            const feedbackResponse = await generateInterviewFeedback(await currentUser.getIdToken(), finalTranscript);
-            const feedback = feedbackResponse.success ? feedbackResponse.data : null;
-            console.log("Feedback generated:", feedback);
-
-            await addDoc(collection(db, "users", currentUser.uid, "interview_sessions"), {
-                date: new Date().toISOString(),
-                transcript: finalTranscript,
-                destination: destination,
-                visaType: visaType,
-                feedback: feedback,
-                status: "completed"
+            // Scored and saved server-side (action/interviewSessions.ts).
+            const result = await saveInterviewSession(await currentUser.getIdToken(), {
+                mode: "voice",
+                transcript: finalTranscript.map(t => ({ role: t.role === 'user' ? 'user' : 'model', text: t.text, timestamp: t.timestamp })),
+                destination,
+                visaType,
+                endedBy: "user",
             });
-            
-            console.log("Session saved to Firestore");
-            toast.success("Interview session and feedback saved!", { id: toastId });
+            if (!result.success) throw new Error(result.error);
+
+            toast.success(
+                result.scoringStatus === "scored" ? "Interview session and feedback saved!" : "Interview saved. You can score it from your history.",
+                { id: toastId },
+            );
             router.push("/dashboard/ai-mock-interview");
         } catch (error) {
             console.error("Error saving session:", error);

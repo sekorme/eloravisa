@@ -18,6 +18,15 @@ export interface TranscriptItem {
 }
 
 
+// Complete, append-only record of one session. Separate from `transcripts`,
+// which only holds the on-screen captions and expires them after a few seconds.
+export interface SessionRecord {
+    turns: { id: string; role: 'user' | 'model'; text: string; timestamp: number }[];
+    startedAt: number | null;
+    endedAt: number | null;
+    endedBy: 'user' | 'dropped';
+}
+
 export function useLiveAPI() {
     const [status, setStatus] = useState<"disconnected" | "connecting" | "connected">("disconnected");
     const [transcripts, setTranscripts] = useState<TranscriptItem[]>([]);
@@ -40,6 +49,31 @@ export function useLiveAPI() {
     // normal hangup (empty/synthetic close event, nothing to report) apart
     // from the server or network dropping the connection unexpectedly.
     const intentionalCloseRef = useRef(false);
+    // connect() is memoised once, so it reads the profile through this ref —
+    // reading state directly would see the empty values from the first render.
+    const profileRef = useRef({ destination: "", visaType: "", documents: [] as any[] });
+    const sessionLogRef = useRef<Map<string, SessionRecord['turns'][number]>>(new Map());
+    const sessionTimesRef = useRef<{ startedAt: number | null; endedAt: number | null; endedBy: 'user' | 'dropped' }>({ startedAt: null, endedAt: null, endedBy: 'user' });
+
+    useEffect(() => {
+        profileRef.current = { destination, visaType, documents };
+    }, [destination, visaType, documents]);
+
+    // Records the latest text for a turn; turns keep their first-seen order.
+    const logTurn = (id: string, role: 'user' | 'ai', text: string) => {
+        const existing = sessionLogRef.current.get(id);
+        sessionLogRef.current.set(id, {
+            id,
+            role: role === 'ai' ? 'model' : 'user',
+            text,
+            timestamp: existing?.timestamp ?? Date.now(),
+        });
+    };
+
+    const getSessionRecord = useCallback((): SessionRecord => ({
+        turns: [...sessionLogRef.current.values()].filter(t => t.text.trim()),
+        ...sessionTimesRef.current,
+    }), []);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -74,6 +108,9 @@ export function useLiveAPI() {
         setStatus("connecting");
         setTranscripts([]);
         setError(null);
+        sessionLogRef.current = new Map();
+        sessionTimesRef.current = { startedAt: null, endedAt: null, endedBy: 'user' };
+        const { destination, visaType, documents } = profileRef.current;
         try {
             if (!auth.currentUser) {
                 throw new Error("You must be logged in to start a session.");
@@ -247,6 +284,7 @@ If feedback mode is enabled after the interview:
                                     const item = next[existingId];
                                     // Only add [interrupted] if it's not already there and there's text
                                     const text = item.text.endsWith("[interrupted]") ? item.text : (item.text ? item.text + " [interrupted]" : "...");
+                                    if (item.text) logTurn(item.id, 'ai', text);
                                     next[existingId] = {
                                         ...item,
                                         text,
@@ -281,6 +319,7 @@ If feedback mode is enabled after the interview:
                             const tx = message.serverContent.inputTranscription;
                             if (tx.text) {
                                 currentUserText = (currentUserText + " " + tx.text).trim();
+                                logTurn(userMessageId, 'user', currentUserText);
                                 setTranscripts(prev => {
                                     const existingId = prev.findIndex(t => t.id === userMessageId);
                                     if (existingId >= 0) {
@@ -316,6 +355,7 @@ If feedback mode is enabled after the interview:
                                 // For output transcription, it might be incremental or partial.
                                 // We accumulate it to get the full transcript for this turn.
                                 currentAiText = (currentAiText + " " + tx.text).trim();
+                                logTurn(aiMessageId, 'ai', currentAiText);
                                 setTranscripts(prev => {
                                     const existingId = prev.findIndex(t => t.id === aiMessageId);
                                     if (existingId >= 0) {
@@ -360,6 +400,7 @@ If feedback mode is enabled after the interview:
                         // A close we triggered ourselves (hanging up) doesn't
                         // come with a real CloseEvent — nothing to report.
                         if (!wasIntentional) {
+                            sessionTimesRef.current.endedBy = 'dropped';
                             console.warn("Gemini Live socket closed:", { code: e?.code, reason: e?.reason, wasClean: e?.wasClean });
                             if (!e || e.code !== 1000) {
                                 setError(e?.reason || `Connection closed unexpectedly${e?.code ? ` (code ${e.code})` : ""}.`);
@@ -371,6 +412,7 @@ If feedback mode is enabled after the interview:
             });
 
             sessionRef.current = session;
+            sessionTimesRef.current.startedAt = Date.now();
             setStatus("connected");
 
             // Audio setup
@@ -438,6 +480,9 @@ If feedback mode is enabled after the interview:
     }, []);
 
     const disconnect = useCallback(() => {
+        if (sessionTimesRef.current.startedAt && !sessionTimesRef.current.endedAt) {
+            sessionTimesRef.current.endedAt = Date.now();
+        }
         setStatus("disconnected");
         stopAllAudio();
         if (sessionRef.current) {
@@ -471,6 +516,7 @@ If feedback mode is enabled after the interview:
         disconnect,
         setTranscripts,
         setError,
+        getSessionRecord,
         userData,
         currentUser,
         destination,

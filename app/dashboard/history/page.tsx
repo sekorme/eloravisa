@@ -106,7 +106,11 @@ export default function HistoryPage() {
     };
 
     useEffect(() => {
+        // onAuthStateChanged ignores the callback's return value — clean up by hand.
+        let unsubData: (() => void) | undefined;
         const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+            unsubData?.();
+            unsubData = undefined;
             if (user) {
                 // 1. Listen to User Doc (for uploads & onboarding)
                 const userDocRef = doc(db, "users", user.uid);
@@ -217,13 +221,18 @@ export default function HistoryPage() {
                         const score = data.feedback?.overallScore || 0;
                         interviewScoreSum += score;
 
+                        const decision = data.feedback?.decision;
                         interviewEvents.push({
                             id: `interview-${doc.id}`,
-                            title: "Mock Interview Completed",
+                            title: decision === "approved" ? "Mock Interview: Visa Approved"
+                                : decision === "refused" ? "Mock Interview: Visa Refused"
+                                : "Mock Interview Completed",
                             date: data.date,
-                            description: `Score: ${score}%. ${data.feedback?.summary?.substring(0, 50) || "Session completed."}...`,
+                            description: data.feedback
+                                ? `Score: ${score}%. ${(data.feedback.decisionReason || data.feedback.summary || "Session completed.").substring(0, 80)}...`
+                                : "Not scored yet. Open Interview History to score it.",
                             icon: Mic,
-                            status: score >= 70 ? "completed" : "warning"
+                            status: decision === "refused" ? "warning" : score >= 70 ? "completed" : "warning"
                         });
                     });
 
@@ -256,7 +265,7 @@ export default function HistoryPage() {
                     setLoadingState(prev => ({ ...prev, interviews: false }));
                 });
 
-                return () => {
+                unsubData = () => {
                     unsubUser();
                     unsubReviews();
                     unsubInterviews();
@@ -266,7 +275,10 @@ export default function HistoryPage() {
             }
         });
 
-        return () => unsubscribeAuth();
+        return () => {
+            unsubData?.();
+            unsubscribeAuth();
+        };
     }, []);
 
 

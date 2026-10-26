@@ -52,8 +52,11 @@ service cloud.firestore {
         allow read, write: if isOwner(uid);
       }
 
+      // Written only server-side (action/interviewSessions.ts, Admin SDK):
+      // the scores feed readiness/history, so the client must not set them.
+      // The owner can read their sessions and delete them from history.
       match /interview_sessions/{sessionId} {
-        allow read, write: if isOwner(uid);
+        allow read, delete: if isOwner(uid);
       }
 
       // Cached AI output (e.g. visa checklist) to avoid re-generating on
