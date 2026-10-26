@@ -1,3 +1,5 @@
+const { withSentryConfig } = require("@sentry/nextjs/config");
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     reactStrictMode: true,
@@ -43,4 +45,15 @@ const nextConfig = {
     },
 };
 
-module.exports = nextConfig;
+// Uploads source maps to Sentry at build time so production stack traces are
+// readable. Needs SENTRY_AUTH_TOKEN in the build env (Vercel); without it the
+// build still succeeds and just skips the upload.
+module.exports = withSentryConfig(nextConfig, {
+    org: process.env.SENTRY_ORG || "none-m66",
+    project: process.env.SENTRY_PROJECT || "eloravisa",
+    authToken: process.env.SENTRY_AUTH_TOKEN,
+    silent: !process.env.CI,
+    widenClientFileUpload: true,
+    // Browser events go through this app route, so ad-blockers don't drop them.
+    tunnelRoute: "/monitoring",
+});
