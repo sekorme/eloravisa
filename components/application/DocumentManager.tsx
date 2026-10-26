@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Download, ExternalLink, FileText, Trash2 } from "lucide-react"
-import { auth, db } from "@/firebase/client"
+import { auth, db, storage } from "@/firebase/client"
+import { ref, deleteObject } from "firebase/storage"
 import { doc, onSnapshot, updateDoc, deleteField, deleteDoc } from "firebase/firestore"
 import { onAuthStateChanged } from "firebase/auth"
 import {
@@ -65,6 +66,17 @@ export default function DocumentManager() {
         if (!user) return
 
         try {
+            // 0. Delete the uploaded file itself — removing only the Firestore
+            // entry left the passport/statement sitting in Storage.
+            const docData = documents[key]
+            const fileUrl = typeof docData === 'string' ? docData : docData?.url
+            if (fileUrl) {
+                await deleteObject(ref(storage, fileUrl)).catch((err) => {
+                    // Already gone is fine; anything else should stop the delete.
+                    if (err?.code !== 'storage/object-not-found') throw err
+                })
+            }
+
             // 1. Remove from documents map
             const userDocRef = doc(db, "users", user.uid)
             await updateDoc(userDocRef, {

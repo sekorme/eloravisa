@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { SUBSCRIPTION_PLANS, PlanId } from '@/lib/subscriptions'
 import { auth, db } from '@/firebase/client'
 import { doc, getDoc, onSnapshot } from 'firebase/firestore'
+import { onAuthStateChanged } from 'firebase/auth'
 import { startPaystackPayment } from '@/lib/paystack'
 import { getUserCurrencyInfo } from '@/lib/currency'
 import { toast } from 'sonner'
@@ -34,16 +35,26 @@ export default function SubscriptionPage() {
   const [pendingPromo, setPendingPromo] = useState<string | null>(null)
 
   useEffect(() => {
-    const user = auth.currentUser
-    if (user) {
-      const unsub = onSnapshot(doc(db, "users", user.uid), (doc) => {
-        const d = doc.data()
-        setUserData(d ? (d as UserData) : null)
+    // Wait for Firebase to restore the session: auth.currentUser is still
+    // null on a hard refresh, which showed paying users the Free plan.
+    let unsubDoc: (() => void) | undefined
+    const unsubAuth = onAuthStateChanged(auth, (user) => {
+      unsubDoc?.()
+      unsubDoc = undefined
+      if (user) {
+        unsubDoc = onSnapshot(doc(db, "users", user.uid), (snap) => {
+          const d = snap.data()
+          setUserData(d ? (d as UserData) : null)
+          setLoading(false)
+        })
+      } else {
+        setUserData(null)
         setLoading(false)
-      })
-      return () => unsub()
-    } else {
-      setLoading(false)
+      }
+    })
+    return () => {
+      unsubDoc?.()
+      unsubAuth()
     }
   }, [])
 

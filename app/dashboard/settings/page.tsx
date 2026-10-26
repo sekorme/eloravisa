@@ -82,6 +82,17 @@ const SettingsPage = () => {
 
         setIsDeleting(true);
         try {
+            // Firebase only lets an account delete itself shortly after
+            // signing in. Check that first: deleting the data and then
+            // failing on deleteUser left a signed-in account with no data,
+            // plan or tokens.
+            const { claims } = await user.getIdTokenResult();
+            const authTime = Number(claims.auth_time) * 1000;
+            if (!authTime || Date.now() - authTime > 4 * 60 * 1000) {
+                toast.error("For your security, please log out and log in again, then delete your account.");
+                return;
+            }
+
             // 1. Delete user data from Firestore
             await deleteDoc(doc(db, "users", user.uid));
 

@@ -50,22 +50,28 @@ const Navbar = () => {
     const [userData, setUserData] = useState<any>(null);
 
     useEffect(() => {
+        // onAuthStateChanged ignores the callback's return value — clean up by hand.
+        let unsubDoc: (() => void) | undefined;
         const unsubscribe = onAuthStateChanged(auth, (user) => {
+            unsubDoc?.();
+            unsubDoc = undefined;
             if (user) {
                 // Use onSnapshot for real-time token updates
                 const userDocRef = doc(db, "influencers", user.uid);
-                const unsubDoc = onSnapshot(userDocRef, (doc) => {
+                unsubDoc = onSnapshot(userDocRef, (doc) => {
                     if (doc.exists()) {
                         // Include the user ID in the state
                         setUserData({ ...doc.data(), id: user.uid });
                     }
                 });
-                return () => unsubDoc();
             } else {
                 setUserData(null);
             }
         });
-        return () => unsubscribe();
+        return () => {
+            unsubDoc?.();
+            unsubscribe();
+        };
     }, []);
 
     const handleSignOut = async () => {

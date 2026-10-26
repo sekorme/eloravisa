@@ -1,0 +1,49 @@
+rules_version = '2';
+
+// Firebase Storage rules, drafted from the upload paths in this codebase:
+//   users/{uid}/documents/{file}  — UploadDocumentsModal (visa documents)
+//   users/{uid}/avatar            — AvatarUploader
+//   influencer_avatars/{uid}      — affiliate profile page
+// Deploy with `firebase deploy --only storage`.
+//
+// Files are displayed and analysed through their tokenised download URLs
+// (getDownloadURL), which keep working under these rules; firebase-admin
+// (server code) bypasses them entirely.
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // Passports, bank statements etc. — owner-only, PDFs/images, 20MB max
+    // (matches the analyzeDocument cap in action/ai.ts).
+    match /users/{uid}/documents/{fileName} {
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid)
+        && request.resource.size < 20 * 1024 * 1024
+        && (request.resource.contentType == 'application/pdf'
+            || request.resource.contentType.matches('image/.*'));
+    }
+
+    match /users/{uid}/avatar {
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid)
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    match /influencer_avatars/{uid} {
+      allow read, delete: if isOwner(uid);
+      allow create, update: if isOwner(uid)
+        && request.resource.size < 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    // Everything else (including admin_avatars, managed server-side) is
+    // closed to the client SDK.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

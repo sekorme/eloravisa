@@ -46,4 +46,3 @@ export default function InstallPrompt() {
         </div>
     );
 }
-9
