@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import {useRouter} from "next/navigation";
 import { mintGeminiSessionToken } from "@/lib/geminiSession";
+import { useWakeLock } from "@/hooks/useWakeLock";
 
 const InterviewDash = () => {
     const [status, setStatus] = useState<SessionStatus>(SessionStatus.IDLE);
@@ -62,27 +63,7 @@ const InterviewDash = () => {
         currentOutputRef.current = currentOutputText;
     }, [currentOutputText]);
 
-    useEffect(() => {
-        let wakeLock :any;
-        const requestWakeLock = async() =>{
-            try{
-                wakeLock = await navigator.wakeLock.request("screen");
-            }catch(err){
-                console.error("Wake Lock Error:", err);
-            }
-        };
-        requestWakeLock();
-
-        document.addEventListener("visibilitychange", () => {
-            if (document.visibilityState === "visible") {
-                requestWakeLock();
-            }
-        });
-        return () => {
-
-            wakeLock?.release();
-        }
-    }, [])
+    useWakeLock();
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {

@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Message, MessageRole, ChatMode } from '../types';
 import { useLiveSession } from '../hooks/useLiveSession';
+import { useWakeLock } from '../hooks/useWakeLock';
 import { X, Mic, Send, Keyboard, AudioWaveform, User, Bot, AlertCircle, Loader2 } from 'lucide-react';
 import { auth } from '@/firebase/client';
 
@@ -22,6 +23,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [mode, setMode] = useState<ChatMode>(ChatMode.TEXT);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+
+    // Keep the screen on while the chat panel is open (typing or talking).
+    useWakeLock();
 
     // Auto-scroll to bottom
     const scrollToBottom = () => {
