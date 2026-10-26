@@ -2,12 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { NextRequest } from "next/server";
 import { auth, db } from "@/firebase/admin";
 import { checkRateLimit } from "@/lib/ratelimit";
-
-const SYSTEM_INSTRUCTION =
-    "You are Elora, a professional, warm, and helpful AI assistant for Elora Visa. " +
-    "You help users with visa applications, requirements, and status checks. " +
-    "Keep responses concise and easy to read. Use formatting like bullet points where appropriate. " +
-    "Avoid special formatting symbols such as asterisks or decorative characters.";
+import { buildEloraInstruction } from "@/lib/eloraContext";
 
 // Text-mode chat for the "Ask Elora" widget. Runs entirely server-side so the
 // real Gemini API key never reaches the browser, and re-checks the Pro/Full
@@ -51,10 +46,12 @@ export async function POST(req: NextRequest) {
         return Response.json({ error: "Message is required" }, { status: 400 });
     }
 
+    const systemInstruction = await buildEloraInstruction(uid, "text", userSnap.data());
+
     const ai = new GoogleGenAI({ apiKey });
     const chat = ai.chats.create({
         model: "gemini-3.8-flash",
-        config: { systemInstruction: SYSTEM_INSTRUCTION },
+        config: { systemInstruction },
         history: history
             .filter((m: any) => (m?.role === "user" || m?.role === "model") && typeof m?.text === "string")
             .map((m: any) => ({ role: m.role, parts: [{ text: m.text }] })),

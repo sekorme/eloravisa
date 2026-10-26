@@ -4,6 +4,7 @@ import { auth, db } from "@/firebase/admin";
 import { TOKEN_COSTS } from "@/lib/subscriptions";
 import { checkRateLimit } from "@/lib/ratelimit";
 import { deductTokensAdmin, refundTokensAdmin } from "@/lib/tokensAdmin";
+import { buildEloraInstruction } from "@/lib/eloraContext";
 
 // Every purpose the client can request maps to a fixed model + policy here.
 // The client only ever sends `purpose` — never a model or a charge flag —
@@ -64,9 +65,11 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "Invalid purpose" }, { status: 400 });
     }
 
+    let userData: FirebaseFirestore.DocumentData | undefined;
     if (policy.requiredPlan) {
         const userSnap = await db.collection("users").doc(uid).get();
-        const planId = userSnap.data()?.planId;
+        userData = userSnap.data();
+        const planId = userData?.planId;
         if (!planId || !policy.requiredPlan.includes(planId)) {
             return NextResponse.json(
                 { error: "Upgrade to Pro to use the AI Assistant" },
@@ -110,7 +113,13 @@ export async function POST(req: NextRequest) {
 
         if (!authToken.name) throw new Error("No token returned");
 
-        return NextResponse.json({ token: authToken.name });
+        // The voice assistant gets the same server-built, profile-aware
+        // instruction as text chat; the interview purposes set their own.
+        const systemInstruction = purpose === "assistant_voice"
+            ? await buildEloraInstruction(uid, "voice", userData)
+            : undefined;
+
+        return NextResponse.json({ token: authToken.name, systemInstruction });
     } catch (err) {
         if (policy.chargeUpfront > 0) {
             await refundTokensAdmin(uid, policy.chargeUpfront).catch(() => {});

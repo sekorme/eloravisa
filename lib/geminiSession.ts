@@ -6,6 +6,14 @@ export type GeminiSessionPurpose = "consular_interview" | "interview_dash" | "as
 // Live API ephemeral token, minted server-side so the real API key never
 // reaches the browser. See app/api/gemini/session/route.ts.
 export async function mintGeminiSessionToken(purpose: GeminiSessionPurpose): Promise<string> {
+    return (await mintGeminiSession(purpose)).token;
+}
+
+// Same as mintGeminiSessionToken, plus the server-built system instruction
+// for purposes that have one (assistant_voice: Elora with the user's profile).
+export async function mintGeminiSession(
+    purpose: GeminiSessionPurpose,
+): Promise<{ token: string; systemInstruction?: string }> {
     if (!auth.currentUser) {
         throw new Error("You must be logged in to start a session.");
     }
@@ -22,5 +30,8 @@ export async function mintGeminiSessionToken(purpose: GeminiSessionPurpose): Pro
         throw new Error(data.error || "Failed to start session");
     }
 
-    return data.token as string;
+    return {
+        token: data.token as string,
+        systemInstruction: typeof data.systemInstruction === "string" ? data.systemInstruction : undefined,
+    };
 }

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { GoogleGenAI, LiveServerMessage, Modality } from '@google/genai';
 import { createPcmBlob, decodeAudioData, base64ToBytes } from '../utils/audio';
-import { mintGeminiSessionToken } from "@/lib/geminiSession";
+import { mintGeminiSession } from "@/lib/geminiSession";
 
 interface UseLiveSessionProps {
     onTranscript?: (text: string, isUser: boolean) => void;
@@ -41,7 +41,7 @@ export const useLiveSession = ({ onTranscript }: UseLiveSessionProps ={}) => {
         setError(null);
         try {
             ensureAudioContexts();
-            const ephemeralToken = await mintGeminiSessionToken("assistant_voice");
+            const { token: ephemeralToken, systemInstruction } = await mintGeminiSession("assistant_voice");
             const ai = new GoogleGenAI({ apiKey: ephemeralToken, httpOptions: { apiVersion: "v1alpha" } });
 
             // Request Microphone Access
@@ -88,7 +88,7 @@ export const useLiveSession = ({ onTranscript }: UseLiveSessionProps ={}) => {
                     speechConfig: {
                         voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } },
                     },
-                    systemInstruction: "You are Elora, a professional, warm, and helpful AI assistant for Elora Visa. You help users with visa applications, requirements, and status checks. Keep responses concise and conversational.",
+                    systemInstruction: systemInstruction || "You are Elora, a professional, warm, and helpful AI assistant for Elora Visa. You help users with visa applications, requirements, and status checks. Keep responses concise and conversational.",
                     inputAudioTranscription: {},
                     outputAudioTranscription: {},
                 },
