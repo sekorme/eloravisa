@@ -10,6 +10,7 @@ import SupportTools from "@/components/application/SupportTools";
 import Disclaimer from "@/components/application/Disclaimer";
 import DocumentManager from "@/components/application/DocumentManager";
 import { CountryRequirementsCard } from "@/components/application/CountryRequirementsCard";
+import { DashboardDataProvider } from "@/context/DashboardDataContext";
 
 export default function MyVisaApplicationPage() {
     const pageRef = useRef<HTMLDivElement>(null);
@@ -30,6 +31,8 @@ export default function MyVisaApplicationPage() {
     }, []);
 
     return (
+        // Shared live data, so progress here matches the dashboard exactly.
+        <DashboardDataProvider>
         <main ref={pageRef} className="min-h-screen w-full bg-lp-page text-lp-fg">
             <div className="mx-auto w-full max-w-[1400px] space-y-6 px-4 py-6 md:px-6 md:py-8 lg:px-8">
                 <div className="app-section">
@@ -73,5 +76,6 @@ export default function MyVisaApplicationPage() {
                 </div>
             </div>
         </main>
+        </DashboardDataProvider>
     );
 }

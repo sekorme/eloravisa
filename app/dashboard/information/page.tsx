@@ -80,12 +80,16 @@ export default function InformationPage() {
           const cachedData = infoDoc.data();
           const metadata = cachedData.metadata;
 
-          // Check if profile matches cache metadata
+          // Check if profile matches cache metadata. Missing values are
+          // stored as null, so compare with ?? null on both sides or a
+          // profile without e.g. a residence would never hit the cache (and
+          // be charged again on every visit).
+          const same = (a: unknown, b: unknown) => (a ?? null) === (b ?? null)
           if (metadata &&
-              metadata.destination === userData.onboarding?.destination &&
-              metadata.visaType === userData.onboarding?.visaType &&
-              metadata.residence === userData.onboarding?.residence &&
-              metadata.country === userData.country) {
+              same(metadata.destination, userData.onboarding?.destination) &&
+              same(metadata.visaType, userData.onboarding?.visaType) &&
+              same(metadata.residence, userData.onboarding?.residence) &&
+              same(metadata.country, userData.country)) {
 
               setInfoData(cachedData);
               shouldUseCache = true;
@@ -114,19 +118,22 @@ export default function InformationPage() {
 
             const response = await getVisaInformation(await user.getIdToken(), userData);
             if (response.success) {
+              // Firestore rejects undefined, so missing profile fields are
+              // stored as null and the AI output is stripped of undefineds.
               const newData = {
-                  ...response.data,
+                  ...JSON.parse(JSON.stringify(response.data ?? {})),
                   metadata: {
-                      destination: userData.onboarding?.destination,
-                      visaType: userData.onboarding?.visaType,
-                      residence: userData.onboarding?.residence,
-                      country: userData.country,
+                      destination: userData.onboarding?.destination ?? null,
+                      visaType: userData.onboarding?.visaType ?? null,
+                      residence: userData.onboarding?.residence ?? null,
+                      country: userData.country ?? null,
                       updatedAt: new Date().toISOString()
                   }
               };
               setInfoData(newData);
-              // Cache it with metadata
-              await setDoc(infoDocRef, newData);
+              // Cache it with metadata. A failed cache write must not hide
+              // the information the user just paid for.
+              await setDoc(infoDocRef, newData).catch((err) => console.error("Caching visa information failed:", err));
             }
         }
 

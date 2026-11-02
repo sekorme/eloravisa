@@ -35,23 +35,13 @@ const SettingsPage = () => {
 
     useEffect(() => {
         const ctx = gsap.context(() => {
-            gsap.from(".settings-section", {
-                opacity: 0,
-                y: 24,
-                duration: 0.6,
-                stagger: 0.12,
-                ease: "power3.out",
-            });
-
-            // small entrance for cards
-            gsap.from(".settings-card", {
-                opacity: 0,
-                y: 8,
-                duration: 0.6,
-                stagger: 0.08,
-                ease: "power3.out",
-                delay: 0.08,
-            });
+            // One tween with an explicit end state. Two .from() tweens on the
+            // same elements (they carry both classes) made the second one
+            // capture opacity 0 as its target and left the cards invisible.
+            gsap.fromTo(".settings-section",
+                { opacity: 0, y: 16 },
+                { opacity: 1, y: 0, duration: 0.6, stagger: 0.1, ease: "power3.out" },
+            );
         }, pageRef);
 
         return () => ctx.revert();

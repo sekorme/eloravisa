@@ -5,7 +5,6 @@ import { WelcomeCard } from "./WelcomeCard"
 import { AlertsSection } from "./AlertsSection"
 import { ProgressTracker } from "./ProgressTracker"
 import { NextActionCard } from "./NextActionCard"
-import { QuickStats } from "./QuickStats"
 import { ResourcesSection } from "./ResourcesSection"
 import { ReadinessPanel } from "./ReadinessPanel"
 import gsap from "gsap"
@@ -43,7 +42,7 @@ export function DashboardContent() {
 
                 <OutcomeCard />
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 items-start lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2 dashboard-section">
                         <ProgressTracker />
                     </div>
@@ -54,9 +53,6 @@ export function DashboardContent() {
                     </div>
                 </div>
 
-                <div className="dashboard-section">
-                    <QuickStats />
-                </div>
 
                 <div className="dashboard-section">
                     <ResourcesSection />

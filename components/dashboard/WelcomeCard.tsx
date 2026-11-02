@@ -6,7 +6,6 @@ import { pillClass } from "@/components/landing/ui"
 import { ArrowRight, CheckCircle2 } from "lucide-react"
 import Link from "next/link"
 import { gsap } from "gsap"
-import { getRequiredDocuments } from "@/utils/documentConfig"
 import {NumberTicker} from "@/components/ui/number-ticker";
 import { useReadiness } from "@/hooks/useReadiness"
 import { useDashboardData } from "@/context/DashboardDataContext"
@@ -34,19 +33,17 @@ interface UserData {
 }
 
 export function WelcomeCard() {
-  const { userData: rawUserData, reviews, interviewSessions, loading } = useDashboardData()
+  const { userData: rawUserData, interviewSessions, loading } = useDashboardData()
   const userData = rawUserData as UserData | null
 
   const cardRef = useRef<HTMLDivElement>(null);
   const progressCircleRef = useRef<SVGCircleElement>(null);
 
-  const totalRequiredDocs = getRequiredDocuments(userData?.onboarding?.visaType).length;
-
-  const reviewsCount = reviews.length
   const interviewsCount = interviewSessions.length
 
   // Same score as the readiness panel and eloraadmin (lib/visaReadiness.ts).
-  const readinessScore = useReadiness().readiness.score
+  const { readiness } = useReadiness()
+  const readinessScore = readiness.score
 
   useEffect(() => {
     // Do not start animations while loading
@@ -92,17 +89,11 @@ export function WelcomeCard() {
   const getCurrentStage = () => {
     if (!userData) return { title: "Getting Started", link: "/onboarding" };
 
-    const completedOnboarding = userData.completedOnboarding || false;
-    const uploadedDocsCount = userData.documents ? Object.keys(userData.documents).length : 0;
-    const docsCompleted = uploadedDocsCount >= totalRequiredDocs;
-    const reviewsCompleted = docsCompleted && reviewsCount >= uploadedDocsCount;
-    const interviewsCompleted = interviewsCount > 0;
-
-    if (!completedOnboarding) return { title: "Complete Onboarding", link: "/onboarding" };
-    if (!docsCompleted) return { title: "Upload Documents", link: "/dashboard/application" };
-    if (!reviewsCompleted) return { title: "Review Documents (AI)", link: "/dashboard/application" };
-    if (!interviewsCompleted) return { title: "Practice Mock Interview", link: "/dashboard/ai-mock-interview" };
-    return { title: "Ready to Apply", link: "/dashboard/application" };
+    if (!userData.completedOnboarding) return { title: "Complete Onboarding", link: "/onboarding" };
+    // The same top step the readiness panel shows, so the dashboard gives one answer.
+    const top = readiness.nextSteps[0];
+    if (top) return { title: top.label, link: top.href };
+    return { title: "Keep practising your interview", link: "/dashboard/ai-mock-interview" };
   }
 
   const currentStage = getCurrentStage();
@@ -124,7 +115,7 @@ export function WelcomeCard() {
               Welcome back, <span className="text-[#8FCDAF]">{getFirstName()}</span>
             </h2>
             <p className="mt-4 max-w-lg text-base text-white/70 md:text-lg">
-              You're making great progress on your <span className="font-semibold text-white">{userData?.onboarding?.destination || '...'} {userData?.onboarding?.visaType || '...'} Visa</span>.
+              {readinessScore >= 60 ? "You're making great progress on your" : "Let's get you ready for your"} <span className="font-semibold text-white">{userData?.onboarding?.destination || '...'} {userData?.onboarding?.visaType || '...'} Visa</span>.
             </p>
           </div>
 
@@ -135,7 +126,7 @@ export function WelcomeCard() {
               </div>
               <div className="min-w-0">
                 <div className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-white/55">Next Step</div>
-                <div className="truncate font-display text-lg font-semibold tracking-tight">{currentStage.title}</div>
+                <div className="line-clamp-2 font-display text-lg font-semibold leading-snug tracking-tight">{currentStage.title}</div>
               </div>
             </div>
 
@@ -148,7 +139,7 @@ export function WelcomeCard() {
           <div className="mt-6 flex flex-wrap items-center gap-2.5">
             <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2">
               <div className="h-1.5 w-1.5 rounded-full bg-[#8FCDAF]"></div>
-              <div className="text-sm font-medium text-white/80"><span className="font-semibold text-white">{reviewsCount}</span> Reviews</div>
+              <div className="text-sm font-medium text-white/80"><span className="font-semibold text-white">{readiness.reviewedRequired}</span> Reviewed</div>
             </div>
             <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2">
               <div className="h-1.5 w-1.5 rounded-full bg-white/60"></div>

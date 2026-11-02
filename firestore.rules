@@ -21,6 +21,19 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == uid;
     }
 
+    // eloraadmin staff: anyone with a document in admins/{uid}. The admin
+    // app still reads and writes some data from the browser, so admins get
+    // full access through the catch-all at the bottom. admins/ itself is
+    // only written server-side or by existing admins.
+    function isAdmin() {
+      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+
+    // eloraadmin's sign-in checks whether the signed-in user is an admin.
+    match /admins/{uid} {
+      allow read: if isOwner(uid);
+    }
+
     // ── users/{uid} ──────────────────────────────────────────────────────
     // Profile + onboarding + document metadata. `tokens` is the paid
     // resource and changes server-side only via firebase-admin: deductions
@@ -33,7 +46,8 @@ service cloud.firestore {
       allow create: if isOwner(uid)
         && request.resource.data.planId == 'free'
         && request.resource.data.tokens is number
-        && request.resource.data.tokens <= 50;
+        && request.resource.data.tokens <= 50
+        && !('isAdmin' in request.resource.data);
 
       // diff/affectedKeys rather than field equality so updates on docs that
       // predate the tokens/planId fields (e.g. Google sign-ins created by an
@@ -43,7 +57,7 @@ service cloud.firestore {
       // them directly would add unpaid members or mix applicants' data.
       allow update: if isOwner(uid)
         && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
-          'planId', 'tokens',
+          'planId', 'tokens', 'isAdmin',
           'familyRoster', 'familyMembers', 'activeMemberId', 'familySeats', 'familyMemberCount', 'accountHolderName'
         ]);
 
@@ -147,9 +161,11 @@ service cloud.firestore {
       allow read, update, delete: if false;
     }
 
-    // Deny anything not explicitly matched above.
+    // Admins can do anything; everyone else is denied anything not
+    // explicitly allowed above (rules are OR'd, so this adds admin access
+    // without loosening any user rule).
     match /{document=**} {
-      allow read, write: if false;
+      allow read, write: if isAdmin();
     }
   }
 }

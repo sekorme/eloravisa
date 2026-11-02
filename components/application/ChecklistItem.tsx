@@ -102,6 +102,8 @@ export default function ChecklistItem({
     }[status];
 
     const number = String(index + 1).padStart(2, "0");
+    // Reviewed below the bar, or the team asked for changes.
+    const needsWork = status === "in-progress" && (!!reviewData || teamReview?.status === "changes_requested");
 
     return (
         <>
@@ -118,16 +120,21 @@ export default function ChecklistItem({
                     aria-controls={panelId}
                     className="flex w-full items-center gap-4 p-4 text-left transition-colors hover:bg-lp-card-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-lp-azure md:gap-5 md:p-5"
                 >
-                    {/* Step marker: number until uploaded, then a check (green when approved) */}
+                    {/* Step marker: a check only once the document is good enough
+                        (approved or scored 80+); amber warning when it needs work. */}
                     <div
                         className={cn(
                             "flex h-11 w-11 shrink-0 items-center justify-center rounded-full font-display text-sm font-semibold transition-colors duration-300",
                             status === "completed" && "bg-lp-azure text-white",
-                            status === "in-progress" && "bg-lp-navy text-[#8FCDAF] dark:bg-lp-navy-2",
+                            status === "in-progress" && !needsWork && "bg-lp-navy text-[#8FCDAF] dark:bg-lp-navy-2",
+                            status === "in-progress" && needsWork && "bg-amber-100 text-amber-700 dark:bg-amber-400/10 dark:text-amber-300",
                             status === "not-started" && "border border-lp-line bg-lp-card-2 text-lp-muted"
                         )}
                     >
-                        {isUploaded ? <Check className="h-5 w-5 stroke-[2.5]" /> : number}
+                        {status === "completed" ? <Check className="h-5 w-5 stroke-[2.5]" />
+                            : needsWork ? <AlertCircle className="h-5 w-5" aria-label="Needs work" />
+                            : isUploaded ? <Check className="h-5 w-5 stroke-[2.5] opacity-60" aria-label="Uploaded" />
+                            : number}
                     </div>
 
                     <div className="min-w-0 flex-1">

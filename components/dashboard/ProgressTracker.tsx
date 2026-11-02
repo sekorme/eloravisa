@@ -4,10 +4,12 @@ import { cn } from "@/lib/utils"
 import { getRequiredDocuments } from "@/utils/documentConfig"
 import { Check as CheckIcon, Lock } from "lucide-react"
 import { useDashboardData } from "@/context/DashboardDataContext"
+import { useReadiness } from "@/hooks/useReadiness"
 
 
 export function ProgressTracker() {
   const { userData, reviews, interviewSessions, loading } = useDashboardData()
+  const { readiness } = useReadiness()
   const reviewsCount = reviews.length
   const interviewsCount = interviewSessions.length
 
@@ -20,12 +22,14 @@ export function ProgressTracker() {
   }
 
   const completedOnboarding = userData?.completedOnboarding || false
-  const uploadedDocsCount = userData?.documents ? Object.keys(userData.documents).length : 0
+  // Required documents only, so this agrees with the readiness panel and
+  // the application page (lib/visaReadiness.ts).
+  const uploadedDocsCount = readiness.uploadedRequired
   const docsProgress = Math.min(Math.round((uploadedDocsCount / totalRequiredDocs) * 100), 100)
   const docsCompleted = uploadedDocsCount >= totalRequiredDocs
 
   const reviewsProgress = Math.min(Math.round((reviewsCount / totalRequiredDocs) * 100), 100)
-  const reviewsCompleted = docsCompleted && reviewsCount >= uploadedDocsCount
+  const reviewsCompleted = docsCompleted && readiness.reviewedRequired >= uploadedDocsCount
 
   const interviewsCompleted = interviewsCount > 0
   
@@ -33,7 +37,8 @@ export function ProgressTracker() {
   // For now, we just check if previous steps are done to unlock it.
   const applicationSubmitted = userData?.applicationSubmitted || false
 
-  const overallProgress = (completedOnboarding ? 20 : 0) + (docsCompleted ? 20 : 0) + (reviewsCompleted ? 20 : 0) + (interviewsCompleted ? 20 : 0) + (applicationSubmitted ? 20 : 0)
+  // Milestones done out of 5; shown as a count so it isn't confused with the readiness %.
+  const milestonesDone = [completedOnboarding, docsCompleted, reviewsCompleted, interviewsCompleted, applicationSubmitted].filter(Boolean).length
 
   // Helper to render step status
   const renderStatus = (isCompleted: boolean, isInProgress: boolean, isLocked: boolean) => {
@@ -100,15 +105,15 @@ export function ProgressTracker() {
   ]
 
   return (
-    <div id="progress-tracker-card" className="h-full rounded-[1.5rem] border border-lp-line bg-lp-card p-6 text-lp-fg md:p-8 lp-shadow">
+    <div id="progress-tracker-card" className="rounded-[1.5rem] border border-lp-line bg-lp-card p-6 text-lp-fg md:p-8 lp-shadow">
       <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
           <span className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-muted">5 milestones to reach your goal</span>
           <h2 className="mt-2 font-display text-2xl font-semibold tracking-[-0.04em] md:text-3xl">Your Journey</h2>
         </div>
         <div className="flex items-center gap-3 rounded-full border border-lp-line bg-lp-sky-2 py-1.5 pl-4 pr-1.5">
-          <span className="font-display text-[10px] font-medium uppercase tracking-[0.16em] text-lp-muted">Overall Progress</span>
-          <span className="rounded-full bg-lp-navy px-3 py-1 font-display text-sm font-semibold text-white">{Math.round(overallProgress)}%</span>
+          <span className="font-display text-[10px] font-medium uppercase tracking-[0.16em] text-lp-muted">Milestones</span>
+          <span className="rounded-full bg-lp-navy px-3 py-1 font-display text-sm font-semibold text-white">{milestonesDone} of 5</span>
         </div>
       </div>
 

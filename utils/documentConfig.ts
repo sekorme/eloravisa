@@ -228,3 +228,17 @@ export const getRequiredDocuments = (visaType?: string) => {
   }
   return BASE_DOCUMENTS;
 };
+
+const ALL_DOCUMENTS = [...BASE_DOCUMENTS, ...WORK_DOCUMENTS, ...STUDY_DOCUMENTS, ...VISIT_DOCUMENTS, ...FAMILY_DOCUMENTS];
+
+/**
+ * Display title for any document key, including ones from another visa type
+ * (left over if the user changed visa type). Never shows a raw key like
+ * "admissionLetter".
+ */
+export const documentTitle = (key: string): string => {
+  const known = ALL_DOCUMENTS.find((d) => d.key === key);
+  if (known) return known.title;
+  const words = key.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/[_-]+/g, " ").trim().toLowerCase();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+};

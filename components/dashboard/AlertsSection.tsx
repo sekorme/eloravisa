@@ -10,15 +10,19 @@ import {
 } from "@/components/ui/accordion"
 import { cn } from "@/lib/utils"
 import { useDashboardData } from "@/context/DashboardDataContext"
+import { documentTitle, getRequiredDocuments } from "@/utils/documentConfig"
 
 export function AlertsSection() {
-  const { reviews, loading } = useDashboardData()
+  const { reviews, userData, loading } = useDashboardData()
 
   const alerts = useMemo(() => {
     const newAlerts: any[] = []
 
-    reviews.forEach((data) => {
-      const docName = data.id.replace(/([A-Z])/g, ' $1').trim()
+    // Only documents on the current checklist: reviews left over from another
+    // visa type would be noise (and inflate the count).
+    const required = new Set(getRequiredDocuments(userData?.onboarding?.visaType).map((d) => d.key))
+    reviews.filter((r) => required.has(r.id)).forEach((data) => {
+      const docName = documentTitle(data.id)
 
       if (data.inconsistencies && data.inconsistencies.length > 0) {
         newAlerts.push({
@@ -57,7 +61,7 @@ export function AlertsSection() {
     })
 
     return newAlerts.slice(0, 5)
-  }, [reviews])
+  }, [reviews, userData?.onboarding?.visaType])
 
   if (loading) {
     return (

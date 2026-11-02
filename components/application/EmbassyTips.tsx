@@ -18,7 +18,7 @@ export default function EmbassyTips({ country }: { country: string }) {
                         Embassy Insider
                     </h3>
                     <p className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-azure">
-                        Target: {country}
+                        Applying from {country}
                     </p>
                 </div>
             </div>

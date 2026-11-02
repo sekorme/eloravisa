@@ -22,7 +22,8 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { Coins } from "lucide-react";
 import {NumberTicker} from "@/components/ui/number-ticker";
 import {NotificationBell} from "@/components/NotificationBell";
-import { FamilySwitcher } from "@/components/dashboard/FamilySwitcher";
+import { FamilyMenuSection, FamilySwitcher } from "@/components/dashboard/FamilySwitcher";
+import { DASHBOARD_PAGE_TITLES } from "@/components/AppSidebar";
 
 function titleizeSegment(seg: string) {
     if (!seg) return "";
@@ -91,7 +92,8 @@ const Navbar = () => {
         if (parts.length <= 1) {
             currentTitle = "Home";
         } else {
-            currentTitle = titleizeSegment(parts[1]);
+            // Same names as the sidebar ("Funds Check", not "Finances").
+            currentTitle = DASHBOARD_PAGE_TITLES[`/dashboard/${parts[1]}`] ?? titleizeSegment(parts[1]);
         }
     } else {
         const parts = pathname.split("/").filter(Boolean);
@@ -107,7 +109,9 @@ const Navbar = () => {
         return name.substring(0, 2).toUpperCase();
     };
 
-    const firstName = userData?.fullName?.trim().split(/\s+/)[0];
+    // Family accounts: fullName follows the active applicant; the menu is the holder's.
+    const accountName: string | undefined = userData?.accountHolderName || userData?.fullName;
+    const firstName = accountName?.trim().split(/\s+/)[0];
     const themeOptions = [
         { value: "light", label: "Light", icon: Sun },
         { value: "dark", label: "Dark", icon: Moon },
@@ -175,7 +179,7 @@ const Navbar = () => {
                     <DropdownMenuTrigger className="group flex items-center gap-2 rounded-full p-0.5 transition-colors hover:bg-lp-card-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-azure md:pr-2.5">
                         <Avatar className="h-9 w-9 ring-2 ring-lp-card">
                             <AvatarImage src={userData?.avatarUrl} className="object-cover" />
-                            <AvatarFallback className="bg-lp-navy font-display text-xs font-semibold text-white">{getInitials(userData?.fullName)}</AvatarFallback>
+                            <AvatarFallback className="bg-lp-navy font-display text-xs font-semibold text-white">{getInitials(accountName ?? "")}</AvatarFallback>
                         </Avatar>
                         {firstName && <span className="hidden max-w-28 truncate text-sm font-semibold md:inline">{firstName}</span>}
                         <ChevronDown className="hidden h-4 w-4 text-lp-muted transition-transform group-data-[state=open]:rotate-180 md:block" />
@@ -184,10 +188,12 @@ const Navbar = () => {
                     <DropdownMenuContent align="end" sideOffset={10} className="w-60 rounded-2xl border-lp-line bg-lp-card p-1.5 text-lp-fg">
                         <DropdownMenuLabel className="px-3 py-2.5 font-normal">
                             <div className="font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-muted">My Account</div>
-                            {userData?.fullName && <div className="mt-1 truncate text-sm font-semibold">{userData.fullName}</div>}
+                            {accountName && <div className="mt-1 truncate text-sm font-semibold">{accountName}</div>}
                             {userData?.email && <div className="truncate text-xs text-lp-muted">{userData.email}</div>}
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator className="bg-lp-line" />
+                        {/* Phones: the family switcher lives here instead of the header. */}
+                        <FamilyMenuSection />
                         <DropdownMenuItem className="rounded-xl px-3 py-2" onClick={() => router.push('/dashboard/profile')}>
                             <User className="mr-2 h-4 w-4" />
                             Profile

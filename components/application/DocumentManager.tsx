@@ -19,6 +19,7 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { toast } from "sonner"
+import { documentTitle } from "@/utils/documentConfig";
 
 const documentLabels: Record<string, string> = {
     passport: "Passport",
@@ -145,7 +146,7 @@ export default function DocumentManager() {
                                 </div>
                                 <div className="min-w-0">
                                     <p className="truncate text-sm font-semibold">
-                                        {documentLabels[key] || key}
+                                        {documentLabels[key] || documentTitle(key)}
                                     </p>
                                     <a 
                                         href={docUrl} 
@@ -162,7 +163,7 @@ export default function DocumentManager() {
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => handleDownload(docUrl, documentLabels[key] || key)}
+                                    onClick={() => handleDownload(docUrl, documentLabels[key] || documentTitle(key))}
                                     className="h-8 flex-1 rounded-full border border-lp-line bg-lp-card text-xs font-semibold text-lp-fg hover:bg-lp-sky hover:text-lp-azure"
                                 >
                                     <Download className="mr-1.5 h-3.5 w-3.5" />

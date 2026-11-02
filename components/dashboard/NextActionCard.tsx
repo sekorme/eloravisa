@@ -31,8 +31,8 @@ export function NextActionCard() {
           <Bolt className="h-5 w-5 text-lp-azure" />
         </div>
         <div>
-          <h2 className="font-display text-xl font-semibold tracking-[-0.03em]">Next Action</h2>
-          <p className="text-xs text-lp-muted">Your personalized checklist</p>
+          <h2 className="font-display text-xl font-semibold tracking-[-0.03em]">Your Documents</h2>
+          <p className="text-xs text-lp-muted">Upload and review each one</p>
         </div>
       </div>
       
@@ -41,7 +41,7 @@ export function NextActionCard() {
         <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-[#5DBF95]/25 blur-2xl" aria-hidden="true"></div>
         <p className="relative z-10 mb-4 font-display font-semibold leading-snug tracking-tight">
           {nextPendingDoc 
-            ? `Next step: Upload your ${nextPendingDoc.label}`
+            ? `Next to upload: ${nextPendingDoc.label}`
             : "All documents uploaded! You are ready for the next stage."}
         </p>
         <div className="relative z-10">

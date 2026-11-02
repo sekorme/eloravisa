@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { Check,  Loader2, Sparkles, Zap, Shield, MessageCircle, Send, Coins } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { SUBSCRIPTION_PLANS, PlanId } from '@/lib/subscriptions'
-import { FAMILY_INCLUDED_MEMBERS } from '@/lib/billing/plans'
+import { FAMILY_INCLUDED_MEMBERS, TOKEN_COSTS } from '@/lib/billing/plans'
 import { auth, db } from '@/firebase/client'
 import { doc, getDoc, onSnapshot } from 'firebase/firestore'
 import { onAuthStateChanged } from 'firebase/auth'
@@ -25,7 +25,7 @@ import {
 } from '@/components/ui/alert-dialog'
 
 export default function SubscriptionPage() {
-  type UserData = { planId?: string | null; fullName?: string | null } | null
+  type UserData = { planId?: string | null; fullName?: string | null; tokens?: number; subscriptionExpiresAt?: number } | null
 
   const [userData, setUserData] = useState<UserData>(null)
   const [loading, setLoading] = useState(true)
@@ -233,12 +233,17 @@ export default function SubscriptionPage() {
     },
   ]
 
+  // From TOKEN_COSTS so the guide can't drift from what's actually charged.
   const costs = [
-    { label: "Document Review", value: "5 Tokens", icon: Shield },
-    { label: "Mock Interview", value: "10 Tokens", icon: MessageCircle },
-    { label: "Document Draft", value: "5 Tokens", icon: Send },
-    { label: "Information", value: "5 Tokens", icon: Sparkles },
+    { label: "Document Review", value: `${TOKEN_COSTS.DOCUMENT_REVIEW} Tokens`, icon: Shield },
+    { label: "Mock Interview", value: `${TOKEN_COSTS.MOCK_INTERVIEW} Tokens`, icon: MessageCircle },
+    { label: "Document Draft", value: `${TOKEN_COSTS.DOCUMENT_DRAFT} Tokens`, icon: Send },
+    { label: "Visa Information", value: `${TOKEN_COSTS.INFORMATION_GENERATION} Tokens`, icon: Sparkles },
+    { label: "Funds Check", value: `${TOKEN_COSTS.FINANCIAL_ANALYSIS} Tokens`, icon: Shield },
+    { label: "Refusal Analysis", value: `${TOKEN_COSTS.REFUSAL_ANALYSIS} Tokens`, icon: Sparkles },
   ]
+  const planNames: Record<string, string> = { free: "Basic", pro: "Pro", full: "Full Features", family: "Family" }
+  const expiresAt = Number(userData?.subscriptionExpiresAt) || 0
 
   return (
     <div className="mx-auto max-w-6xl space-y-12 px-4 py-6 text-lp-fg md:px-8 md:py-10">
@@ -247,6 +252,11 @@ export default function SubscriptionPage() {
           <Coins className="h-3.5 w-3.5 text-lp-azure" /> Plans & tokens
         </span>
         <h1 className="font-display text-4xl font-semibold tracking-[-0.045em] text-balance md:text-5xl">Choose Your Plan</h1>
+        <p className="mx-auto w-fit rounded-full border border-lp-line bg-lp-card px-4 py-1.5 text-sm">
+          You&apos;re on <strong>{planNames[currentPlanId] ?? currentPlanId}</strong>
+          {currentPlanId !== 'free' && expiresAt > 0 && <> · {expiresAt > Date.now() ? 'renews' : 'ended'} {new Date(expiresAt).toLocaleDateString()}</>}
+          {' · '}<strong>{userData?.tokens ?? 0}</strong> tokens
+        </p>
         <p className="mx-auto max-w-2xl text-lp-muted">
           Get the tokens you need to power your visa application journey. All tokens are valid for one month and roll over if you renew.
         </p>
@@ -400,7 +410,7 @@ export default function SubscriptionPage() {
 
       <div className="mt-16 rounded-[1.75rem] border border-lp-line bg-lp-card-2 p-6 md:p-8">
         <h2 className="mb-6 text-center font-display text-[11px] font-medium uppercase tracking-[0.2em] text-lp-muted">Token Cost Guide</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
           {costs.map((c) => (
             <div key={c.label} className="flex items-center gap-4 rounded-2xl border border-lp-line bg-lp-card p-4">
               <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-lp-sky text-lp-azure">

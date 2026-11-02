@@ -85,9 +85,11 @@ export default function HomePageContent() {
                 ) : (
                     <button
                         onClick={() => setIsChatOpen(true)}
-                        className="group flex h-14 items-center gap-3 rounded-full bg-lp-navy py-2 pl-5 pr-2 text-white shadow-[0_16px_40px_-12px_rgba(8,32,26,0.55)] ring-1 ring-white/10 transition-[background-color,transform] duration-200 hover:bg-lp-navy-2 motion-safe:hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-azure focus-visible:ring-offset-2 focus-visible:ring-offset-lp-page"
+                        aria-label="Ask Elora, your AI assistant"
+                        className="group flex h-14 items-center gap-3 rounded-full bg-lp-navy py-2 pl-2 pr-2 text-white sm:pl-5 shadow-[0_16px_40px_-12px_rgba(8,32,26,0.55)] ring-1 ring-white/10 transition-[background-color,transform] duration-200 hover:bg-lp-navy-2 motion-safe:hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-azure focus-visible:ring-offset-2 focus-visible:ring-offset-lp-page"
                     >
-                        <span className="font-semibold">Ask Elora</span>
+                        {/* Icon-only on phones so it covers less of the page. */}
+                        <span className="hidden font-semibold sm:inline">Ask Elora</span>
                         <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-[#8FCDAF]">
                             <MessageCircle size={20} />
                             {!hasAccess && <Lock size={12} className="absolute -left-1 -top-1 rounded-full bg-lp-azure p-0.5 text-white" />}
