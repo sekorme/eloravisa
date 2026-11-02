@@ -4,6 +4,7 @@ import { getFirestore, FieldValue } from "firebase-admin/firestore";
 import { getMessaging } from "firebase-admin/messaging";
 import { getAuth } from "firebase-admin/auth";
 import { requireAdmin } from "@/lib/requireAdmin";
+import { isAllowed } from "@/lib/notificationPrefs";
 
 // ── Initialise Firebase Admin once ───────────────────────────────────────────
 if (!admin.apps.length) {
@@ -74,7 +75,7 @@ export async function POST(req: NextRequest) {
         /* 2️⃣  collect unique tokens & map → userId, one page at a time --------- */
         let pageQuery = db
             .collection("users")
-            .select("fcmToken")
+            .select("fcmToken", "notificationPrefs")
             .orderBy(admin.firestore.FieldPath.documentId())
             .limit(PAGE_SIZE);
 
@@ -88,7 +89,8 @@ export async function POST(req: NextRequest) {
         snap.forEach((d) => {
             const token = d.get("fcmToken");
 
-            if (token) tokenToUid[token] = d.id; // dedupe automatically
+            // Announcements count as "updates"; skip users who turned push off for them.
+      if (token && isAllowed(d.get("notificationPrefs"), "broadcast", "push")) tokenToUid[token] = d.id; // dedupe automatically
         });
 
         const tokens = Object.keys(tokenToUid);

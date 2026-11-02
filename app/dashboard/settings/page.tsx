@@ -3,11 +3,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from "gsap";
 import ProfileForm from "@/components/dashboard/ProfileForm";
+import { NotificationSettings } from "@/components/dashboard/NotificationSettings";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { Bell, Shield, Lock, AlertTriangle, LogOut } from "lucide-react";
+import { Shield, Lock, AlertTriangle, LogOut } from "lucide-react";
 import { auth, db } from "@/firebase/client";
 import { sendPasswordResetEmail, deleteUser, signOut } from "firebase/auth";
 import { doc, deleteDoc } from "firebase/firestore";
@@ -29,10 +29,6 @@ const SettingsPage = () => {
     const pageRef = useRef<HTMLDivElement>(null);
     const router = useRouter();
     const [isDeleting, setIsDeleting] = useState(false);
-
-    // Controlled settings
-    const [emailNotifications, setEmailNotifications] = useState(true);
-    const [marketingEmails, setMarketingEmails] = useState(false);
 
     // Danger zone confirmation
     const [confirmText, setConfirmText] = useState("");
@@ -142,31 +138,8 @@ const SettingsPage = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="settings-section settings-card">
-                    <Card className="h-full">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-lg">
-                                <Bell className="w-5 h-5 text-primary" /> Notifications
-                            </CardTitle>
-                            <CardDescription>Configure how you receive alerts and updates.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <div className="space-y-0.5">
-                                    <Label className="text-base">Email Notifications</Label>
-                                    <p className="text-sm text-muted-foreground">Receive emails about your application status.</p>
-                                </div>
-                                <Switch checked={emailNotifications} onCheckedChange={(v: boolean) => setEmailNotifications(v)} />
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <div className="space-y-0.5">
-                                    <Label className="text-base">Marketing Emails</Label>
-                                    <p className="text-sm text-muted-foreground">Receive emails about new features and offers.</p>
-                                </div>
-                                <Switch checked={marketingEmails} onCheckedChange={(v: boolean) => setMarketingEmails(v)} />
-                            </div>
-                        </CardContent>
-                    </Card>
+                <div className="settings-section settings-card md:col-span-2">
+                    <NotificationSettings />
                 </div>
 
                 <div className="settings-section settings-card">

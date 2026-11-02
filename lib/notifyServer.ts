@@ -4,6 +4,7 @@ import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { getMessaging } from "firebase-admin/messaging";
 import { Attachment, EmailParams, MailerSend, Recipient, Sender } from "mailersend";
 import { db } from "@/firebase/admin";
+import { isAllowed, type NotificationPrefs } from "@/lib/notificationPrefs";
 
 /**
  * Server-side user notifications for paid live sessions: push (FCM), the
@@ -45,6 +46,9 @@ async function sendEmail(to: string, name: string | undefined, { title, body, pa
         <a href="${escapeHtml(url)}" style="background: #1d4ed8; color: #fff; padding: 12px 22px; border-radius: 999px; text-decoration: none; font-weight: bold;">${escapeHtml(ctaLabel)}</a>
       </p>
       <p>Warm regards,<br/>The Elora Visa Team</p>
+      <p style="margin-top: 32px; font-size: 12px; color: #6b7280;">
+        <a href="${SITE_URL}/dashboard/settings#notifications" style="color: #6b7280;">Manage which emails you get</a>
+      </p>
     </div>`;
 
   const params = new EmailParams()
@@ -59,7 +63,11 @@ async function sendEmail(to: string, name: string | undefined, { title, body, pa
   await mailer.email.send(params);
 }
 
-/** Push + in-app + email. Each channel is best-effort; returns what went out. */
+/**
+ * Push + in-app + email. Push and email respect the user's notification
+ * preferences (lib/notificationPrefs.ts); in-app is always written. Each
+ * channel is best-effort; returns what went out.
+ */
 export async function notifyUser(uid: string, options: NotifyOptions): Promise<{ pushed: boolean; emailed: boolean }> {
   const userRef = db.collection("users").doc(uid);
   const snap = await userRef.get();
@@ -67,8 +75,9 @@ export async function notifyUser(uid: string, options: NotifyOptions): Promise<{
   const url = `${SITE_URL}${options.path}`;
 
   let pushed = false;
+  const prefs = snap.get("notificationPrefs") as NotificationPrefs | undefined;
   const fcmToken: string | undefined = snap.get("fcmToken") || undefined;
-  if (fcmToken) {
+  if (fcmToken && isAllowed(prefs, options.type, "push")) {
     try {
       await getMessaging().send({ token: fcmToken, data: { title: options.title, body: options.body, icon: "/512.png", link: url } });
       pushed = true;
@@ -82,7 +91,7 @@ export async function notifyUser(uid: string, options: NotifyOptions): Promise<{
 
   let emailed = false;
   const address: string | undefined = snap.get("email") || undefined;
-  if (address) {
+  if (address && isAllowed(prefs, options.type, "email")) {
     try {
       await sendEmail(address, snap.get("fullName") || undefined, options);
       emailed = true;
