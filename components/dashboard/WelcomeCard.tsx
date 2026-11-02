@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useMemo, useRef } from "react"
+import { useEffect, useRef } from "react"
 import { Card } from "@/components/ui/card"
 import { pillClass } from "@/components/landing/ui"
 import { ArrowRight, CheckCircle2 } from "lucide-react"
@@ -8,6 +8,7 @@ import Link from "next/link"
 import { gsap } from "gsap"
 import { getRequiredDocuments } from "@/utils/documentConfig"
 import {NumberTicker} from "@/components/ui/number-ticker";
+import { useReadiness } from "@/hooks/useReadiness"
 import { useDashboardData } from "@/context/DashboardDataContext"
 
 
@@ -44,12 +45,8 @@ export function WelcomeCard() {
   const reviewsCount = reviews.length
   const interviewsCount = interviewSessions.length
 
-  const readinessScore = useMemo(() => {
-    const totalScore = reviews.reduce((sum, r) => sum + (r.score || 0), 0)
-    const docAvg = reviews.length > 0 ? totalScore / reviews.length : 0
-    const interviewMax = interviewSessions.reduce((max, s) => Math.max(max, s.feedback?.overallScore || 0), 0)
-    return Math.round((docAvg * 0.6) + (interviewMax * 0.4))
-  }, [reviews, interviewSessions])
+  // Same score as the readiness panel and eloraadmin (lib/visaReadiness.ts).
+  const readinessScore = useReadiness().readiness.score
 
   useEffect(() => {
     // Do not start animations while loading

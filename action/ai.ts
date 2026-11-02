@@ -92,6 +92,7 @@ export async function analyzeDocument(idToken: string, documentUrl: string, docu
       6.  **Risk Flags:** List potential red flags for a visa officer.
       7.  **Improvement Suggestions:** Provide actionable advice to improve the document.
       8.  **Overall Score:** Provide a score from 0 to 100 based on its quality and alignment with the user's profile.
+      9.  **Dates:** If the document shows an expiry date ("valid until", "date of expiry"), give it as expiry_date. If it shows the date it was issued or, for a bank statement, the statement's end date, give it as issue_date. Use YYYY-MM-DD, and null when the document doesn't show one. Never guess.
 
       **Important:**
       - If the document is not a valid "${documentType}" (e.g., a random image uploaded as a bank statement), state this clearly in the summary and assign a very low score.
@@ -106,7 +107,9 @@ export async function analyzeDocument(idToken: string, documentUrl: string, docu
         "missing_info": ["string"],
         "risk_flags": ["string"],
         "improvement_suggestions": ["string"],
-        "score": 0
+        "score": 0,
+        "issue_date": "YYYY-MM-DD or null",
+        "expiry_date": "YYYY-MM-DD or null"
       }
     `;
 
@@ -127,7 +130,12 @@ export async function analyzeDocument(idToken: string, documentUrl: string, docu
     const cleanedText = responseText.replace(/```json/g, "").replace(/```/g, "").trim();
     const analysis = JSON.parse(cleanedText);
 
-    return { success: true, data: analysis };
+    // Dates feed the document expiry watch (lib/visaReadiness.ts), stored as
+    // issueDate/expiryDate. Anything that isn't a real YYYY-MM-DD is dropped.
+    const asDate = (v: unknown) =>
+      typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v) && Number.isFinite(Date.parse(v)) ? v : null;
+    const { issue_date, expiry_date, ...rest } = analysis;
+    return { success: true, data: { ...rest, issueDate: asDate(issue_date), expiryDate: asDate(expiry_date) } };
 
   } catch (error: any) {
     if (chargedUid) {

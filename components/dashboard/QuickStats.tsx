@@ -7,10 +7,12 @@ import Link from "next/link"
 import gsap from "gsap"
 import { getRequiredDocuments } from "@/utils/documentConfig"
 import { useDashboardData } from "@/context/DashboardDataContext"
+import { useReadiness } from "@/hooks/useReadiness"
 
 
 export function QuickStats() {
   const { userData, reviews, interviewSessions, loading } = useDashboardData()
+  const { readiness } = useReadiness()
   const containerRef = useRef<HTMLDivElement>(null)
 
   const totalRequiredDocs = getRequiredDocuments(userData?.onboarding?.visaType).length;
@@ -53,10 +55,8 @@ export function QuickStats() {
 
   const docsProgress = Math.min(Math.round((metrics.uploadedDocs / totalRequiredDocs) * 100), 100)
   
-  // Calculate overall readiness: 60% docs, 40% interview
-  const readinessScore = Math.round(
-    (metrics.reviewScore * 0.6) + (metrics.interviewScore * 0.4)
-  )
+  // Same score as the readiness panel and eloraadmin (lib/visaReadiness.ts).
+  const readinessScore = readiness.score
 
   const stats = [
     {
@@ -78,7 +78,7 @@ export function QuickStats() {
     },
     {
         title: "Interview Readiness",
-        value: metrics.interviewsCount > 0 ? `${readinessScore}%` : '0%',
+        value: `${readinessScore}%`,
         label: metrics.interviewsCount > 0 ? `${metrics.interviewsCount} sessions completed` : 'Not started',
         link: "/dashboard/ai-mock-interview",
         linkText: metrics.interviewsCount > 0 ? 'Practice Again' : 'Begin Practice',

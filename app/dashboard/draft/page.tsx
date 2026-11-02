@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
-import {FileText, Download, Printer, Coins, Loader2, Sparkles, Wand2, Info, BookOpen, Send, Plane, ShieldCheck, Briefcase} from "lucide-react"
+import {FileText, Download, Printer, Coins, Loader2, Sparkles, Wand2, Info, BookOpen, Send, Plane, ShieldCheck, Briefcase, Route} from "lucide-react"
 import { toast } from "sonner"
 import { TOKEN_COSTS } from '@/lib/subscriptions'
 import Link from 'next/link'
@@ -30,6 +30,7 @@ export default function DraftPage() {
     { value: "Travel Purpose", label: "Statement of Travel Purpose", icon: Plane },
     { value: "Sponsorship Letter", label: "Sponsorship Letter", icon: ShieldCheck },
     { value: "Cover Letter", label: "Visa Cover Letter", icon: Briefcase },
+    { value: "Travel Itinerary", label: "Travel Itinerary (day by day)", icon: Route },
   ]
 
   useEffect(() => {
@@ -184,14 +185,18 @@ export default function DraftPage() {
                                     <div className="group relative">
                                         <Info className="h-3.5 w-3.5 cursor-help text-lp-muted" />
                                         <div className="pointer-events-none absolute bottom-full right-0 z-50 mb-2 w-48 rounded-lg bg-lp-navy p-2 text-[10px] text-white opacity-0 shadow-xl transition-opacity group-hover:opacity-100">
-                                            The AI uses your profile (name, nationality, destination) automatically.
+                                            The AI uses your profile, your appointment and what the AI reviews found in your uploaded documents automatically.
                                         </div>
                                     </div>
                                 </div>
                                 <Textarea
                                     value={extra}
                                     onChange={(e) => setExtra(e.target.value)}
-                                    placeholder="E.g., University name, course details, host's relationship, travel dates..."
+                                    placeholder={docType === "Travel Itinerary"
+                                        ? "E.g., arrival and return dates, cities you'll visit, where you're staying, flight numbers..."
+                                        : docType === "Sponsorship Letter"
+                                          ? "E.g., sponsor's name, relationship to you, occupation, what they'll pay for..."
+                                          : "E.g., University name, course details, host's relationship, travel dates..."}
                                     className="min-h-[180px] resize-none rounded-xl border-lp-line bg-lp-card focus-visible:ring-lp-azure/40"
                                 />
                                 <p className="text-[11px] text-lp-muted">

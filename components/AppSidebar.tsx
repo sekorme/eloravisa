@@ -12,6 +12,7 @@ import {
     Mic,
     Users,
     Video,
+    CalendarClock,
 } from "lucide-react";
 import {
     Sidebar,
@@ -41,6 +42,11 @@ const items = [
         title: "My Application",
         url: "/dashboard/application",
         icon: FileCheck,
+    },
+    {
+        title: "Embassy Appointment",
+        url: "/dashboard/appointment",
+        icon: CalendarClock,
     },
 
     {

@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { Receiver } from "@upstash/qstash";
 import { db } from "@/firebase/admin";
 import { notifyUser } from "@/lib/notifyServer";
+import { runAppointmentReminders, runExpiryWatch } from "@/lib/appointmentReminders";
 
 /**
  * Reminds seat holders before a paid live session: once the day before and
- * once about an hour before. Run hourly by an Upstash QStash schedule (Vercel
+ * once about an hour before. Also sends embassy appointment reminders and,
+ * once a day at 08:00 UTC, document expiry warnings (lib/appointmentReminders). Run hourly by an Upstash QStash schedule (Vercel
  * Hobby only allows daily crons), verified by QStash's request signature.
  * `Authorization: Bearer $CRON_SECRET` also works, for manual runs.
  *
@@ -102,5 +104,18 @@ export async function GET(req: NextRequest) {
     sent.push({ meetingId: doc.id, kind, recipients: ids.length });
   }
 
-  return NextResponse.json({ ok: true, sent });
+  // Independent jobs: one failing must not stop the others.
+  const appointments = await runAppointmentReminders(now).catch((err) => {
+    console.error("Appointment reminders failed:", err);
+    return [];
+  });
+  const runExpiry = new Date(now).getUTCHours() === 8 || req.nextUrl.searchParams.get("task") === "expiry";
+  const expiry = runExpiry
+    ? await runExpiryWatch(now).catch((err) => {
+        console.error("Expiry watch failed:", err);
+        return { usersWarned: 0, failed: true };
+      })
+    : null;
+
+  return NextResponse.json({ ok: true, sent, appointments, expiry });
 }

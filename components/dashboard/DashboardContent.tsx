@@ -7,6 +7,7 @@ import { ProgressTracker } from "./ProgressTracker"
 import { NextActionCard } from "./NextActionCard"
 import { QuickStats } from "./QuickStats"
 import { ResourcesSection } from "./ResourcesSection"
+import { ReadinessPanel } from "./ReadinessPanel"
 import gsap from "gsap"
 import { DashboardDataProvider } from "@/context/DashboardDataContext"
 
@@ -44,6 +45,7 @@ export function DashboardContent() {
                         <ProgressTracker />
                     </div>
                     <div className="space-y-6 dashboard-section">
+                        <ReadinessPanel />
                         <NextActionCard />
                         <AlertsSection />
                     </div>

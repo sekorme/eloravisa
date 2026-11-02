@@ -1,5 +1,5 @@
 /**
- * Calendar invite (.ics) for a paid live session. Plain string building, so
+ * Calendar invite (.ics) for a paid live session or an embassy appointment. Plain string building, so
  * it runs both on the server (email attachment) and in the browser (download).
  */
 
@@ -16,11 +16,18 @@ export function buildSessionIcs(session: {
   title: string;
   description?: string;
   scheduledAt: string | Date;
-  joinUrl: string;
+  /** Online sessions: the join link. */
+  joinUrl?: string;
+  /** In-person events: the address. Defaults to the join link. */
+  location?: string;
+  /** Reminder before the start, in minutes. */
+  alarmMinutes?: number;
 }): string {
   const start = new Date(session.scheduledAt);
   const end = new Date(start.getTime() + DEFAULT_LENGTH_MS);
-  const description = [session.description, `Join: ${session.joinUrl}`].filter(Boolean).join("\n\n");
+  const description = [session.description, session.joinUrl && `Join: ${session.joinUrl}`].filter(Boolean).join("\n\n");
+  const location = session.location ?? session.joinUrl ?? "";
+  const alarm = session.alarmMinutes ?? 15;
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
@@ -34,12 +41,12 @@ export function buildSessionIcs(session: {
     `DTEND:${stamp(end)}`,
     `SUMMARY:${escape(session.title)}`,
     `DESCRIPTION:${escape(description)}`,
-    `URL:${session.joinUrl}`,
-    `LOCATION:${session.joinUrl}`,
+    ...(session.joinUrl ? [`URL:${session.joinUrl}`] : []),
+    `LOCATION:${escape(location)}`,
     "BEGIN:VALARM",
-    "TRIGGER:-PT15M",
+    `TRIGGER:-PT${alarm}M`,
     "ACTION:DISPLAY",
-    `DESCRIPTION:${escape(session.title)} starts in 15 minutes`,
+    `DESCRIPTION:${escape(session.title)} starts in ${alarm} minutes`,
     "END:VALARM",
     "END:VEVENT",
     "END:VCALENDAR",
