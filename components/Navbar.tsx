@@ -22,6 +22,7 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { Coins } from "lucide-react";
 import {NumberTicker} from "@/components/ui/number-ticker";
 import {NotificationBell} from "@/components/NotificationBell";
+import { FamilySwitcher } from "@/components/dashboard/FamilySwitcher";
 
 function titleizeSegment(seg: string) {
     if (!seg) return "";
@@ -132,6 +133,7 @@ const Navbar = () => {
 
             {/* RIGHT */}
             <div className="flex shrink-0 items-center gap-2 md:gap-3">
+                <FamilySwitcher />
                 {userData && (
                     <Link
                         href="/dashboard/subscription"

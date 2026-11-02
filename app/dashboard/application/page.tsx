@@ -9,6 +9,7 @@ import EmbassyTips from "@/components/application/EmbassyTips";
 import SupportTools from "@/components/application/SupportTools";
 import Disclaimer from "@/components/application/Disclaimer";
 import DocumentManager from "@/components/application/DocumentManager";
+import { CountryRequirementsCard } from "@/components/application/CountryRequirementsCard";
 
 export default function MyVisaApplicationPage() {
     const pageRef = useRef<HTMLDivElement>(null);
@@ -53,6 +54,9 @@ export default function MyVisaApplicationPage() {
                     </div>
 
                     <div className="space-y-6">
+                        <div className="app-section">
+                            <CountryRequirementsCard />
+                        </div>
                         <div className="app-section">
                             <EmbassyTips country="Ghana" />
                         </div>

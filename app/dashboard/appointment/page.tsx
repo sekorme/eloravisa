@@ -16,6 +16,7 @@ import { useReadiness, type Appointment } from "@/hooks/useReadiness"
 import { appointmentChecklist } from "@/lib/visaReadiness"
 import { getRequiredDocuments } from "@/utils/documentConfig"
 import { buildSessionIcs } from "@/lib/ics"
+import { OutcomeCard } from "@/components/dashboard/OutcomeCard"
 
 export default function AppointmentPage() {
   return (
@@ -80,6 +81,8 @@ function AppointmentContent() {
           Add your appointment and we&apos;ll remind you a week, a day and a few hours before, check your documents are still valid on the day, and give you a checklist of what to bring.
         </p>
       </div>
+
+      <OutcomeCard />
 
       {!appointment || editing ? (
         <AppointmentForm existing={appointment} onDone={() => setEditing(false)} />

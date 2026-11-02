@@ -5,6 +5,7 @@ import { TOKEN_COSTS } from "@/lib/subscriptions";
 import { checkRateLimit } from "@/lib/ratelimit";
 import { deductTokensAdmin, refundTokensAdmin } from "@/lib/tokensAdmin";
 import { buildEloraInstruction } from "@/lib/eloraContext";
+import { PREMIUM_PLAN_IDS } from "@/lib/billing/plans";
 
 // Every purpose the client can request maps to a fixed model + policy here.
 // The client only ever sends `purpose` — never a model or a charge flag —
@@ -27,7 +28,7 @@ const PURPOSES = {
     assistant_voice: {
         model: "gemini-2.5-flash-native-audio-preview-12-2025",
         chargeUpfront: 0,
-        requiredPlan: ["pro", "full"] as string[] | null,
+        requiredPlan: [...PREMIUM_PLAN_IDS] as string[] | null,
     },
 } as const;
 

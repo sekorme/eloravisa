@@ -93,7 +93,8 @@ export async function notifyUser(uid: string, options: NotifyOptions): Promise<{
   const address: string | undefined = snap.get("email") || undefined;
   if (address && isAllowed(prefs, options.type, "email")) {
     try {
-      await sendEmail(address, snap.get("fullName") || undefined, options);
+      // Family accounts: address the holder, not whichever applicant is active.
+      await sendEmail(address, snap.get("accountHolderName") || snap.get("fullName") || undefined, options);
       emailed = true;
     } catch (err) {
       console.warn(`Email to user ${uid} failed:`, err instanceof Error ? err.message : err);

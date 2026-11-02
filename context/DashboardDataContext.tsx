@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from "react"
 import { auth, db } from "@/firebase/client"
 import { doc, onSnapshot, collection } from "firebase/firestore"
 import { onAuthStateChanged } from "firebase/auth"
+import { activeMemberOf, sessionBelongsTo } from "@/lib/family"
 
 export interface ReviewDoc {
     id: string
@@ -16,6 +17,8 @@ export interface ReviewDoc {
 
 export interface InterviewSessionDoc {
     id: string
+    /** Family accounts: the applicant this interview belongs to. */
+    memberId?: string
     feedback?: { overallScore?: number }
     [key: string]: unknown
 }
@@ -84,8 +87,12 @@ export function DashboardDataProvider({ children }: { children: React.ReactNode 
         }
     }, [])
 
+    // Family accounts: only the active applicant's interviews (lib/family.ts).
+    const member = activeMemberOf(userData)
+    const memberSessions = interviewSessions.filter((s) => sessionBelongsTo(s, member))
+
     return (
-        <DashboardDataContext.Provider value={{ userData, reviews, interviewSessions, loading }}>
+        <DashboardDataContext.Provider value={{ userData, reviews, interviewSessions: memberSessions, loading }}>
             {children}
         </DashboardDataContext.Provider>
     )

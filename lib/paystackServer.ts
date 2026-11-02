@@ -2,7 +2,7 @@ import "server-only";
 
 import { db } from "@/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
-import { SUBSCRIPTION_PLANS, PlanId } from "@/lib/billing/plans";
+import { SUBSCRIPTION_PLANS, PlanId, FAMILY_SEAT_DAYS } from "@/lib/billing/plans";
 import { getUsdToGhsRate } from "@/lib/exchangeRate";
 import { buildSessionIcs } from "@/lib/ics";
 import { notifyUser } from "@/lib/notifyServer";
@@ -324,6 +324,15 @@ export async function fulfilPaystackPayment(params: {
       // One-time top-up: tokens only, plan and expiry untouched.
       txn.update(userRef, {
         tokens: newTokens,
+        lastPaymentReference: verified.reference,
+        updatedAt: now,
+      });
+    } else if (intent.planKey === "FAMILY_SEAT") {
+      // One more family member for FAMILY_SEAT_DAYS (lib/family.ts counts
+      // unexpired seats), plus the add-on's tokens. Plan untouched.
+      txn.update(userRef, {
+        tokens: newTokens,
+        familySeats: FieldValue.arrayUnion({ expiresAt: now + FAMILY_SEAT_DAYS * 24 * 60 * 60 * 1000, reference: verified.reference }),
         lastPaymentReference: verified.reference,
         updatedAt: now,
       });

@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import { auth, db } from "@/firebase/admin";
 import { checkRateLimit } from "@/lib/ratelimit";
 import { buildEloraInstruction } from "@/lib/eloraContext";
+import { hasPremiumAccess } from "@/lib/billing/plans";
 
 // Text-mode chat for the "Ask Elora" widget. Runs entirely server-side so the
 // real Gemini API key never reaches the browser, and re-checks the Pro/Full
@@ -34,7 +35,7 @@ export async function POST(req: NextRequest) {
 
     const userSnap = await db.collection("users").doc(uid).get();
     const planId = userSnap.data()?.planId;
-    if (planId !== "pro" && planId !== "full") {
+    if (!hasPremiumAccess(planId)) {
         return Response.json({ error: "Upgrade to Pro to use the AI Assistant" }, { status: 403 });
     }
 

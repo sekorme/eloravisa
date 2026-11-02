@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/firebase/admin";
 import { initializePaystackTransaction, resolvePaidPlan } from "@/lib/paystackServer";
 import { checkRateLimit } from "@/lib/ratelimit";
+import { db } from "@/firebase/admin";
 
 /**
  * Starts a checkout. The client says WHICH plan it wants; the server decides
@@ -36,6 +37,12 @@ export async function POST(req: NextRequest) {
     const resolved = resolvePaidPlan(typeof body?.planId === "string" ? body.planId : null);
     if (!resolved) {
       return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
+    }
+    if (resolved.key === "FAMILY_SEAT") {
+      const user = (await db.collection("users").doc(decoded.uid).get()).data();
+      if (user?.planId !== "family" || !(Number(user?.subscriptionExpiresAt) > Date.now())) {
+        return NextResponse.json({ error: "Extra members need an active Family plan" }, { status: 400 });
+      }
     }
     // Promo codes are generated uppercase (lib/influencerAuth.ts) and the
     // influencer lookup is case-sensitive — normalize here rather than

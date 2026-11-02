@@ -24,11 +24,12 @@ import { InterviewFeedback, Feedback } from "./InterviewFeedback"
 import { SessionInsights, DecisionBadge, type SessionFeedbackV2, type SessionTurn } from "./SessionInsights"
 import { rescoreInterviewSession } from "@/action/interviewSessions"
 import { auth, db } from '@/firebase/client'
-import { collection, onSnapshot, query, orderBy, deleteDoc, doc } from 'firebase/firestore'
+import { collection, onSnapshot, query, orderBy, deleteDoc, doc, getDoc } from 'firebase/firestore'
 import { onAuthStateChanged } from "firebase/auth"
 import { format } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
+import { activeMemberOf, sessionBelongsTo } from "@/lib/family"
 
 interface InterviewRecord {
   id: string
@@ -67,11 +68,15 @@ export function InterviewHistory() {
       unsubscribeSnapshot = undefined
       if (user) {
         const q = query(collection(db, 'users', user.uid, 'interview_sessions'), orderBy('date', 'desc'))
-        unsubscribeSnapshot = onSnapshot(q, (snapshot) => {
-          const data: InterviewRecord[] = snapshot.docs.map(d => ({ 
-            id: d.id, 
-            ...d.data() 
-          } as InterviewRecord))
+        unsubscribeSnapshot = onSnapshot(q, async (snapshot) => {
+          // Family accounts: only the active applicant's interviews.
+          const member = activeMemberOf((await getDoc(doc(db, 'users', user.uid))).data())
+          const data: InterviewRecord[] = snapshot.docs
+            .filter(d => sessionBelongsTo(d.data(), member))
+            .map(d => ({
+              id: d.id,
+              ...d.data()
+            } as InterviewRecord))
           setHistory(data)
           // Keep an open details dialog in sync (e.g. after a re-score).
           setSelectedInterview(prev => prev ? data.find(d => d.id === prev.id) ?? null : prev)

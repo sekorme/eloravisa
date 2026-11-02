@@ -13,6 +13,9 @@ import {
     Users,
     Video,
     CalendarClock,
+    Wallet,
+    HeartHandshake,
+    UsersRound,
 } from "lucide-react";
 import {
     Sidebar,
@@ -47,6 +50,21 @@ const items = [
         title: "Embassy Appointment",
         url: "/dashboard/appointment",
         icon: CalendarClock,
+    },
+    {
+        title: "Funds Check",
+        url: "/dashboard/finances",
+        icon: Wallet,
+    },
+    {
+        title: "Refusal Recovery",
+        url: "/dashboard/refusal",
+        icon: HeartHandshake,
+    },
+    {
+        title: "Family & Group",
+        url: "/dashboard/family",
+        icon: UsersRound,
     },
 
     {

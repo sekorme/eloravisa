@@ -6,6 +6,7 @@ import { auth, db } from '@/firebase/client';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import Link from 'next/link';
+import { hasPremiumAccess } from "@/lib/billing/plans";
 
 export default function HomePageContent() {
     const [isChatOpen, setIsChatOpen] = useState(false);
@@ -24,7 +25,7 @@ export default function HomePageContent() {
                     if (doc.exists()) {
                         const data = doc.data();
                         // Pro and Full plans have access to chatbot
-                        setHasAccess(data.planId === 'pro' || data.planId === 'full');
+                        setHasAccess(hasPremiumAccess(data.planId));
                     }
                     setLoading(false);
                 });

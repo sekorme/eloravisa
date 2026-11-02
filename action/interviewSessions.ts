@@ -8,6 +8,7 @@ import { verifyActionUser } from "@/lib/actionAuth";
 import { TOKEN_COSTS } from "@/lib/billing/plans";
 import { getRequiredDocuments } from "@/utils/documentConfig";
 import { LANGUAGE_FAIRNESS } from "@/lib/languageFairness";
+import { activeMemberOf } from "@/lib/family";
 
 // Interview history is written only here (Admin SDK), never by the browser:
 // scores feed readiness and history, so the client must not be able to set
@@ -138,6 +139,8 @@ async function loadApplicantContext(uid: string) {
     residence: str(onboarding.residence, 80),
     documentsUploaded: required.filter((d) => uploaded[d.key]).map((d) => d.title),
     documentsMissing: required.filter((d) => !uploaded[d.key]).map((d) => d.title),
+    // Family accounts: which applicant this interview belongs to (lib/family.ts).
+    memberId: activeMemberOf(data),
   };
 }
 
@@ -224,6 +227,7 @@ export async function saveInterviewSession(idToken: string, input: SaveSessionIn
 
   const ref = await db.collection("users").doc(user.uid).collection("interview_sessions").add({
     schemaVersion: SCHEMA_VERSION,
+    memberId: applicant.memberId,
     mode,
     status: "completed",
     date: new Date(now).toISOString(),

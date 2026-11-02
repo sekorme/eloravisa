@@ -6,6 +6,7 @@ import { verifyActionUser } from "@/lib/actionAuth";
 import { deductTokensAdmin, refundTokensAdmin } from "@/lib/tokensAdmin";
 import { TOKEN_COSTS } from "@/lib/billing/plans";
 import { LANGUAGE_FAIRNESS } from "@/lib/languageFairness";
+import { getApprovedQuestions } from "@/lib/interviewQuestions";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
@@ -32,6 +33,7 @@ export async function generateInterviewQuestions(idToken: string, userData: any,
     chargedUid = user.uid;
 
     const model = genAI.getGenerativeModel({ model: "gemini-3.8-flash" });
+    const reported = await getApprovedQuestions(userData.onboarding?.destination, userData.onboarding?.visaType).catch(() => []);
 
     const prompt = `
       Generate ${count} visa interview questions for a user with the following profile:
@@ -41,6 +43,8 @@ export async function generateInterviewQuestions(idToken: string, userData: any,
       - **Status:** ${userData.onboarding?.appStatus}
 
       The questions should be realistic, challenging, and relevant to their specific scenario.
+      ${reported.length ? `Real applicants reported being asked these at this embassy; include about half of your questions from this list (reworded is fine):
+${reported.map((q) => `- ${q}`).join("\n")}` : ""}
       
       Return ONLY a JSON array of strings, e.g.:
       ["Question 1?", "Question 2?", ...]

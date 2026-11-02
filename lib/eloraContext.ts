@@ -1,6 +1,7 @@
 import "server-only";
 import { db } from "@/firebase/admin";
 import { getRequiredDocuments } from "@/utils/documentConfig";
+import { activeMemberOf, sessionBelongsTo } from "@/lib/family";
 
 // Builds Elora's system instruction for a signed-in user from their own
 // Firestore data. Read server-side with the Admin SDK so the browser can't
@@ -22,7 +23,8 @@ async function buildProfileBlock(uid: string, userData?: FirebaseFirestore.Docum
     const [data, reviewsSnap, interviewsSnap] = await Promise.all([
         userData ? Promise.resolve(userData) : userRef.get().then((s) => s.data()),
         userRef.collection("reviews").get(),
-        userRef.collection("interview_sessions").orderBy("date", "desc").limit(3).get().catch(() => null),
+        // Extra rows so a family account still finds 3 for the active applicant.
+        userRef.collection("interview_sessions").orderBy("date", "desc").limit(12).get().catch(() => null),
     ]);
     if (!data) return "";
 
@@ -60,7 +62,8 @@ async function buildProfileBlock(uid: string, userData?: FirebaseFirestore.Docum
         }
     }
 
-    const interviews = interviewsSnap?.docs.map((d) => d.data()) || [];
+    const member = activeMemberOf(data);
+    const interviews = (interviewsSnap?.docs.map((d) => d.data()).filter((s) => sessionBelongsTo(s, member)) || []).slice(0, 3);
     if (interviews.length) {
         lines.push(`- Recent mock interviews (latest first):`);
         for (const s of interviews) {

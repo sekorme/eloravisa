@@ -39,8 +39,13 @@ service cloud.firestore {
       // predate the tokens/planId fields (e.g. Google sign-ins created by an
       // older LoginModal) don't error out — touching either field is what's
       // forbidden.
+      // Family fields are server-owned too (lib/familyServer.ts): editing
+      // them directly would add unpaid members or mix applicants' data.
       allow update: if isOwner(uid)
-        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['planId', 'tokens']);
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'planId', 'tokens',
+          'familyRoster', 'familyMembers', 'activeMemberId', 'familySeats', 'familyMemberCount', 'accountHolderName'
+        ]);
 
       // Account deletion in dashboard settings removes the user's own doc
       // client-side before deleting the auth user.

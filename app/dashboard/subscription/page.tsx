@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { Check,  Loader2, Sparkles, Zap, Shield, MessageCircle, Send, Coins } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { SUBSCRIPTION_PLANS, PlanId } from '@/lib/subscriptions'
+import { FAMILY_INCLUDED_MEMBERS } from '@/lib/billing/plans'
 import { auth, db } from '@/firebase/client'
 import { doc, getDoc, onSnapshot } from 'firebase/firestore'
 import { onAuthStateChanged } from 'firebase/auth'
@@ -143,7 +144,7 @@ export default function SubscriptionPage() {
             })
             const data = await res.json()
             if (data.success) {
-              toast.success(planKey === 'TOPUP_50' ? 'Tokens added successfully!' : `Welcome to the ${plan.name}!`)
+              toast.success(planKey === 'TOPUP_50' ? 'Tokens added successfully!' : planKey === 'FAMILY_SEAT' ? 'Place added! Add the member on the Family page.' : `Welcome to the ${plan.name}!`)
             } else {
               toast.error(data.error || 'Failed to update subscription')
             }
@@ -323,6 +324,41 @@ export default function SubscriptionPage() {
 
       {/* Top Up Section */}
       <div className="mt-12">
+        <div id="family" className="mx-auto mb-12 max-w-2xl scroll-mt-24 space-y-4">
+          <h2 className="text-center font-display text-2xl font-semibold tracking-[-0.04em]">Applying as a family or group?</h2>
+          <div className="flex flex-col gap-6 rounded-[1.75rem] border border-lp-azure/30 bg-lp-card p-7 sm:flex-row sm:items-center lp-shadow">
+            <div className="flex-1">
+              <h3 className="font-display text-xl font-semibold tracking-[-0.03em]">{SUBSCRIPTION_PLANS.FAMILY.name}</h3>
+              <p className="text-sm text-lp-muted">You plus {FAMILY_INCLUDED_MEMBERS} family members, each with their own documents, interviews and readiness.</p>
+              <ul className="mt-4 flex flex-wrap gap-2">
+                {[`${SUBSCRIPTION_PLANS.FAMILY.tokens} shared tokens`, `${FAMILY_INCLUDED_MEMBERS + 1} applicants`, "AI assistant", "Telegram group"].map((f) => (
+                  <li key={f} className="flex items-center gap-1.5 rounded-full bg-lp-sky px-3 py-1 text-xs"><Check className="h-3.5 w-3.5 text-lp-azure" />{f}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="flex shrink-0 flex-col gap-3 sm:w-48">
+              <div className="flex items-baseline sm:justify-end">
+                <span className="font-display text-4xl font-semibold tracking-[-0.05em]">${SUBSCRIPTION_PLANS.FAMILY.price}</span>
+                <span className="ml-1.5 text-sm text-lp-muted">/month</span>
+              </div>
+              <Button onClick={() => handleSubscribe('FAMILY')} className="h-12 w-full rounded-full bg-lp-azure font-semibold text-white hover:bg-lp-azure-2" disabled={payingPlan === 'FAMILY'}>
+                {payingPlan === 'FAMILY' ? <Loader2 className="w-4 h-4 animate-spin" /> : currentPlanId === 'family' ? 'Renew Family Plan' : 'Get Family Plan'}
+              </Button>
+            </div>
+          </div>
+          {currentPlanId === 'family' && (
+            <div className="flex flex-col gap-4 rounded-[1.75rem] border border-lp-line bg-lp-card p-6 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="font-medium">{SUBSCRIPTION_PLANS.FAMILY_SEAT.name}</p>
+                <p className="text-sm text-lp-muted">One more applicant for 30 days, plus {SUBSCRIPTION_PLANS.FAMILY_SEAT.tokens} tokens. <a href="/dashboard/family" className="text-lp-azure underline">Manage family</a></p>
+              </div>
+              <Button onClick={() => handleSubscribe('FAMILY_SEAT')} variant="outline" className="rounded-full" disabled={payingPlan === 'FAMILY_SEAT'}>
+                {payingPlan === 'FAMILY_SEAT' ? <Loader2 className="w-4 h-4 animate-spin" /> : `Add a member · $${SUBSCRIPTION_PLANS.FAMILY_SEAT.price}`}
+              </Button>
+            </div>
+          )}
+        </div>
+
         <h2 className="mb-6 text-center font-display text-2xl font-semibold tracking-[-0.04em]">Need More Tokens?</h2>
         <div className="mx-auto max-w-2xl">
             <div className="flex flex-col gap-6 rounded-[1.75rem] border border-lp-line bg-lp-card p-7 sm:flex-row sm:items-center lp-shadow">

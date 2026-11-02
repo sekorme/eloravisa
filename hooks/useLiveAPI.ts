@@ -117,6 +117,17 @@ export function useLiveAPI() {
                 throw new Error("You must be logged in to start a session.");
             }
 
+            // Real questions applicants reported at this embassy (question bank).
+            // Optional: the interview runs without them if this fails.
+            let reportedQuestions: string[] = [];
+            try {
+                const qs = new URLSearchParams({ country: destination || selectedCountry.name, visaType: visaType || "" });
+                const res = await fetch(`/api/interview-questions?${qs}`, { headers: { Authorization: `Bearer ${await auth.currentUser.getIdToken()}` } });
+                if (res.ok) reportedQuestions = (await res.json()).questions ?? [];
+            } catch {
+                reportedQuestions = [];
+            }
+
             if (!selectedCountry.requiresInterview) {
                 throw new Error(`The destination country ${selectedCountry.name} does not require an interview for your visa category.`);
             }
@@ -189,7 +200,11 @@ USER CONTEXT:
 
 Your role is to behave like an actual consular officer during a B1/B2, F1, J1, or other non-immigrant visa interview for ${selectedCountry.name}.
 
-DOCUMENT SCANNING & VERIFICATION:
+${reportedQuestions.length ? `QUESTIONS REAL APPLICANTS WERE ASKED AT THIS EMBASSY:
+${reportedQuestions.map((q) => `* ${q}`).join("\n")}
+Work several of these into the interview naturally (reworded is fine), mixed with your own follow-ups.
+
+` : ""}DOCUMENT SCANNING & VERIFICATION:
 * You MUST "scan" through the applicant's provided documents during the interview.
 * Reference specific documents from the "Documents provided" list above in your questions.
 * If a critical document is missing or if the documents seem inconsistent with the travel purpose, ask about it.

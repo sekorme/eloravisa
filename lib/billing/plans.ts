@@ -52,7 +52,38 @@ export const SUBSCRIPTION_PLANS = {
     hasTelegram: false,
     durationMonths: 0, // One-time purchase
   },
+  /** Account holder + FAMILY_INCLUDED_MEMBERS others, sharing one token balance. */
+  FAMILY: {
+    id: 'family',
+    name: 'Family Plan',
+    price: 150,
+    tokens: 400,
+    hasChatbot: true,
+    hasTelegram: true,
+    durationMonths: 1,
+  },
+  /** One more family member for 30 days, on top of the Family plan. */
+  FAMILY_SEAT: {
+    id: 'family_seat',
+    name: 'Extra Family Member',
+    price: 30,
+    tokens: 100,
+    hasChatbot: false,
+    hasTelegram: false,
+    durationMonths: 0,
+  },
 } as const;
+
+/** Family members included in the Family plan, besides the account holder. */
+export const FAMILY_INCLUDED_MEMBERS = 3;
+/** Each FAMILY_SEAT purchase lasts this long. */
+export const FAMILY_SEAT_DAYS = 30;
+
+/** Plans that unlock the AI assistant (chat and voice). */
+export const PREMIUM_PLAN_IDS = ['pro', 'full', 'family'] as const;
+export function hasPremiumAccess(planId: unknown): boolean {
+  return typeof planId === 'string' && (PREMIUM_PLAN_IDS as readonly string[]).includes(planId);
+}
 
 export const TOKEN_COSTS = {
   DOCUMENT_REVIEW: 5,
@@ -60,6 +91,8 @@ export const TOKEN_COSTS = {
   DOCUMENT_DRAFT: 5,
   INFORMATION_GENERATION: 5,
   CONSULAR_SESSION: 10,
+  FINANCIAL_ANALYSIS: 10,
+  REFUSAL_ANALYSIS: 10,
 } as const;
 
 /** Currency the list prices above are denominated in. */

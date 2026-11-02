@@ -28,9 +28,10 @@ import {
     CardDescription,
 } from "@/components/ui/card";
 import { auth, db } from "@/firebase/client";
-import { doc, onSnapshot, collection } from "firebase/firestore";
+import { doc, onSnapshot, collection, getDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { format } from "date-fns";
+import { activeMemberOf, sessionBelongsTo } from "@/lib/family";
 
 // Local types for timeline and score history
 type TimelineEvent = {
@@ -210,13 +211,16 @@ export default function HistoryPage() {
 
                 // 3. Listen to Interview Sessions
                 const interviewsRef = collection(db, "users", user.uid, "interview_sessions");
-                const unsubInterviews = onSnapshot(interviewsRef, (snapshot) => {
+                const unsubInterviews = onSnapshot(interviewsRef, async (snapshot) => {
                     const interviewEvents: TimelineEvent[] = [];
                     let interviewCount = 0;
                     let interviewScoreSum = 0;
+                    // Family accounts: only the active applicant's interviews.
+                    const member = activeMemberOf((await getDoc(doc(db, "users", user.uid))).data());
 
                     snapshot.forEach((doc) => {
                         const data = doc.data();
+                        if (!sessionBelongsTo(data, member)) return;
                         interviewCount++;
                         const score = data.feedback?.overallScore || 0;
                         interviewScoreSum += score;

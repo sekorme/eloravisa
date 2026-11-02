@@ -10,6 +10,7 @@ import { ResourcesSection } from "./ResourcesSection"
 import { ReadinessPanel } from "./ReadinessPanel"
 import gsap from "gsap"
 import { DashboardDataProvider } from "@/context/DashboardDataContext"
+import { OutcomeCard } from "./OutcomeCard"
 
 
 
@@ -39,6 +40,8 @@ export function DashboardContent() {
                 <div className="dashboard-section">
                     <WelcomeCard />
                 </div>
+
+                <OutcomeCard />
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2 dashboard-section">
