@@ -26,25 +26,28 @@ const messaging = firebase.messaging();
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));
 
-/* 1️⃣  Handle background message */
-messaging.onBackgroundMessage(({ data }) => {
-    if (!data) return; // safety check
-
-    self.registration.showNotification(data.title ?? 'New notification', {
+/* 1️⃣  Background messages.
+   Messages with a webpush `notification` (everything lib/push.ts sends) are
+   shown by the browser/Firebase itself, with fcmOptions.link opened on tap;
+   showing them here too would duplicate them. Data-only messages (older
+   senders) are shown here, and the promise is returned so the push event
+   waits for it: iOS revokes subscriptions whose pushes show nothing. */
+messaging.onBackgroundMessage((payload) => {
+    if (payload.notification || !payload.data) return;
+    const data = payload.data;
+    return self.registration.showNotification(data.title ?? 'Elora Visa', {
         body: data.body ?? '',
         icon: data.icon ?? '/512.png',
-        vibrate: [200, 100, 200], // ✅ Vibration pattern
-        badge: '/badge.png',       // optional: small badge icon
-        data: {
-            url: data.link ?? '/',  // used in notificationclick
-            dateOfArrival: Date.now()
-        }
+        badge: '/512.png',
+        vibrate: [200, 100, 200],
+        data: { url: data.link ?? '/dashboard', dateOfArrival: Date.now() },
     });
 });
 
 /* 2️⃣  Focus existing tab or open new */
 self.addEventListener('notificationclick', event => {
-    const url = event.notification?.data?.url ?? '/';
+    const d = event.notification?.data ?? {};
+    const url = d.url ?? d.FCM_MSG?.fcmOptions?.link ?? d.FCM_MSG?.data?.link ?? '/dashboard';
     event.notification.close();
 
     event.waitUntil(

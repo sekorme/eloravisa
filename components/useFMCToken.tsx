@@ -1,71 +1,51 @@
 'use client';
 
 import { useEffect } from 'react';
-import { getToken, onMessage, Unsubscribe } from 'firebase/messaging';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '@/firebase/client';
+import { onMessage, Unsubscribe } from 'firebase/messaging';
 import { getFirebaseMessaging } from '@/lib/firebase';
+import { getPushState, registerPushToken } from '@/lib/pushClient';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 
+/**
+ * Keeps this device registered for push once the user has allowed it, and
+ * shows pushes that arrive while the app is open as a toast. Never asks for
+ * permission itself: phones only allow that from a tap (see EnablePushPrompt
+ * and the notification settings), and lib/pushClient.ts explains why.
+ */
 export function useFCMToken(userId: string | null) {
     const router = useRouter();
 
     useEffect(() => {
-        if (!userId) return;               // wait for auth
+        if (!userId || getPushState() !== 'granted') return;
 
         let unsubscribe: Unsubscribe | null = null;
+        let cancelled = false;
 
         (async () => {
             try {
-                // 1️⃣  Ask permission
-                const permission = await Notification.requestPermission();
-                if (permission !== 'granted') {
-                    console.log('🔕 Notification permission denied');
-                    return;
-                }
-
-                // 2️⃣  Get Messaging instance
+                // Refresh the token each visit: browsers rotate them.
+                await registerPushToken(userId);
                 const messaging = await getFirebaseMessaging();
-                if (!messaging) return;
+                if (!messaging || cancelled) return;
 
-                // 3️⃣  Retrieve token
-                const token = await getToken(messaging, {
-                    vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID!,
-                });
-
-                if (token) {
-                    console.log('✅ FCM Token:', token);
-                    await updateDoc(doc(db, 'users', userId), { fcmToken: token });
-                } else {
-                    console.warn('⚠️ No registration token available');
-                }
-
-                // 4️⃣  Foreground notifications → toast
+                // Foreground messages: the OS doesn't show them while the app is open.
                 unsubscribe = onMessage(messaging, (payload) => {
-                    console.log('📩 Foreground message:', payload);
-
-                    // Extract title/body/link
-                    const { title, body } = payload.notification || {};
+                    const title = payload.notification?.title ?? payload.data?.title;
+                    const body = payload.notification?.body ?? payload.data?.body;
                     const link = payload.fcmOptions?.link || payload.data?.link;
-
-                    toast.info(`${title ?? 'Notification'}: ${body ?? ''}`, {
-                        action: link
-                            ? {
-                                label: 'Open',
-                                onClick: () => router.push(link),
-                            }
-                            : undefined,
+                    toast.info(`${title ?? 'Notification'}${body ? `: ${body}` : ''}`, {
+                        action: link ? { label: 'Open', onClick: () => router.push(new URL(link, window.location.origin).pathname) } : undefined,
                     });
                 });
             } catch (err) {
-                console.error('❌ Error getting FCM token:', err);
+                console.error('Push registration failed:', err);
             }
         })();
 
-        // 5️⃣  Cleanup listener on unmount
         return () => {
-            if (unsubscribe) unsubscribe();
+            cancelled = true;
+            unsubscribe?.();
         };
     }, [userId, router]);
 }

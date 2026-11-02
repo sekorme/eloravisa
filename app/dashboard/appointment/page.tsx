@@ -17,6 +17,9 @@ import { appointmentChecklist } from "@/lib/visaReadiness"
 import { getRequiredDocuments } from "@/utils/documentConfig"
 import { buildSessionIcs } from "@/lib/ics"
 import { OutcomeCard } from "@/components/dashboard/OutcomeCard"
+import {
+  AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 export default function AppointmentPage() {
   return (
@@ -201,9 +204,11 @@ function AppointmentSummary({ appointment, onEdit }: { appointment: Appointment;
     URL.revokeObjectURL(url)
   }
 
+  const [confirming, setConfirming] = useState(false)
+
   const remove = async () => {
     const user = auth.currentUser
-    if (!user || !confirm("Remove this appointment? Reminders for it will stop.")) return
+    if (!user) return
     setRemoving(true)
     try {
       await updateDoc(doc(db, "users", user.uid), { appointment: deleteField() })
@@ -224,9 +229,25 @@ function AppointmentSummary({ appointment, onEdit }: { appointment: Appointment;
         <div className="flex gap-1">
           <Button variant="outline" size="sm" className="rounded-full" onClick={addToCalendar}><CalendarPlus className="mr-1 h-4 w-4" /> Calendar</Button>
           <Button variant="ghost" size="sm" className="rounded-full" onClick={onEdit} aria-label="Edit appointment"><Pencil className="h-4 w-4" /></Button>
-          <Button variant="ghost" size="sm" className="rounded-full text-red-600" onClick={remove} disabled={removing} aria-label="Remove appointment"><Trash2 className="h-4 w-4" /></Button>
+          <Button variant="ghost" size="sm" className="rounded-full text-red-600" onClick={() => setConfirming(true)} disabled={removing} aria-label="Remove appointment"><Trash2 className="h-4 w-4" /></Button>
         </div>
       </div>
+      <AlertDialog open={confirming} onOpenChange={(o) => !removing && setConfirming(o)}>
+        <AlertDialogContent className="rounded-[1.5rem] border-lp-line bg-lp-card text-lp-fg">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove this appointment?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your appointment at {appointment.embassy} on {new Date(appointment.at).toLocaleDateString()} will be removed and its reminders will stop. Your checklist ticks will be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-full" disabled={removing}>Keep it</AlertDialogCancel>
+            <Button className="rounded-full bg-red-600 text-white hover:bg-red-700" disabled={removing} onClick={remove}>
+              {removing ? <Loader2 className="h-4 w-4 animate-spin" /> : "Remove appointment"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       <Countdown atMs={appointment.atMs} />
       {appointment.notes && <p className="whitespace-pre-wrap rounded-xl bg-lp-card-2 p-3 text-sm">{appointment.notes}</p>}
     </div>

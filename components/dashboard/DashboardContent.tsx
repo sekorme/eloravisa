@@ -10,6 +10,7 @@ import { ReadinessPanel } from "./ReadinessPanel"
 import gsap from "gsap"
 import { DashboardDataProvider } from "@/context/DashboardDataContext"
 import { OutcomeCard } from "./OutcomeCard"
+import { EnablePushPrompt } from "./EnablePushPrompt"
 
 
 
@@ -41,6 +42,8 @@ export function DashboardContent() {
                 </div>
 
                 <OutcomeCard />
+
+                <EnablePushPrompt />
 
                 <div className="grid grid-cols-1 items-start lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2 dashboard-section">

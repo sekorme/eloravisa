@@ -13,6 +13,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { FAMILY_INCLUDED_MEMBERS, SUBSCRIPTION_PLANS } from "@/lib/billing/plans"
 import { RELATIONSHIPS, SELF, familyCapacity, type FamilyMember } from "@/lib/family"
+import {
+  AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 const COUNTRY_NAMES = countries.map((c) => c.name.common).sort((a, b) => a.localeCompare(b))
 const VISA_TYPES = ["Study", "Visit", "Work", "Family"]
@@ -83,12 +86,14 @@ export default function FamilyPage() {
     }
   }
 
+  const [toRemove, setToRemove] = useState<FamilyMember | null>(null)
+
   const remove = async (m: FamilyMember) => {
-    if (!confirm(`Remove ${m.name}? Their documents list, reviews and appointment in Elora Visa will be deleted. This can't be undone.`)) return
     setBusy(m.id)
     try {
       await call(`/api/family/members/${m.id}`, { method: "DELETE" })
       toast.success(`${m.name} removed`)
+      setToRemove(null)
       if (account?.activeMemberId === m.id) window.location.reload()
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Couldn't remove the member")
@@ -161,7 +166,7 @@ export default function FamilyPage() {
                   </Button>
                 )}
                 {m.id !== SELF && (
-                  <Button size="sm" variant="ghost" className="rounded-full text-red-600" disabled={busy !== null} onClick={() => remove(m)} aria-label={`Remove ${m.name}`}>
+                  <Button size="sm" variant="ghost" className="rounded-full text-red-600" disabled={busy !== null} onClick={() => setToRemove(m as FamilyMember)} aria-label={`Remove ${m.name}`}>
                     {busy === m.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                   </Button>
                 )}
@@ -170,6 +175,23 @@ export default function FamilyPage() {
           ))}
         </ul>
       </div>
+
+      <AlertDialog open={!!toRemove} onOpenChange={(o) => !o && busy === null && setToRemove(null)}>
+        <AlertDialogContent className="rounded-[1.5rem] border-lp-line bg-lp-card text-lp-fg">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove {toRemove?.name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Their documents list, AI reviews, appointment and readiness in Elora Visa will be deleted, and their place on your plan becomes free. This can&apos;t be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-full" disabled={busy !== null}>Keep {toRemove?.name?.split(" ")[0]}</AlertDialogCancel>
+            <Button className="rounded-full bg-red-600 text-white hover:bg-red-700" disabled={busy !== null} onClick={() => toRemove && remove(toRemove)}>
+              {busy === toRemove?.id ? <Loader2 className="h-4 w-4 animate-spin" /> : "Remove member"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {onFamilyPlan && (full ? (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-[1.5rem] border border-lp-line bg-lp-card p-6">

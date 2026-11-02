@@ -1,26 +1,10 @@
 "use client"
 
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { DashboardContent } from '@/components/dashboard/DashboardContent'
-import { auth } from "@/firebase/client"
-import FCMInitializer from "@/components/FCMInitializer";
-import { onAuthStateChanged, User } from "firebase/auth";
 
-const Dashboard = () => {
-    const [user, setUser] = useState<User | null>(null);
+// Push registration now runs on every dashboard page (FCMInitializer in the
+// dashboard layout), not just here.
+const Dashboard = () => <DashboardContent />
 
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-            setUser(currentUser);
-        });
-        return () => unsubscribe();
-    }, []);
-
-    return (
-        <>
-            {user && <FCMInitializer userid={user.uid} />}
-            <DashboardContent />
-        </>
-    )
-}
 export default Dashboard

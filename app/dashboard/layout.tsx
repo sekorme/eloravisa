@@ -10,6 +10,7 @@ import {RegisterSW} from "@/components/RegisterSW";
 // only mount point.
 import HomePageContent from "@/components/HomePageContent";
 import LiveSessionPopup from "@/components/dashboard/LiveSessionPopup";
+import FCMInitializer from "@/components/FCMInitializer";
 
 // AuthProvider is intentionally NOT mounted here — the root layout already
 // wraps the whole tree in it; a second mount duplicated every auth listener
@@ -29,6 +30,7 @@ const Layout = async({children}:{children: React.ReactNode}) =>{
                     {/* Bottom room so the floating Ask Elora button never hides the end of a page. */}
                     <div className="pb-24">
                         <RegisterSW/>
+                        <FCMInitializer/>
                         {children}
                         <HomePageContent/>
                         <LiveSessionPopup/>

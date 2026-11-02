@@ -1,10 +1,10 @@
 import "server-only";
 
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
-import { getMessaging } from "firebase-admin/messaging";
 import { Attachment, EmailParams, MailerSend, Recipient, Sender } from "mailersend";
 import { db } from "@/firebase/admin";
 import { isAllowed, type NotificationPrefs } from "@/lib/notificationPrefs";
+import { pushToUser } from "@/lib/push";
 
 /**
  * Server-side user notifications for paid live sessions: push (FCM), the
@@ -76,17 +76,12 @@ export async function notifyUser(uid: string, options: NotifyOptions): Promise<{
 
   let pushed = false;
   const prefs = snap.get("notificationPrefs") as NotificationPrefs | undefined;
-  const fcmToken: string | undefined = snap.get("fcmToken") || undefined;
-  if (fcmToken && isAllowed(prefs, options.type, "push")) {
-    try {
-      await getMessaging().send({ token: fcmToken, data: { title: options.title, body: options.body, icon: "/512.png", link: url } });
-      pushed = true;
-    } catch (err: unknown) {
-      const code = (err as { code?: string })?.code;
-      if (code === "messaging/registration-token-not-registered" || code === "messaging/invalid-argument") {
-        await userRef.update({ fcmToken: "" }).catch(() => {});
-      }
-    }
+  if (isAllowed(prefs, options.type, "push")) {
+    // Every device the user has enabled; dead tokens are pruned (lib/push.ts).
+    pushed = await pushToUser(userRef, snap.data(), options.title, options.body, url).catch((err) => {
+      console.warn(`Push to user ${uid} failed:`, err instanceof Error ? err.message : err);
+      return false;
+    });
   }
 
   let emailed = false;

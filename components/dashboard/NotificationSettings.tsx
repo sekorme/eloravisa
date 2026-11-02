@@ -9,6 +9,7 @@ import { auth, db } from "@/firebase/client"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
+import { EnablePushPrompt } from "@/components/dashboard/EnablePushPrompt"
 import {
   NOTIFICATION_CATEGORIES,
   type NotificationCategory,
@@ -24,7 +25,6 @@ import {
 export function NotificationSettings() {
   const [uid, setUid] = useState<string | null>(null)
   const [prefs, setPrefs] = useState<NotificationPrefs>({})
-  const [hasPush, setHasPush] = useState(false)
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
@@ -35,7 +35,6 @@ export function NotificationSettings() {
       if (!user) return
       unsubDoc = onSnapshot(doc(db, "users", user.uid), (snap) => {
         setPrefs((snap.get("notificationPrefs") as NotificationPrefs) ?? {})
-        setHasPush(!!snap.get("fcmToken"))
         setLoaded(true)
       })
     })
@@ -128,11 +127,8 @@ export function NotificationSettings() {
                 </tbody>
               </table>
             </div>
-            {!hasPush && (
-              <p className="rounded-lg bg-muted p-3 text-xs text-muted-foreground">
-                Push notifications aren&apos;t enabled on this device yet. Allow notifications when your browser asks, or in its site settings, to receive them.
-              </p>
-            )}
+            {/* Per-device: turning push on here only covers this phone or browser. */}
+            <EnablePushPrompt compact />
             <div className="flex flex-wrap gap-2">
               <Button variant="outline" size="sm" onClick={() => setAllEmail(false)}>Turn off all optional emails</Button>
               <Button variant="ghost" size="sm" onClick={() => setAllEmail(true)}>Turn all emails on</Button>

@@ -5,6 +5,7 @@ import { getMessaging } from "firebase-admin/messaging";
 import { getAuth } from "firebase-admin/auth";
 import { requireAdmin } from "@/lib/requireAdmin";
 import { isAllowed } from "@/lib/notificationPrefs";
+import { isDeadTokenError, pushPayload, userTokens } from "@/lib/push";
 
 // ── Initialise Firebase Admin once ───────────────────────────────────────────
 if (!admin.apps.length) {
@@ -75,7 +76,7 @@ export async function POST(req: NextRequest) {
         /* 2️⃣  collect unique tokens & map → userId, one page at a time --------- */
         let pageQuery = db
             .collection("users")
-            .select("fcmToken", "notificationPrefs")
+            .select("fcmToken", "fcmTokens", "notificationPrefs")
             .orderBy(admin.firestore.FieldPath.documentId())
             .limit(PAGE_SIZE);
 
@@ -85,12 +86,17 @@ export async function POST(req: NextRequest) {
 
         const snap = await pageQuery.get();
         const tokenToUid: Record<string, string> = {};
+        const legacyTokens = new Set<string>();
 
         snap.forEach((d) => {
-            const token = d.get("fcmToken");
-
             // Announcements count as "updates"; skip users who turned push off for them.
-      if (token && isAllowed(d.get("notificationPrefs"), "broadcast", "push")) tokenToUid[token] = d.id; // dedupe automatically
+            if (!isAllowed(d.get("notificationPrefs"), "broadcast", "push")) return;
+            // Every device the user enabled (lib/push.ts); remember which token is the
+            // legacy single field so cleanup can clear it too.
+            for (const token of userTokens(d.data())) {
+              tokenToUid[token] = d.id;
+              if (token === d.get("fcmToken")) legacyTokens.add(token);
+            }
         });
 
         const tokens = Object.keys(tokenToUid);
@@ -110,24 +116,20 @@ export async function POST(req: NextRequest) {
         /* 3️⃣  send FCM in ≤500‑token chunks ------------------------------------ */
         let successCount = 0;
         let failureCount = 0;
-        const invalidUids: Set<string> = new Set();
+        const deadTokens: string[] = [];
 
         for (const slice of chunk(tokens, 500)) {
             const res = await messaging.sendEachForMulticast({
                 tokens: slice,
-                data: {
-                    title,
-                    body,
-                    icon: "/512.png",
-                    link: "https://eloraadmin.com/dashboard",
-                },
+                ...pushPayload(title, body, "https://www.eloravisa.com/dashboard"),
             });
 
             successCount += res.successCount;
             failureCount += res.failureCount;
 
             res.responses.forEach((r, idx) => {
-                if (!r.success) invalidUids.add(tokenToUid[slice[idx]]);
+                // Only tokens FCM says are gone; other errors must not unsubscribe anyone.
+        if (!r.success && isDeadTokenError(r.error?.code)) deadTokens.push(slice[idx]);
             });
         }
 
@@ -139,8 +141,8 @@ export async function POST(req: NextRequest) {
         );
 
         // a) notification docs
-        tokens.forEach((t) => {
-            const uid = tokenToUid[t];
+        // One in-app notification per user, however many devices they have.
+          [...new Set(Object.values(tokenToUid))].forEach((uid) => {
             const ref = db.doc(
                 `users/${uid}/notifications/${db.collection("_").doc().id}`,
             );
@@ -149,7 +151,7 @@ export async function POST(req: NextRequest) {
                 title,
                 body,
                 icon: "/512.png",
-                url: "https://eloravisa.com/admin",
+                url: "https://www.eloravisa.com/dashboard",
                 createdAt,
                 expiresAt,
                 read: false,
@@ -157,8 +159,11 @@ export async function POST(req: NextRequest) {
         });
 
         // b) clear invalid tokens
-        invalidUids.forEach((uid) => {
-            bw.update(db.doc(`users/${uid}`), { fcmToken: "" });
+        deadTokens.forEach((t) => {
+            bw.update(db.doc(`users/${tokenToUid[t]}`), {
+              fcmTokens: FieldValue.arrayRemove(t),
+              ...(legacyTokens.has(t) ? { fcmToken: "" } : {}),
+            });
         });
 
         await bw.close(); // flush all queued writes

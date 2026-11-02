@@ -9,6 +9,7 @@ import { getCurrentUserDetails } from "@/action/user"
 import { auth } from "@/firebase/client"
 import { generateInterviewQuestions } from "@/action/interview"
 import { toast } from "sonner"
+import { TOKEN_COSTS } from "@/lib/billing/plans"
 import countries from "world-countries"
 import {useRouter} from "next/navigation";
 
@@ -171,6 +172,8 @@ export function InterviewSetup({ onStart }: InterviewSetupProps) {
           ) : (
               <>
                 <span>Begin Mock Interview</span>
+                {/* Same constant the session charges (app/api/gemini/session). */}
+                <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-sm font-medium text-[#8FCDAF]">{TOKEN_COSTS.MOCK_INTERVIEW} tokens</span>
                 <ArrowRight className="text-[#8FCDAF] transition-transform group-hover/btn:translate-x-1" />
               </>
           )}
