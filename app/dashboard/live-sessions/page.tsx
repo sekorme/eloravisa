@@ -229,7 +229,7 @@ function PastSessionRow({ session }: { session: PastSession }) {
     try {
       const recordings = await fetchReplays(session.id)
       if (recordings.length === 0) {
-        toast.info("The replay isn't ready yet. Recordings can take a little while after the session ends.")
+        toast.info("No replay is available for this session. If it just ended, check back shortly.")
         return
       }
       // A session restarted mid-way has several parts; open the first and
