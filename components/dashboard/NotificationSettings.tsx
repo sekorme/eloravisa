@@ -78,6 +78,8 @@ export function NotificationSettings() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* First, so turning push on for this phone is the obvious first step. */}
+        <EnablePushPrompt compact />
         {!loaded ? (
           <div className="h-48 animate-pulse rounded-xl bg-muted" />
         ) : (
@@ -127,8 +129,6 @@ export function NotificationSettings() {
                 </tbody>
               </table>
             </div>
-            {/* Per-device: turning push on here only covers this phone or browser. */}
-            <EnablePushPrompt compact />
             <div className="flex flex-wrap gap-2">
               <Button variant="outline" size="sm" onClick={() => setAllEmail(false)}>Turn off all optional emails</Button>
               <Button variant="ghost" size="sm" onClick={() => setAllEmail(true)}>Turn all emails on</Button>
