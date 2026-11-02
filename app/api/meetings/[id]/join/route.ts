@@ -12,7 +12,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const { id } = await params;
     const profile = await db.collection("users").doc(user.uid).get();
     const name = profile.get("fullName") || user.name || user.email?.split("@")[0] || "Guest";
-    return NextResponse.json(await createJoinCredentials(user.uid, name, id));
+    const { renewal } = await req.json().catch(() => ({ renewal: false }));
+    return NextResponse.json(await createJoinCredentials(user.uid, name, id, renewal === true));
   } catch (error) {
     if (error instanceof MeetingAccessError) {
       return NextResponse.json({ error: error.message }, { status: error.status });

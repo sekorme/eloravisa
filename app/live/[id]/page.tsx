@@ -5,8 +5,12 @@ import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import { onAuthStateChanged } from 'firebase/auth'
 import {
-  CallControls,
   CallingState,
+  CancelCallButton,
+  ReactionsButton,
+  ScreenShareButton,
+  ToggleAudioPublishingButton,
+  ToggleVideoPublishingButton,
   SpeakerLayout,
   StreamCall,
   StreamTheme,
@@ -16,9 +20,10 @@ import {
   type Call,
 } from '@stream-io/video-react-sdk'
 import '@stream-io/video-react-sdk/dist/css/styles.css'
-import { Loader2 } from 'lucide-react'
+import { Loader2, MessageCircleQuestion } from 'lucide-react'
 import { auth } from '@/firebase/client'
 import { fetchJoinCredentials, LiveSessionError } from '@/lib/liveSessions'
+import SessionQA from '@/components/live/SessionQA'
 
 function Screen({ title, children }: { title: string; children?: React.ReactNode }) {
   return (
@@ -32,9 +37,10 @@ function Screen({ title, children }: { title: string; children?: React.ReactNode
   )
 }
 
-function Room({ onLeave }: { onLeave: () => void }) {
+function Room({ meetingId, onLeave }: { meetingId: string; onLeave: () => void }) {
   const { useCallCallingState } = useCallStateHooks()
   const state = useCallCallingState()
+  const [qaOpen, setQaOpen] = useState(false)
   if (state !== CallingState.JOINED) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -44,11 +50,32 @@ function Room({ onLeave }: { onLeave: () => void }) {
   }
   return (
     <div className="flex h-screen flex-col bg-[#101213] p-4">
-      <div className="min-h-0 flex-1">
-        <SpeakerLayout participantsBarPosition="bottom" />
+      <div className="relative flex min-h-0 flex-1">
+        <div className="min-w-0 flex-1">
+          <SpeakerLayout participantsBarPosition="bottom" />
+        </div>
+        {qaOpen && (
+          <div className="absolute inset-y-0 right-0 z-20 w-full overflow-hidden rounded-xl border border-white/10 shadow-2xl sm:static sm:ml-3 sm:w-[320px]">
+            <SessionQA meetingId={meetingId} onClose={() => setQaOpen(false)} />
+          </div>
+        )}
       </div>
-      <div className="flex justify-center pt-3">
-        <CallControls onLeave={onLeave} />
+      {/* Audience controls: no record button (the host records), and
+          reactions include raise hand. */}
+      <div className="str-video__call-controls flex flex-wrap justify-center gap-2 pt-3">
+        <ToggleAudioPublishingButton />
+        <ToggleVideoPublishingButton />
+        <ReactionsButton />
+        <ScreenShareButton />
+        <button
+          onClick={() => setQaOpen((o) => !o)}
+          aria-label="Questions for the host"
+          aria-pressed={qaOpen}
+          className={`flex h-10 items-center gap-2 rounded-full px-4 text-sm text-white ${qaOpen ? 'bg-sky-600' : 'bg-[#19232d] hover:bg-[#4c535b]'}`}
+        >
+          <MessageCircleQuestion className="h-5 w-5" /> Q&amp;A
+        </button>
+        <CancelCallButton onLeave={onLeave} />
       </div>
     </div>
   )
@@ -88,7 +115,7 @@ export default function LiveSessionRoomPage() {
           user: creds.user,
           token: creds.token,
           // Re-checks the seat each time the token needs renewing.
-          tokenProvider: async () => (await fetchJoinCredentials(meetingId)).token,
+          tokenProvider: async () => (await fetchJoinCredentials(meetingId, true)).token,
         })
         joined = c.call(creds.callType, creds.callId)
         await joined.join()
@@ -146,7 +173,7 @@ export default function LiveSessionRoomPage() {
     <StreamVideo client={client}>
       <StreamCall call={call}>
         <StreamTheme>
-          <Room onLeave={() => router.push('/dashboard/live-sessions')} />
+          <Room meetingId={meetingId} onLeave={() => router.push('/dashboard/live-sessions')} />
         </StreamTheme>
       </StreamCall>
     </StreamVideo>

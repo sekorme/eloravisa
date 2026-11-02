@@ -22,7 +22,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   try {
     const { id } = await params;
-    const result = await getMeetingForCheckout(user.uid, id);
+    const { code } = await req.json().catch(() => ({ code: null }));
+    const result = await getMeetingForCheckout(user.uid, id, typeof code === "string" ? code : null);
     if ("error" in result) return NextResponse.json({ error: result.error }, { status: 409 });
 
     const initialized = await initializeMeetingTransaction({
@@ -30,7 +31,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       email: user.email,
       meetingId: id,
       meetingTitle: result.meeting.title,
-      priceUsd: result.meeting.priceUsd,
+      priceUsd: result.priceUsd,
+      discountCode: result.discountCode,
     });
     return NextResponse.json({ success: true, ...initialized });
   } catch (error) {

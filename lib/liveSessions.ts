@@ -7,9 +7,13 @@
  * grants it too if that confirmation never arrives.
  */
 import { toast } from "sonner";
-import type { PaidMeetingView } from "@/lib/meetings";
+import type { PaidMeetingView, PastSessionView, QuestionView, ReplayRecording } from "@/lib/meetings";
+import { buildSessionIcs } from "@/lib/ics";
 
 export type LiveSession = PaidMeetingView;
+export type PastSession = PastSessionView;
+export type SessionQuestion = QuestionView;
+export type { ReplayRecording };
 
 export interface JoinCredentials {
     apiKey: string;
@@ -42,17 +46,75 @@ export async function fetchLiveSessions(): Promise<LiveSession[]> {
     return (await authedFetch("/api/meetings")).meetings;
 }
 
-export async function fetchJoinCredentials(meetingId: string): Promise<JoinCredentials> {
-    return authedFetch(`/api/meetings/${encodeURIComponent(meetingId)}/join`, { method: "POST" });
+/** Upcoming sessions plus past ones the user bought (for replays). */
+export async function fetchSessionsWithPast(): Promise<{ meetings: LiveSession[]; past: PastSession[] }> {
+    const { meetings, past } = await authedFetch("/api/meetings");
+    return { meetings, past: past ?? [] };
+}
+
+export interface SeatQuote {
+    priceUsd: number;
+    percentOff: number;
+    discountCode: string | null;
+}
+
+/** Price with a discount code applied; throws LiveSessionError if the code is refused. */
+export async function quoteSeat(meetingId: string, code: string): Promise<SeatQuote> {
+    return authedFetch(`/api/meetings/${encodeURIComponent(meetingId)}/quote?code=${encodeURIComponent(code)}`);
+}
+
+export async function fetchReplays(meetingId: string): Promise<ReplayRecording[]> {
+    return (await authedFetch(`/api/meetings/${encodeURIComponent(meetingId)}/replays`)).recordings;
+}
+
+export async function fetchQuestions(meetingId: string): Promise<SessionQuestion[]> {
+    return (await authedFetch(`/api/meetings/${encodeURIComponent(meetingId)}/questions`)).questions;
+}
+
+export async function postQuestion(
+    meetingId: string,
+    body: { text: string } | { questionId: string; upvote: boolean },
+): Promise<SessionQuestion[]> {
+    return (
+        await authedFetch(`/api/meetings/${encodeURIComponent(meetingId)}/questions`, {
+            method: "POST",
+            body: JSON.stringify(body),
+        })
+    ).questions;
+}
+
+/** Downloads a calendar invite for a session. */
+export function downloadSessionIcs(session: LiveSession) {
+    const ics = buildSessionIcs({
+        id: session.id,
+        title: session.title,
+        description: session.description,
+        scheduledAt: session.scheduledAt,
+        joinUrl: `${window.location.origin}/live/${session.id}`,
+    });
+    const url = URL.createObjectURL(new Blob([ics], { type: "text/calendar" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${session.title.replace(/[^\w\- ]+/g, "").trim() || "live-session"}.ics`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+export async function fetchJoinCredentials(meetingId: string, renewal = false): Promise<JoinCredentials> {
+    return authedFetch(`/api/meetings/${encodeURIComponent(meetingId)}/join`, {
+        method: "POST",
+        body: JSON.stringify({ renewal }),
+    });
 }
 
 /**
  * Runs checkout for a seat. Resolves "paid" once the server has confirmed the
  * payment, or "cancelled" if the buyer closed the popup.
  */
-export async function buyLiveSessionSeat(meetingId: string): Promise<"paid" | "cancelled"> {
+export async function buyLiveSessionSeat(meetingId: string, code?: string | null): Promise<"paid" | "cancelled"> {
     const { accessCode } = await authedFetch(`/api/meetings/${encodeURIComponent(meetingId)}/checkout`, {
         method: "POST",
+        body: JSON.stringify({ code: code || null }),
     });
     if (!accessCode) throw new LiveSessionError(500, "Failed to initialize payment");
 
@@ -82,12 +144,12 @@ export async function buyLiveSessionSeat(meetingId: string): Promise<"paid" | "c
  * session filled up or was cancelled mid-checkout, the payment is recorded
  * for a refund instead (lib/paystackServer.ts fulfilMeetingSeat).
  */
-export async function purchaseAndConfirm(meetingId: string): Promise<LiveSession[] | null> {
-    const outcome = await buyLiveSessionSeat(meetingId);
+export async function purchaseAndConfirm(meetingId: string, code?: string | null): Promise<LiveSession[] | null> {
+    const outcome = await buyLiveSessionSeat(meetingId, code);
     if (outcome === "cancelled") return null;
     const sessions = await fetchLiveSessions();
     if (sessions.find((s) => s.id === meetingId)?.purchased) {
-        toast.success("You're in! We'll see you at the session.");
+        toast.success("You're in! Check your email for the calendar invite.");
     } else {
         toast.error("Payment received, but the session was no longer available. We'll refund you.");
     }

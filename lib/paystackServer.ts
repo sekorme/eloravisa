@@ -4,6 +4,8 @@ import { db } from "@/firebase/admin";
 import { FieldValue } from "firebase-admin/firestore";
 import { SUBSCRIPTION_PLANS, PlanId } from "@/lib/billing/plans";
 import { getUsdToGhsRate } from "@/lib/exchangeRate";
+import { buildSessionIcs } from "@/lib/ics";
+import { notifyUser } from "@/lib/notifyServer";
 
 /**
  * Server-side Paystack integration shared by:
@@ -177,9 +179,11 @@ export async function initializeMeetingTransaction(params: {
   email: string;
   meetingId: string;
   meetingTitle: string;
+  /** Final price after early-bird and any discount code. */
   priceUsd: number;
+  discountCode: string | null;
 }): Promise<InitializedTransaction> {
-  const { uid, email, meetingId, meetingTitle, priceUsd } = params;
+  const { uid, email, meetingId, meetingTitle, priceUsd, discountCode } = params;
 
   const rate = await getUsdToGhsRate();
   const amountMinor = Math.round(priceUsd * rate * 100);
@@ -197,6 +201,7 @@ export async function initializeMeetingTransaction(params: {
     email,
     meetingId,
     meetingTitle,
+    discountCode,
     amount,
     currency: "GHS",
     priceUSD: priceUsd,
@@ -205,7 +210,7 @@ export async function initializeMeetingTransaction(params: {
     createdAt: Date.now(),
   });
 
-  return { accessCode, reference, amount, currency: "GHS", promoApplied: false };
+  return { accessCode, reference, amount, currency: "GHS", promoApplied: Boolean(discountCode) };
 }
 
 export type FulfilmentErrorCode =
@@ -230,6 +235,8 @@ export interface FulfilmentResult {
   uid: string;
   /** Set when the payment bought a seat in a paid live session. */
   meetingId?: string;
+  /** The session payment became a seat (false: flagged for a refund). */
+  seatGranted?: boolean;
 }
 
 /**
@@ -248,7 +255,7 @@ export async function fulfilPaystackPayment(params: {
   const paymentRef = db.collection("payments").doc(verified.reference);
   const intentRef = db.collection("payment_intents").doc(verified.reference);
 
-  return db.runTransaction(async (txn) => {
+  const result = await db.runTransaction(async (txn): Promise<FulfilmentResult> => {
     const [paymentSnap, intentSnap] = await Promise.all([
       txn.get(paymentRef),
       txn.get(intentRef),
@@ -359,6 +366,43 @@ export async function fulfilPaystackPayment(params: {
 
     return { alreadyProcessed: false, tokens: newTokens, uid: intent.uid };
   });
+
+  // Exactly once per seat: only the run that granted it gets here with
+  // seatGranted. Email failures never undo the purchase.
+  if (result.seatGranted && result.meetingId) {
+    await sendSeatConfirmation(result.uid, result.meetingId).catch((err) =>
+      console.error(`Seat confirmation for ${verified.reference} failed:`, err)
+    );
+  }
+  return result;
+}
+
+/** "You're booked" email with a calendar invite and the join link. */
+async function sendSeatConfirmation(uid: string, meetingId: string) {
+  const meeting = (await db.collection("meetings").doc(meetingId).get()).data();
+  if (!meeting) return;
+  const joinPath = `/live/${meetingId}`;
+  const startsAt: Date = meeting.scheduledAt.toDate();
+  const when = startsAt.toLocaleString("en-GB", {
+    weekday: "long", day: "numeric", month: "long", hour: "numeric", minute: "2-digit", timeZone: "Africa/Accra",
+  });
+  await notifyUser(uid, {
+    title: `You're booked: ${meeting.title}`,
+    body: `Your seat for "${meeting.title}" with ${meeting.hostName ?? "the Elora team"} is confirmed for ${when} (GMT).\n\nThe room opens 15 minutes before the start. We'll remind you the day before and an hour before. The calendar invite attached has the join link.`,
+    type: "paid_meeting_booked",
+    path: joinPath,
+    ctaLabel: "Your session page",
+    attachment: {
+      filename: "live-session.ics",
+      content: buildSessionIcs({
+        id: meetingId,
+        title: meeting.title,
+        description: meeting.description,
+        scheduledAt: startsAt,
+        joinUrl: `https://eloravisa.com${joinPath}`,
+      }),
+    },
+  });
 }
 
 /**
@@ -413,6 +457,10 @@ async function fulfilMeetingSeat(
       paidAt: now,
     });
     txn.update(meetingRef, { seatsTaken: FieldValue.increment(1) });
+    if (intent.discountCode) {
+      // set+merge: a code deleted mid-checkout must not fail a paid seat.
+      txn.set(db.collection("session_codes").doc(intent.discountCode), { uses: FieldValue.increment(1) }, { merge: true });
+    }
   } else {
     console.error(`Paid session ${intent.meetingId}: payment ${verified.reference} needs a refund (${needsRefund})`);
   }
@@ -429,6 +477,7 @@ async function fulfilMeetingSeat(
     kind: "meeting",
     meetingId: intent.meetingId,
     meetingTitle: intent.meetingTitle ?? null,
+    discountCode: intent.discountCode ?? null,
     needsRefund,
     status: "success",
     influencerId: null,
@@ -439,5 +488,5 @@ async function fulfilMeetingSeat(
     createdAt: now,
   });
 
-  return { alreadyProcessed: false, tokens: null, uid: intent.uid, meetingId: intent.meetingId };
+  return { alreadyProcessed: false, tokens: null, uid: intent.uid, meetingId: intent.meetingId, seatGranted: !needsRefund };
 }
