@@ -5,6 +5,7 @@ import { checkRateLimit } from "@/lib/ratelimit";
 import { verifyActionUser } from "@/lib/actionAuth";
 import { deductTokensAdmin, refundTokensAdmin } from "@/lib/tokensAdmin";
 import { TOKEN_COSTS } from "@/lib/billing/plans";
+import { LANGUAGE_FAIRNESS } from "@/lib/languageFairness";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
@@ -80,10 +81,12 @@ export async function analyzeAnswer(idToken: string, question: string, answer: s
           **Question:** "${question}"
           **Applicant's Answer:** "${answer}"
     
+          ${LANGUAGE_FAIRNESS}
+
           Analyze the answer. Provide:
-          1. **Feedback:** Constructive criticism.
-          2. **Score:** 0-100 based on clarity, confidence, and relevance.
-          3. **Better Answer:** An example of a stronger response.
+          1. **Feedback:** Constructive criticism of the content.
+          2. **Score:** 0-100 based on how specific, credible and relevant the content is.
+          3. **Better Answer:** An example of a stronger response, in simple words.
     
           Return JSON: { "feedback": "string", "score": number, "better_answer": "string" }
           No markdown.
@@ -124,11 +127,13 @@ export async function generateInterviewFeedback(idToken: string, transcript: any
       **Transcript:**
       ${conversation}
 
+      ${LANGUAGE_FAIRNESS}
+
       **Analysis Requirements:**
       1.  **Scores (0-100):**
-          - **Clarity:** How clear and understandable were the answers?
+          - **Clarity:** How specific and unambiguous was the content (facts, names, amounts, dates)?
           - **Consistency:** Did the answers align with each other and the visa intent?
-          - **Confidence:** Did the applicant sound sure and prepared?
+          - **Confidence:** Did the applicant answer directly and consistently, without evading?
           - **Overall:** A weighted average.
       2.  **Summary:** A brief overview of how the interview went.
       3.  **Strengths:** List 3-5 key strengths demonstrated by the applicant.

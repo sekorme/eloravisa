@@ -61,15 +61,17 @@ export function InterviewFeedback({ onRestart, interview }: InterviewFeedbackPro
             <div className="max-w-3xl mx-auto">
               <div className="grid grid-cols-3 gap-4 md:gap-8">
                   {[
-                      { label: "Clarity", key: 'clarity', color: "bg-primary" },
-                      { label: "Consistency", key: 'consistency', color: "bg-primary" },
-                      { label: "Confidence", key: 'confidence', color: "bg-lp-azure" },
+                      // Scored on content only, never English level (lib/languageFairness.ts).
+                      { label: "Clarity", key: 'clarity', color: "bg-primary", hint: "Specific, clear facts" },
+                      { label: "Consistency", key: 'consistency', color: "bg-primary", hint: "Answers agree" },
+                      { label: "Confidence", key: 'confidence', color: "bg-lp-azure", hint: "Direct answers" },
                   ].map((stat) => {
                       const value = scores[stat.key] ?? 0
                       return (
                         <div key={stat.label} className="text-center space-y-2 bg-white/10 rounded-2xl p-4 backdrop-blur-sm border border-white/10">
                             <div className="text-2xl md:text-3xl font-black tracking-tighter">{value}%</div>
                             <div className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-primary-foreground/90 opacity-80">{stat.label}</div>
+                            <div className="text-[10px] text-primary-foreground/70">{stat.hint}</div>
                             <div className="h-1.5 w-full bg-black/20 rounded-full overflow-hidden mt-2">
                                 <div className={`${stat.color} h-full`} style={{ width: `${value}%` }} />
                             </div>
@@ -77,6 +79,9 @@ export function InterviewFeedback({ onRestart, interview }: InterviewFeedbackPro
                       )
                   })}
               </div>
+              <p className="mt-4 text-center text-xs text-primary-foreground/70">
+                Scored on what you say, not how you say it. Grammar, accent and fluency never lower your score.
+              </p>
             </div>
         </CardContent>
       </Card>

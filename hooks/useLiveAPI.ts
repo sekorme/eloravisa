@@ -7,6 +7,7 @@ import {onAuthStateChanged, User} from "firebase/auth";
 import {auth} from "@/firebase/client";
 import {getCurrentUserDetails} from "@/action/user";
 import {mintGeminiSessionToken} from "@/lib/geminiSession";
+import { LANGUAGE_FAIRNESS } from "@/lib/languageFairness";
 
 export interface TranscriptItem {
     id: string;
@@ -200,7 +201,8 @@ INTERVIEW STYLE:
 * Ask only ONE interview question at a time.
 * Maintain a brisk, realistic embassy interview pace.
 * Do not over-explain or coach the applicant.
-* Occasionally interrupt or ask follow-up questions when answers are unclear, inconsistent, suspicious, rehearsed, or incomplete.
+* Occasionally interrupt or ask follow-up questions when answers are vague, inconsistent, suspicious, rehearsed, or incomplete.
+* If you can't understand an answer, politely ask the applicant to repeat it or rephrase your question in simpler words. Never comment on their English, accent or grammar, and never count it against them.
 * Use natural embassy-style questioning patterns.
 
 VIDEO & BEHAVIOR ANALYSIS:
@@ -237,7 +239,7 @@ DECISION LOGIC:
 At the end of the interview:
 * Decide whether to APPROVE or REJECT the visa.
 * Provide a realistic embassy-style final decision for ${selectedCountry.name}.
-* If rejected, briefly state the likely reason (e.g. weak ties, unclear purpose, insufficient funding, inconsistent answers, immigrant intent concerns).
+* If rejected, briefly state the likely reason (e.g. weak ties, unclear purpose, insufficient funding, inconsistent answers, immigrant intent concerns). Language ability is never a reason.
 * If approved, remain professional and concise.
 
 OUTPUT STYLE:
@@ -246,6 +248,8 @@ OUTPUT STYLE:
 * Keep the interaction immersive and realistic.
 * Avoid long explanations.
 * Keep questions embassy-authentic and pressure-balanced.
+
+${LANGUAGE_FAIRNESS}
 
 OPTIONAL FEEDBACK MODE:
 If feedback mode is enabled after the interview:
