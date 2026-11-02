@@ -2,12 +2,22 @@
 
 import { useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, Check, AlertCircle, Sparkles, Quote } from "lucide-react";
+import { ChevronDown, Check, AlertCircle, Sparkles, Quote, BadgeCheck, MessageSquareWarning } from "lucide-react";
 import { gsap } from "gsap";
 import { cn } from "@/lib/utils";
 import { ReviewDetails } from "./ReviewDetails";
 import { DocumentReviewModal } from "@/components/dashboard/DocumentReviewModal";
 import { UploadDocumentsModal } from "@/components/UploadDocumentsModal";
+
+// A decision by the Elora team on an uploaded document, written by the admin
+// app to users/{uid}/admin_document_reviews/{docKey}. It applies only to the
+// file it was made on (fileUrl): after a re-upload it no longer counts.
+export interface AdminDocumentReview {
+    status: "approved" | "changes_requested";
+    comment?: string | null;
+    fileUrl: string;
+    fileUploadedAt?: string | null;
+}
 
 interface ChecklistItemProps {
     index: number;
@@ -18,8 +28,10 @@ interface ChecklistItemProps {
     mistakes: string[];
     isUploaded: boolean;
     documentUrl?: string;
+    documentUploadedAt?: string;
     mimeType?: string;
     reviewData?: any;
+    adminReview?: AdminDocumentReview;
 }
 
 export default function ChecklistItem({
@@ -31,8 +43,10 @@ export default function ChecklistItem({
     mistakes,
     isUploaded,
     documentUrl,
+    documentUploadedAt,
     mimeType,
     reviewData,
+    adminReview,
 }: ChecklistItemProps) {
     const [open, setOpen] = useState(false);
     const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
@@ -49,10 +63,20 @@ export default function ChecklistItem({
         });
     };
 
-    // Determine status
+    // The team's decision only counts for the file it was made on. Upload time
+    // is compared too: re-uploading a same-named file can keep the same URL.
+    const teamReview = isUploaded && adminReview
+        && adminReview.fileUrl === documentUrl
+        && (adminReview.fileUploadedAt ?? null) === (documentUploadedAt ?? null)
+        ? adminReview
+        : undefined;
+
+    // Determine status. A team decision outranks the AI score.
     let status: "completed" | "in-progress" | "not-started" = "not-started";
     if (isUploaded) {
-        if (reviewData) {
+        if (teamReview) {
+            status = teamReview.status === "approved" ? "completed" : "in-progress";
+        } else if (reviewData) {
             status = reviewData.score >= 80 ? "completed" : "in-progress";
         } else {
             status = "in-progress";
@@ -60,6 +84,7 @@ export default function ChecklistItem({
     }
 
     const getStatusLabel = () => {
+        if (teamReview) return teamReview.status === "approved" ? "Approved by Elora" : "Changes Requested";
         if (status === "completed") return "Completed";
         if (status === "in-progress") {
             if (reviewData) return "Needs Improvement";
@@ -70,7 +95,7 @@ export default function ChecklistItem({
 
     const statusPill = {
         "completed": "bg-lp-sky text-lp-azure",
-        "in-progress": reviewData
+        "in-progress": reviewData || teamReview
             ? "bg-amber-100 text-amber-800 dark:bg-amber-400/10 dark:text-amber-300"
             : "bg-lp-navy text-white dark:bg-lp-navy-2",
         "not-started": "border border-lp-line text-lp-muted",
@@ -139,6 +164,32 @@ export default function ChecklistItem({
                 <div ref={contentRef} id={panelId} className="h-0 overflow-hidden opacity-0">
                     <div className="space-y-6 border-t border-lp-line p-5 md:p-6 md:pl-[5.25rem]">
 
+                        {teamReview && (
+                            <div
+                                className={cn(
+                                    "flex items-start gap-3 rounded-2xl border p-4 text-sm",
+                                    teamReview.status === "approved"
+                                        ? "border-lp-azure/30 bg-lp-sky text-lp-fg"
+                                        : "border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-200"
+                                )}
+                            >
+                                {teamReview.status === "approved"
+                                    ? <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-lp-azure" aria-hidden="true" />
+                                    : <MessageSquareWarning className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />}
+                                <div className="space-y-1">
+                                    <p className="font-semibold">
+                                        {teamReview.status === "approved"
+                                            ? "Approved by the Elora team"
+                                            : "The Elora team asked for changes"}
+                                    </p>
+                                    {teamReview.comment && <p className="whitespace-pre-wrap leading-relaxed">{teamReview.comment}</p>}
+                                    {teamReview.status === "changes_requested" && (
+                                        <p className="text-xs opacity-80">Upload a new version and we&apos;ll take another look.</p>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
                         {reviewData ? (
                             <ReviewDetails reviewData={reviewData} />
                         ) : (
@@ -175,7 +226,13 @@ export default function ChecklistItem({
                             </div>
                         )}
 
-                        {(!isUploaded || !reviewData) && (
+                        {teamReview?.status === "changes_requested" && (
+                            <div className="w-full border-t border-lp-line pt-5 sm:w-auto sm:min-w-[240px]">
+                                <UploadDocumentsModal replaceKey={docKey} />
+                            </div>
+                        )}
+
+                        {(!isUploaded || !reviewData) && teamReview?.status !== "changes_requested" && (
                             <div className="flex flex-col gap-3 border-t border-lp-line pt-5 sm:flex-row">
                                 {!isUploaded ? (
                                     <div className="w-full sm:w-auto sm:min-w-[240px]">

@@ -115,26 +115,12 @@ export async function initializePaystackTransaction(params: {
   const amountMinor = Math.round(plan.price * rate * 100);
   const amount = amountMinor / 100;
 
-  const res = await fetch("https://api.paystack.co/transaction/initialize", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${getPaystackSecretKey()}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      email,
-      amount: amountMinor,
-      currency: "GHS",
-      metadata: { uid, planId: plan.id, promoCode: influencerId ? promoCode : null },
-    }),
+  const { accessCode, reference } = await createPaystackCharge(email, amountMinor, {
+    uid,
+    planId: plan.id,
+    promoCode: influencerId ? promoCode : null,
   });
-  const body = await res.json();
-  if (!body.status || !body.data?.access_code || !body.data?.reference) {
-    console.error("Paystack initialize failed:", body.message ?? res.status);
-    throw new Error("Failed to initialize payment");
-  }
 
-  const reference: string = body.data.reference;
   await db.collection("payment_intents").doc(reference).create({
     uid,
     email,
@@ -151,12 +137,75 @@ export async function initializePaystackTransaction(params: {
   });
 
   return {
-    accessCode: body.data.access_code,
+    accessCode,
     reference,
     amount,
     currency: "GHS",
     promoApplied: Boolean(influencerId),
   };
+}
+
+/** Creates the Paystack transaction; amount in GHS minor units (pesewas). */
+async function createPaystackCharge(
+  email: string,
+  amountMinor: number,
+  metadata: Record<string, unknown>
+): Promise<{ accessCode: string; reference: string }> {
+  const res = await fetch("https://api.paystack.co/transaction/initialize", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${getPaystackSecretKey()}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, amount: amountMinor, currency: "GHS", metadata }),
+  });
+  const body = await res.json();
+  if (!body.status || !body.data?.access_code || !body.data?.reference) {
+    console.error("Paystack initialize failed:", body.message ?? res.status);
+    throw new Error("Failed to initialize payment");
+  }
+  return { accessCode: body.data.access_code, reference: body.data.reference };
+}
+
+/**
+ * Checkout for a seat in a paid live session (lib/meetings.ts). Priced like
+ * the plans: the admin sets a USD price, charged in GHS at today's rate.
+ * Callers check the session is on sale first (getMeetingForCheckout).
+ */
+export async function initializeMeetingTransaction(params: {
+  uid: string;
+  email: string;
+  meetingId: string;
+  meetingTitle: string;
+  priceUsd: number;
+}): Promise<InitializedTransaction> {
+  const { uid, email, meetingId, meetingTitle, priceUsd } = params;
+
+  const rate = await getUsdToGhsRate();
+  const amountMinor = Math.round(priceUsd * rate * 100);
+  const amount = amountMinor / 100;
+
+  const { accessCode, reference } = await createPaystackCharge(email, amountMinor, {
+    uid,
+    kind: "meeting",
+    meetingId,
+  });
+
+  await db.collection("payment_intents").doc(reference).create({
+    kind: "meeting",
+    uid,
+    email,
+    meetingId,
+    meetingTitle,
+    amount,
+    currency: "GHS",
+    priceUSD: priceUsd,
+    rate,
+    status: "initialized",
+    createdAt: Date.now(),
+  });
+
+  return { accessCode, reference, amount, currency: "GHS", promoApplied: false };
 }
 
 export type FulfilmentErrorCode =
@@ -179,6 +228,8 @@ export interface FulfilmentResult {
   alreadyProcessed: boolean;
   tokens: number | null;
   uid: string;
+  /** Set when the payment bought a seat in a paid live session. */
+  meetingId?: string;
 }
 
 /**
@@ -217,7 +268,7 @@ export async function fulfilPaystackPayment(params: {
       );
     }
     if (paymentSnap.exists) {
-      return { alreadyProcessed: true, tokens: null, uid: intent.uid };
+      return { alreadyProcessed: true, tokens: null, uid: intent.uid, meetingId: intent.meetingId };
     }
     if (
       verified.currency !== intent.currency ||
@@ -227,6 +278,10 @@ export async function fulfilPaystackPayment(params: {
         "AMOUNT_MISMATCH",
         `Paid ${verified.amount} ${verified.currency}, intent expects ${intent.amount} ${intent.currency} (${verified.reference})`
       );
+    }
+
+    if (intent.kind === "meeting") {
+      return fulfilMeetingSeat(txn, { intent, verified, source, paymentRef, intentRef });
     }
 
     const plan = SUBSCRIPTION_PLANS[intent.planKey as PlanId];
@@ -304,4 +359,85 @@ export async function fulfilPaystackPayment(params: {
 
     return { alreadyProcessed: false, tokens: newTokens, uid: intent.uid };
   });
+}
+
+/**
+ * Fulfils a paid-session seat inside fulfilPaystackPayment's transaction:
+ * records the buyer as an attendee, counts the seat and writes the payment.
+ * The money has already been taken by now, so this never refuses: if the
+ * session was cancelled, filled up or already bought in the meantime, the
+ * payment is still recorded and flagged `needsRefund` for an admin.
+ */
+async function fulfilMeetingSeat(
+  txn: FirebaseFirestore.Transaction,
+  ctx: {
+    intent: FirebaseFirestore.DocumentData;
+    verified: VerifiedPaystackTransaction;
+    source: "callback" | "webhook";
+    paymentRef: FirebaseFirestore.DocumentReference;
+    intentRef: FirebaseFirestore.DocumentReference;
+  }
+): Promise<FulfilmentResult> {
+  const { intent, verified, source, paymentRef, intentRef } = ctx;
+  const meetingRef = db.collection("meetings").doc(intent.meetingId);
+  const attendeeRef = meetingRef.collection("attendees").doc(intent.uid);
+  const userRef = db.collection("users").doc(intent.uid);
+
+  // All reads before any write (Firestore transaction rule).
+  const [meetingSnap, attendeeSnap, userSnap] = await Promise.all([
+    txn.get(meetingRef),
+    txn.get(attendeeRef),
+    txn.get(userRef),
+  ]);
+  const meeting = meetingSnap.data();
+  const user = userSnap.data() || {};
+  const now = Date.now();
+
+  let needsRefund: string | null = null;
+  if (!meeting || meeting.status === "cancelled" || meeting.status === "ended") {
+    needsRefund = "session unavailable";
+  } else if (attendeeSnap.exists) {
+    needsRefund = "already had a seat";
+  } else if (meeting.maxSeats && (meeting.seatsTaken ?? 0) >= meeting.maxSeats) {
+    needsRefund = "session full";
+  }
+
+  if (!needsRefund) {
+    txn.create(attendeeRef, {
+      uid: intent.uid,
+      name: user.fullName ?? null,
+      email: user.email ?? intent.email ?? null,
+      reference: verified.reference,
+      amount: verified.amount,
+      currency: verified.currency,
+      paidAt: now,
+    });
+    txn.update(meetingRef, { seatsTaken: FieldValue.increment(1) });
+  } else {
+    console.error(`Paid session ${intent.meetingId}: payment ${verified.reference} needs a refund (${needsRefund})`);
+  }
+
+  txn.update(intentRef, { status: "fulfilled", fulfilledAt: now });
+  txn.create(paymentRef, {
+    userId: intent.uid,
+    email: user.email ?? verified.customerEmail ?? intent.email ?? null,
+    reference: verified.reference,
+    amount: verified.amount,
+    currency: verified.currency,
+    // "meeting" so revenue reports can group session sales like a plan.
+    planId: "meeting",
+    kind: "meeting",
+    meetingId: intent.meetingId,
+    meetingTitle: intent.meetingTitle ?? null,
+    needsRefund,
+    status: "success",
+    influencerId: null,
+    promoCode: null,
+    commissionAmount: 0,
+    source,
+    paidAt: verified.paidAt,
+    createdAt: now,
+  });
+
+  return { alreadyProcessed: false, tokens: null, uid: intent.uid, meetingId: intent.meetingId };
 }

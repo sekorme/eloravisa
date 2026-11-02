@@ -9,6 +9,7 @@ import {RegisterSW} from "@/components/RegisterSW";
 // (Pro/Full-gated chat bubble), not marketing content — this layout is its
 // only mount point.
 import HomePageContent from "@/components/HomePageContent";
+import LiveSessionPopup from "@/components/dashboard/LiveSessionPopup";
 
 // AuthProvider is intentionally NOT mounted here — the root layout already
 // wraps the whole tree in it; a second mount duplicated every auth listener
@@ -26,6 +27,7 @@ const Layout = async({children}:{children: React.ReactNode}) =>{
                         <RegisterSW/>
                         {children}
                         <HomePageContent/>
+                        <LiveSessionPopup/>
                     </div>
                 </main>
             </SidebarProvider>

@@ -11,6 +11,7 @@ import {
     Info,
     Mic,
     Users,
+    Video,
 } from "lucide-react";
 import {
     Sidebar,
@@ -52,6 +53,11 @@ const items = [
         url : "/dashboard/draft",
         icon: FileText,
 
+    },
+    {
+        title: "Live Sessions",
+        url: "/dashboard/live-sessions",
+        icon: Video,
     },
     {
         title: "History",

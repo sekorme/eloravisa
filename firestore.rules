@@ -65,6 +65,15 @@ service cloud.firestore {
         allow read, write: if isOwner(uid);
       }
 
+      // Elora team decisions on uploaded documents (approved / changes
+      // requested). Written only by the admin app (eloraadmin, firebase-admin)
+      // and kept out of the user doc, which the owner can write - so a user
+      // can't mark their own document approved. Owner may read.
+      match /admin_document_reviews/{docKey} {
+        allow read: if isOwner(uid);
+        allow write: if false;
+      }
+
       // Created server-side only (app/api/notifications/broadcast uses
       // firebase-admin, bypassing these rules). Client may read its own,
       // mark items read, and dismiss (delete) them — NotificationBell does

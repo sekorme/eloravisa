@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import ChecklistItem from "./ChecklistItem"
+import ChecklistItem, { type AdminDocumentReview } from "./ChecklistItem"
 import { auth, db } from "@/firebase/client"
 import { doc, onSnapshot, collection } from "firebase/firestore"
 import { onAuthStateChanged } from "firebase/auth"
@@ -10,6 +10,7 @@ import { getRequiredDocuments } from "@/utils/documentConfig"
 export default function VisaCheckList() {
     const [documents, setDocuments] = useState<Record<string, any>>({})
     const [reviews, setReviews] = useState<Record<string, any>>({})
+    const [adminReviews, setAdminReviews] = useState<Record<string, AdminDocumentReview>>({})
     const [visaType, setVisaType] = useState<string | undefined>(undefined)
     const [loading, setLoading] = useState(true)
 
@@ -42,9 +43,26 @@ export default function VisaCheckList() {
                     setLoading(false)
                 })
 
+                // Decisions from the Elora team (written by eloraadmin via the
+                // Admin SDK; read-only here). Optional: if it can't be read,
+                // the checklist still works without them.
+                const adminReviewsRef = collection(db, "users", user.uid, "admin_document_reviews")
+                const unsubAdminReviews = onSnapshot(
+                    adminReviewsRef,
+                    (snapshot) => {
+                        const data: Record<string, AdminDocumentReview> = {}
+                        snapshot.forEach((doc) => {
+                            data[doc.id] = doc.data() as AdminDocumentReview
+                        })
+                        setAdminReviews(data)
+                    },
+                    (error) => console.warn("Admin document reviews unavailable:", error.code)
+                )
+
                 unsubData = () => {
                     unsubUser()
                     unsubReviews()
+                    unsubAdminReviews()
                 }
             } else {
                 setLoading(false)
@@ -122,8 +140,10 @@ export default function VisaCheckList() {
                             mistakes={item.mistakes || []}
                             isUploaded={isUploaded}
                             documentUrl={docUrl}
+                            documentUploadedAt={typeof docData === 'string' ? undefined : docData?.uploadedAt}
                             mimeType={mimeType}
                             reviewData={reviews[item.key]}
+                            adminReview={adminReviews[item.key]}
                         />
                     )
                 })}

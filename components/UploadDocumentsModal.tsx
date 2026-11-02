@@ -42,7 +42,10 @@ const triggerVariants: Record<TriggerVariant, { button: string; chip: string }> 
     },
 }
 
-export function UploadDocumentsModal({ variant = "navy", className }: { variant?: TriggerVariant; className?: string } = {}) {
+// `replaceKey` opens the modal for that one document even if it's already
+// uploaded, so the user can send a new version (e.g. after the Elora team
+// asked for changes).
+export function UploadDocumentsModal({ variant = "navy", className, replaceKey }: { variant?: TriggerVariant; className?: string; replaceKey?: string } = {}) {
     const [user, setUser] = useState<any>(null)
     const [currentStep, setCurrentStep] = useState(0)
     const [availableSteps, setAvailableSteps] = useState<any[]>([])
@@ -65,7 +68,9 @@ export function UploadDocumentsModal({ variant = "navy", className }: { variant?
                         const requiredDocs = getRequiredDocuments(visaType)
                         
                         const uploadedKeys = Object.keys(userData.documents || {})
-                        const remainingSteps = requiredDocs.filter(step => !uploadedKeys.includes(step.key))
+                        const remainingSteps = replaceKey
+                            ? requiredDocs.filter(step => step.key === replaceKey)
+                            : requiredDocs.filter(step => !uploadedKeys.includes(step.key))
                         setAvailableSteps(remainingSteps)
                     } else {
                         setAvailableSteps(getRequiredDocuments())
@@ -76,7 +81,7 @@ export function UploadDocumentsModal({ variant = "navy", className }: { variant?
             }
         })
         return () => unsubscribe()
-    }, [isOpen])
+    }, [isOpen, replaceKey])
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
         if (acceptedFiles && acceptedFiles[0]) {
@@ -200,7 +205,7 @@ export function UploadDocumentsModal({ variant = "navy", className }: { variant?
                     <span className={cn("flex shrink-0 items-center justify-center", trigger.chip)} aria-hidden="true">
                         <Upload className={cn("transition-transform duration-300 group-hover:-translate-y-0.5", variant === "tile" ? "h-6 w-6" : "h-4 w-4")} />
                     </span>
-                    Upload Document
+                    {replaceKey ? "Upload New Version" : "Upload Document"}
                 </button>
             </DialogTrigger>
             <DialogContent className="rounded-[1.5rem] border-lp-line bg-lp-card text-lp-fg sm:max-w-[460px]">
