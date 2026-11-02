@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Receiver } from "@upstash/qstash";
 import { db } from "@/firebase/admin";
 import { notifyUser } from "@/lib/notifyServer";
 
 /**
  * Reminds seat holders before a paid live session: once the day before and
- * once about an hour before. Run hourly by Vercel Cron (vercel.json), which
- * sends `Authorization: Bearer $CRON_SECRET`.
+ * once about an hour before. Run hourly by an Upstash QStash schedule (Vercel
+ * Hobby only allows daily crons), verified by QStash's request signature.
+ * `Authorization: Bearer $CRON_SECRET` also works, for manual runs.
  *
  * Each reminder is claimed on the meeting doc in a transaction before sending,
  * so overlapping or retried runs never send it twice.
@@ -21,9 +23,31 @@ const DAY_REMINDER_MIN_LEAD_MS = 3 * HOUR;
 type Kind = "day" | "soon";
 const FLAG: Record<Kind, string> = { day: "reminderDaySentAt", soon: "reminderSoonSentAt" };
 
-export async function GET(req: NextRequest) {
+async function isAuthorized(req: NextRequest) {
   const secret = process.env.CRON_SECRET;
-  if (!secret || req.headers.get("authorization") !== `Bearer ${secret}`) {
+  if (secret && req.headers.get("authorization") === `Bearer ${secret}`) return true;
+
+  const signature = req.headers.get("upstash-signature");
+  const current = process.env.QSTASH_CURRENT_SIGNING_KEY;
+  const next = process.env.QSTASH_NEXT_SIGNING_KEY;
+  if (!signature || !current || !next) return false;
+  try {
+    return await new Receiver({ currentSigningKey: current, nextSigningKey: next }).verify({
+      signature,
+      body: await req.text(),
+    });
+  } catch {
+    return false;
+  }
+}
+
+// QStash schedules POST; GET is kept for manual runs with CRON_SECRET.
+export async function POST(req: NextRequest) {
+  return GET(req);
+}
+
+export async function GET(req: NextRequest) {
+  if (!(await isAuthorized(req))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

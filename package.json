@@ -37,6 +37,7 @@
     "@stream-io/video-react-sdk": "^1.45.0",
     "@tabler/icons-react": "^3.36.1",
     "@types/three": "^0.183.1",
+    "@upstash/qstash": "^2.12.1",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.2",
     "@vercel/functions": "^3.8.0",
