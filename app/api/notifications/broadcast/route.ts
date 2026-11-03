@@ -155,6 +155,8 @@ export async function POST(req: NextRequest) {
                 createdAt,
                 expiresAt,
                 read: false,
+                // Shows under "Tips and updates" on the notifications page.
+                type: "broadcast",
             });
         });
 

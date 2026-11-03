@@ -7,6 +7,7 @@ import { toast } from "sonner"
 import { auth } from "@/firebase/client"
 import { Button } from "@/components/ui/button"
 import { enablePush, getPushState, type PushState } from "@/lib/pushClient"
+import { dashCard } from "@/components/dashboard/dashboardStyles"
 
 const DISMISS_KEY = "push-prompt-dismissed"
 
@@ -120,9 +121,9 @@ export function EnablePushPrompt({ compact = false }: { compact?: boolean }) {
   }
 
   return (
-    <div className="flex items-start gap-3 rounded-[1.5rem] border border-lp-azure/30 bg-lp-sky p-5">
-      <BellRing className="mt-0.5 h-5 w-5 shrink-0 text-lp-azure" />
-      <div className="min-w-0 flex-1 space-y-3">
+    <div className={`flex items-start gap-3 border-l-4 border-l-lp-azure p-4 ${dashCard}`}>
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-lp-sky"><BellRing className="h-4 w-4 text-lp-azure" /></span>
+      <div className="min-w-0 flex-1 space-y-2">
         <p className="font-medium">Don&apos;t miss your reminders</p>
         {body}
         {action}

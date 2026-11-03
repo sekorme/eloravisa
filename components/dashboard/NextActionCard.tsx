@@ -2,11 +2,13 @@
 
 import { useState } from "react"
 import { Bolt, CircleCheck, Circle, Sparkles } from "lucide-react"
+import { cn } from "@/lib/utils"
 import { UploadDocumentsModal } from "@/components/UploadDocumentsModal"
 import { DocumentReviewModal } from "@/components/dashboard/DocumentReviewModal"
 import { Button } from "@/components/ui/button"
 import { getRequiredDocuments } from "@/utils/documentConfig"
 import { useDashboardData } from "@/context/DashboardDataContext"
+import { dashCard, dashCardSubtitle, dashCardTitle } from "./dashboardStyles"
 
 
 export function NextActionCard() {
@@ -25,28 +27,25 @@ export function NextActionCard() {
   }
 
   return (
-    <div id="next-action-card" className="group rounded-[1.5rem] border border-lp-line bg-lp-card p-6 text-lp-fg lp-shadow">
-      <div className="mb-5 flex items-center gap-4">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-lp-sky transition-transform duration-300 group-hover:-rotate-6">
-          <Bolt className="h-5 w-5 text-lp-azure" />
+    <div id="next-action-card" className={cn("p-5", dashCard)}>
+      <div className="mb-4 flex items-center gap-3">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-lp-sky">
+          <Bolt className="h-4 w-4 text-lp-azure" />
         </div>
         <div>
-          <h2 className="font-display text-xl font-semibold tracking-[-0.03em]">Your Documents</h2>
-          <p className="text-xs text-lp-muted">Upload and review each one</p>
+          <h2 className={dashCardTitle}>Your documents</h2>
+          <p className={dashCardSubtitle}>Upload and review each one</p>
         </div>
       </div>
-      
-      <div className="relative mb-5 overflow-hidden rounded-2xl bg-lp-navy p-5 text-white">
-        <div className="lp-grid-dots pointer-events-none absolute inset-0 opacity-[0.15]" aria-hidden="true"></div>
-        <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-[#5DBF95]/25 blur-2xl" aria-hidden="true"></div>
-        <p className="relative z-10 mb-4 font-display font-semibold leading-snug tracking-tight">
+
+      {/* Light panel: dark navy is kept for the welcome banner only. */}
+      <div className="mb-4 rounded-2xl bg-lp-sky p-4">
+        <p className="mb-3 font-display font-semibold leading-snug tracking-tight">
           {nextPendingDoc 
             ? `Next to upload: ${nextPendingDoc.label}`
             : "All documents uploaded! You are ready for the next stage."}
         </p>
-        <div className="relative z-10">
-          <UploadDocumentsModal variant="white"/>
-        </div>
+        <UploadDocumentsModal variant="navy"/>
       </div>
 
       <div className="custom-scrollbar max-h-[250px] space-y-1 overflow-y-auto pr-1">

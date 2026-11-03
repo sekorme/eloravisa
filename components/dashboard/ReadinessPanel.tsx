@@ -3,6 +3,9 @@
 import Link from "next/link"
 import { AlertTriangle, ArrowRight, CalendarClock, CheckCircle2, Gauge } from "lucide-react"
 import { useReadiness } from "@/hooks/useReadiness"
+import { plainText } from "@/lib/reviewIssues"
+import { dashCard } from "@/components/dashboard/dashboardStyles"
+import { Sparkline, useReadinessHistory } from "@/components/dashboard/delight/useReadinessHistory"
 
 const scoreTone = (score: number) =>
   score >= 75 ? "text-emerald-600" : score >= 50 ? "text-amber-600" : "text-red-600"
@@ -17,6 +20,7 @@ function daysUntil(ms: number, now: number) {
  */
 export function ReadinessPanel({ maxSteps = 4, showAppointment = true }: { maxSteps?: number; showAppointment?: boolean }) {
   const { readiness, appointment, loading, now } = useReadiness()
+  const trend = useReadinessHistory()
 
   if (loading) return <div className="h-64 animate-pulse rounded-[1.5rem] border border-lp-line bg-lp-card-2" />
 
@@ -25,16 +29,29 @@ export function ReadinessPanel({ maxSteps = 4, showAppointment = true }: { maxSt
   const days = appointment ? daysUntil(appointment.atMs, now) : null
 
   return (
-    <div className="space-y-5 rounded-[1.5rem] border border-lp-line bg-lp-card p-6 lp-shadow">
+    <div className={`space-y-5 p-5 md:p-6 ${dashCard}`}>
       <div className="flex items-start justify-between gap-4">
         <div>
-          <span className="inline-flex items-center gap-1.5 font-display text-[10px] font-medium uppercase tracking-[0.18em] text-lp-muted">
-            <Gauge className="h-3.5 w-3.5 text-lp-azure" /> Interview readiness
+          <span className="inline-flex items-center gap-1.5 text-sm font-medium text-lp-muted">
+            <Gauge className="h-4 w-4 text-lp-azure" /> Interview readiness
           </span>
-          <p className={`mt-1 font-display text-4xl font-semibold tracking-[-0.04em] ${scoreTone(readiness.score)}`}>
-            {readiness.score}
-            <span className="text-base text-lp-muted">/100</span>
-          </p>
+          <div className="mt-1 flex items-end gap-3">
+            <p className={`font-display text-4xl font-semibold tracking-[-0.04em] ${scoreTone(readiness.score)}`}>
+              {readiness.score}
+              <span className="text-base text-lp-muted">/100</span>
+            </p>
+            {/* Trend from daily snapshots; appears from the second day. */}
+            {trend.hasTrend && (
+              <div className="mb-1 flex items-center gap-2">
+                <Sparkline points={trend.points} className="h-8 w-24 text-lp-azure" />
+                {trend.change !== 0 && (
+                  <span className={`text-xs font-semibold ${trend.change > 0 ? "text-emerald-600" : "text-red-600"}`}>
+                    {trend.change > 0 ? "+" : ""}{trend.change} this week
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
         </div>
         {showAppointment && appointment && days !== null && days >= 0 && (
           <Link href="/dashboard/appointment" className="rounded-2xl bg-lp-sky px-4 py-2 text-right">
@@ -79,8 +96,8 @@ export function ReadinessPanel({ maxSteps = 4, showAppointment = true }: { maxSt
               <li key={s.id}>
                 <Link href={s.href} className="group flex items-start justify-between gap-3 rounded-xl p-2 hover:bg-lp-sky">
                   <span>
-                    <span className="block text-sm font-medium">{s.label}</span>
-                    <span className="block text-xs text-lp-muted">{s.detail}</span>
+                    <span className="block text-sm font-medium">{plainText(s.label)}</span>
+                    <span className="block line-clamp-2 text-xs text-lp-muted">{plainText(s.detail)}</span>
                   </span>
                   <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-lp-muted group-hover:text-lp-azure" />
                 </Link>

@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo } from "react"
-import { AlertTriangle, AlertCircle, Info, AlertOctagon } from "lucide-react"
+import { AlertTriangle, AlertCircle, AlertOctagon } from "lucide-react"
 import {
   Accordion,
   AccordionContent,
@@ -11,6 +11,9 @@ import {
 import { cn } from "@/lib/utils"
 import { useDashboardData } from "@/context/DashboardDataContext"
 import { documentTitle, getRequiredDocuments } from "@/utils/documentConfig"
+import { isRealProblem, plainText } from "@/lib/reviewIssues"
+import { dashCard, dashCardSubtitle, dashCardTitle } from "./dashboardStyles"
+import { EmptyState } from "./delight/EmptyState"
 
 export function AlertsSection() {
   const { reviews, userData, loading } = useDashboardData()
@@ -21,8 +24,16 @@ export function AlertsSection() {
     // Only documents on the current checklist: reviews left over from another
     // visa type would be noise (and inflate the count).
     const required = new Set(getRequiredDocuments(userData?.onboarding?.visaType).map((d) => d.key))
-    reviews.filter((r) => required.has(r.id)).forEach((data) => {
-      const docName = documentTitle(data.id)
+    reviews.filter((r) => required.has(r.id)).forEach((review) => {
+      const docName = documentTitle(review.id)
+      // Drop reassurances the AI sometimes lists as problems (lib/reviewIssues.ts).
+      const clean = (list: unknown) => (Array.isArray(list) ? list.filter(isRealProblem).map(plainText) : [])
+      const data = {
+        id: review.id,
+        inconsistencies: clean(review.inconsistencies),
+        risk_flags: clean(review.risk_flags),
+        missing_info: clean(review.missing_info),
+      }
 
       if (data.inconsistencies && data.inconsistencies.length > 0) {
         newAlerts.push({
@@ -70,53 +81,39 @@ export function AlertsSection() {
   }
 
   return (
-    <div id="alerts-warnings-card" className="group rounded-[1.5rem] border border-lp-line bg-lp-card p-6 text-lp-fg lp-shadow">
-      <div className="mb-5 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-4">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-100 transition-transform duration-300 group-hover:-rotate-6 dark:bg-amber-400/10">
-            <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-300" />
-          </div>
-          <div>
-            <h2 className="font-display text-xl font-semibold tracking-[-0.03em]">Alerts & Warnings</h2>
-            <p className="text-xs text-lp-muted">Potential issues in your profile</p>
-          </div>
+    <div id="alerts-warnings-card" className={cn("p-5", dashCard)}>
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div>
+          <h2 className={dashCardTitle}>Alerts</h2>
+          <p className={dashCardSubtitle}>Issues the AI found in your documents</p>
         </div>
         {alerts.length > 0 && (
-          <div className="shrink-0 rounded-full bg-lp-navy px-3 py-1 font-display text-[10px] font-medium uppercase tracking-[0.16em] text-white">
-            {alerts.length} New
-          </div>
+          <span className="shrink-0 rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800 dark:bg-amber-400/10 dark:text-amber-300">
+            {alerts.length} {alerts.length === 1 ? "issue" : "issues"}
+          </span>
         )}
       </div>
       
       <div className="space-y-3">
         {alerts.length > 0 ? (
-          <Accordion type="single" collapsible className="w-full space-y-2">
+          <Accordion type="single" collapsible className="w-full divide-y divide-lp-line">
             {alerts.map((alert) => (
               <AccordionItem 
                 key={alert.id} 
                 value={alert.id} 
-                className={cn(
-                  "rounded-xl border !border-b",
-                  {
-                    "border-red-200 bg-red-50/60 dark:border-red-400/20 dark:bg-red-400/[0.06]": alert.type === "critical",
-                    "border-amber-200 bg-amber-50/60 dark:border-amber-400/20 dark:bg-amber-400/[0.06]": alert.type === "warning",
-                  }
-                )}
+                className="border-0"
               >
-                <AccordionTrigger className="p-3 hover:no-underline">
+                <AccordionTrigger className="py-3 hover:no-underline">
                   <div className="flex items-center gap-3 text-left">
-                    <alert.icon className={cn(
-                      "h-4 w-4 flex-shrink-0",
-                      {
-                        "text-red-600 dark:text-red-300": alert.type === "critical",
-                        "text-amber-600 dark:text-amber-300": alert.type === "warning",
-                      }
-                    )} />
-                    <p className="text-sm font-semibold text-lp-fg">{alert.title}</p>
+                    <span
+                      className={cn("h-2 w-2 shrink-0 rounded-full", alert.type === "critical" ? "bg-red-500" : "bg-amber-500")}
+                      aria-label={alert.type === "critical" ? "Important" : "Worth checking"}
+                    />
+                    <p className="text-sm font-medium text-lp-fg">{alert.title}</p>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
-                  <div className="px-4 pb-2 pl-10 pt-0">
+                  <div className="pb-2 pl-5 pt-0">
                     <ul className="list-disc space-y-1 text-xs leading-relaxed text-lp-muted marker:text-lp-fg/30">
                       {alert.details.map((detail: string, i: number) => (
                         <li key={i}>{detail}</li>
@@ -128,17 +125,9 @@ export function AlertsSection() {
             ))}
           </Accordion>
         ) : (
-          <div className="rounded-xl border border-lp-line bg-lp-sky-2 p-4">
-            <div className="flex items-start gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-lp-sky">
-                <Info className="h-4 w-4 text-lp-azure" />
-              </div>
-              <div>
-                <p className="mb-0.5 text-sm font-semibold text-lp-fg">No Critical Alerts</p>
-                <p className="text-xs text-lp-muted">Great job! Your documents look good so far.</p>
-              </div>
-            </div>
-          </div>
+          <EmptyState art="check" title="No issues found">
+            <p className="text-lp-muted">Your reviewed documents look good so far.</p>
+          </EmptyState>
         )}
       </div>
     </div>

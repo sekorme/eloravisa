@@ -3,7 +3,8 @@
 import { useEffect, useRef } from "react"
 import { Card } from "@/components/ui/card"
 import { pillClass } from "@/components/landing/ui"
-import { ArrowRight, CheckCircle2 } from "lucide-react"
+import { ArrowRight, CalendarClock, CheckCircle2 } from "lucide-react"
+import { Landmark, flagFor } from "./delight/Landmark"
 import Link from "next/link"
 import { gsap } from "gsap"
 import {NumberTicker} from "@/components/ui/number-ticker";
@@ -42,7 +43,10 @@ export function WelcomeCard() {
   const interviewsCount = interviewSessions.length
 
   // Same score as the readiness panel and eloraadmin (lib/visaReadiness.ts).
-  const { readiness } = useReadiness()
+  const { readiness, appointment, now } = useReadiness()
+  const destination = userData?.onboarding?.destination
+  const flag = flagFor(destination)
+  const daysToInterview = appointment && appointment.atMs > now ? Math.ceil((appointment.atMs - now) / 86_400_000) : null
   const readinessScore = readiness.score
 
   useEffect(() => {
@@ -103,13 +107,15 @@ export function WelcomeCard() {
       <div className="lp-grid-dots pointer-events-none absolute inset-0 opacity-[0.18] [mask-image:radial-gradient(ellipse_at_top_right,black,transparent_70%)]" aria-hidden="true"></div>
       <div className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-[#5DBF95]/20 blur-3xl" aria-hidden="true"></div>
       <div className="pointer-events-none absolute -bottom-40 left-1/3 h-80 w-80 rounded-full bg-lp-navy-2 blur-3xl" aria-hidden="true"></div>
+      {/* Destination landmark, faint line art behind the text (larger screens). */}
+      <Landmark country={destination} className="pointer-events-none absolute -bottom-4 right-[17rem] hidden h-56 w-56 text-[#8FCDAF] opacity-[0.16] lg:block" />
 
       <div className="relative z-10 flex flex-col items-center justify-between gap-10 md:flex-row">
         <div className="w-full flex-1">
           <div className="welcome-text">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 font-display text-[10px] font-medium uppercase tracking-[0.18em] text-white/85 backdrop-blur">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#8FCDAF]"></span>
-              Your visa journey
+              {flag ? <span className="text-sm leading-none" aria-hidden="true">{flag}</span> : <span className="h-1.5 w-1.5 rounded-full bg-[#8FCDAF]"></span>}
+              {destination ? `${destination} · ${userData?.onboarding?.visaType ?? "visa"}` : "Your visa journey"}
             </span>
             <h2 className="mt-5 font-display text-4xl font-semibold leading-[1.05] tracking-[-0.045em] text-balance md:text-5xl lg:text-6xl">
               Welcome back, <span className="text-[#8FCDAF]">{getFirstName()}</span>
@@ -145,6 +151,12 @@ export function WelcomeCard() {
               <div className="h-1.5 w-1.5 rounded-full bg-white/60"></div>
               <div className="text-sm font-medium text-white/80"><span className="font-semibold text-white">{interviewsCount}</span> Interviews</div>
             </div>
+            {daysToInterview !== null && (
+              <Link href="/dashboard/appointment" className="flex items-center gap-2 rounded-full border border-[#8FCDAF]/30 bg-[#8FCDAF]/10 px-4 py-2 text-sm font-medium text-white hover:bg-[#8FCDAF]/20">
+                <CalendarClock className="h-3.5 w-3.5 text-[#8FCDAF]" />
+                {daysToInterview <= 1 ? "Interview tomorrow" : `Interview in ${daysToInterview} days`}
+              </Link>
+            )}
           </div>
         </div>
 

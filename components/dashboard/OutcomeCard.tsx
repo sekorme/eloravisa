@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Textarea } from "@/components/ui/textarea"
 import { useReadiness } from "@/hooks/useReadiness"
+import { celebrate } from "./delight/celebrate"
 
 type Status = "approved" | "refused" | "waiting"
 
@@ -49,6 +50,7 @@ export function OutcomeCard() {
       })
       if (!res.ok) throw new Error()
       setDone(status)
+      if (status === "approved") celebrate()
     } catch {
       toast.error("Couldn't save that. Please try again.")
     } finally {

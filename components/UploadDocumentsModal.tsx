@@ -22,7 +22,7 @@ import { useDropzone } from "react-dropzone"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 
-type TriggerVariant = "navy" | "white" | "tile"
+type TriggerVariant = "navy" | "white" | "tile" | "tileLight"
 
 const triggerBase = "group cursor-pointer border-none font-semibold transition-[background-color,box-shadow,transform] duration-200 motion-safe:hover:-translate-y-0.5 motion-safe:active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-azure focus-visible:ring-offset-2 focus-visible:ring-offset-lp-page"
 
@@ -34,6 +34,11 @@ const triggerVariants: Record<TriggerVariant, { button: string; chip: string }> 
     white: {
         button: "inline-flex h-12 w-full items-center justify-center gap-3 rounded-full bg-white pl-1.5 pr-6 text-sm text-lp-navy hover:bg-lp-sky-2 hover:shadow-[0_16px_40px_-12px_rgba(8,32,26,0.35)]",
         chip: "h-9 w-9 rounded-full bg-lp-sky text-lp-azure",
+    },
+    // Light card-style trigger, matching the other Quick Actions tiles.
+    tileLight: {
+        button: "relative flex h-full min-h-[112px] w-full flex-col items-start justify-between rounded-[1.25rem] !border !border-solid !border-lp-line bg-lp-card p-4 text-left font-display text-base tracking-[-0.02em] text-lp-fg hover:!border-lp-azure/40 hover:bg-lp-card-2 md:p-5",
+        chip: "h-10 w-10 rounded-xl bg-lp-sky text-lp-azure transition-transform duration-300 group-hover:-rotate-6",
     },
     // Large card-style trigger for action grids (dashboard Quick Actions)
     tile: {
