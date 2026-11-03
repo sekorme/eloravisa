@@ -216,7 +216,7 @@ export function UploadDocumentsModal({ variant = "navy", className, replaceKey, 
                     {replaceKey ? "Upload New Version" : "Upload Document"}
                 </button>}
             </DialogTrigger>
-            <DialogContent className="rounded-[1.5rem] border-lp-line bg-lp-card text-lp-fg sm:max-w-[460px]">
+            <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto rounded-[1.5rem] border-lp-line bg-lp-card p-5 text-lp-fg sm:max-w-[460px] sm:p-6">
                 {availableSteps.length > 0 && currentDocument ? (
                     <>
                         <DialogHeader>
@@ -233,11 +233,11 @@ export function UploadDocumentsModal({ variant = "navy", className, replaceKey, 
                                 ))}
                             </div>
                         </DialogHeader>
-                        <div className="grid gap-4 py-4">
+                        <div className="grid gap-4 py-2 sm:py-4">
                             <div
                                 {...getRootProps()}
                                 className={cn(
-                                    "cursor-pointer rounded-2xl border-2 border-dashed p-10 text-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-azure",
+                                    "cursor-pointer rounded-2xl border-2 border-dashed p-6 text-center sm:p-10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-azure",
                                     isDragActive ? "border-lp-azure bg-lp-sky" : "border-lp-line bg-lp-card-2 hover:border-lp-azure/50 hover:bg-lp-sky/60"
                                 )}
                             >
@@ -258,7 +258,7 @@ export function UploadDocumentsModal({ variant = "navy", className, replaceKey, 
                             {file && !uploading && (
                                 <div className="flex items-center rounded-xl border border-lp-line bg-lp-card-2 p-3 text-sm">
                                     <File className="mr-2 h-4 w-4 flex-shrink-0 text-lp-azure" />
-                                    <span className="truncate">{file.name}</span>
+                                    <span className="min-w-0 truncate">{file.name}</span>
                                 </div>
                             )}
                             {uploading && (
@@ -269,17 +269,17 @@ export function UploadDocumentsModal({ variant = "navy", className, replaceKey, 
                             )}
                             {error && (
                                 <div className="flex items-center rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-400/20 dark:bg-red-400/[0.06] dark:text-red-300">
-                                    <AlertCircle className="w-4 h-4 mr-2" />
-                                    <span>{error}</span>
+                                    <AlertCircle className="mr-2 h-4 w-4 shrink-0" />
+                                    <span className="min-w-0 break-words">{error}</span>
                                 </div>
                             )}
                         </div>
                         <DialogFooter className="flex-col sm:flex-col sm:space-x-0 gap-2">
-                            <div className="flex w-full items-center justify-between gap-2">
-                                <Button variant="ghost" className="rounded-full text-lp-muted hover:bg-lp-card-2 hover:text-lp-fg" onClick={prevStep} disabled={currentStep === 0 || uploading}>
+                            <div className="grid w-full grid-cols-2 items-center gap-2 sm:flex sm:justify-between">
+                                <Button variant="ghost" className="justify-self-start rounded-full text-lp-muted hover:bg-lp-card-2 hover:text-lp-fg" onClick={prevStep} disabled={currentStep === 0 || uploading}>
                                     <ArrowLeft className="mr-2 h-4 w-4" /> Back
                                 </Button>
-                                <Button onClick={handleUpload} disabled={!file || uploading} className="h-11 rounded-full bg-lp-navy px-6 font-semibold text-white hover:bg-lp-navy-2">
+                                <Button onClick={handleUpload} disabled={!file || uploading} className="order-first col-span-2 h-11 w-full rounded-full bg-lp-navy px-6 font-semibold text-white hover:bg-lp-navy-2 sm:order-none sm:w-auto">
                                     {uploading ? (
                                         <>
                                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -289,7 +289,7 @@ export function UploadDocumentsModal({ variant = "navy", className, replaceKey, 
                                         "Upload & Continue"
                                     )}
                                 </Button>
-                                <Button variant="ghost" className="rounded-full text-lp-muted hover:bg-lp-card-2 hover:text-lp-fg" onClick={nextStep} disabled={currentStep === availableSteps.length - 1 || uploading}>
+                                <Button variant="ghost" className="justify-self-end rounded-full text-lp-muted hover:bg-lp-card-2 hover:text-lp-fg" onClick={nextStep} disabled={currentStep === availableSteps.length - 1 || uploading}>
                                     Skip <ArrowRight className="ml-2 h-4 w-4" />
                                 </Button>
                             </div>
