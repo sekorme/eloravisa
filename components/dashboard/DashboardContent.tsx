@@ -37,8 +37,11 @@ export function DashboardContent() {
 
     return (
         <DashboardDataProvider>
-            <div ref={containerRef} className="relative min-h-screen w-full bg-lp-page text-lp-fg">
-                <div className="mx-auto w-full max-w-[1400px] space-y-6 px-4 py-6 md:px-6 md:py-8 lg:px-8">
+            <div ref={containerRef} className="relative min-h-screen w-full overflow-hidden bg-lp-page text-lp-fg">
+                {/* Soft wash of brand colour behind the top of the page. */}
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-gradient-to-b from-lp-sky via-lp-sky/30 to-transparent" aria-hidden="true" />
+                <div className="pointer-events-none absolute -right-40 top-24 h-96 w-96 rounded-full bg-emerald-200/30 blur-3xl dark:bg-emerald-500/10" aria-hidden="true" />
+                <div className="relative mx-auto w-full max-w-[1400px] space-y-6 px-4 py-6 md:px-6 md:py-8 lg:px-8">
                     <div className="dashboard-section">
                         <WelcomeCard />
                     </div>

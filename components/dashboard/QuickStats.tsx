@@ -9,11 +9,35 @@ import { getRequiredDocuments } from "@/utils/documentConfig"
 import { useDashboardData } from "@/context/DashboardDataContext"
 import { dashCard } from "./dashboardStyles"
 import { useReadiness } from "@/hooks/useReadiness"
+import { Sparkline, useReadinessHistory } from "./delight/useReadinessHistory"
 
+
+const TONES = {
+  green: { bar: "bg-emerald-500", ring: "text-emerald-500", text: "text-emerald-700 dark:text-emerald-300" },
+  sky: { bar: "bg-sky-500", ring: "text-sky-500", text: "text-sky-700 dark:text-sky-300" },
+  violet: { bar: "bg-violet-500", ring: "text-violet-500", text: "text-violet-700 dark:text-violet-300" },
+} as const
+
+/** Icon inside a small ring that fills with the metric's progress. */
+function ProgressRing({ value, className, children }: { value: number; className: string; children: React.ReactNode }) {
+  const r = 18
+  const c = 2 * Math.PI * r
+  const pct = Math.min(100, Math.max(0, value))
+  return (
+    <span className={cn("relative flex h-11 w-11 shrink-0 items-center justify-center", className)}>
+      <svg viewBox="0 0 44 44" className="absolute inset-0 -rotate-90" aria-hidden="true">
+        <circle cx="22" cy="22" r={r} fill="none" stroke="currentColor" strokeOpacity="0.15" strokeWidth="3.5" />
+        <circle cx="22" cy="22" r={r} fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c - (pct / 100) * c} className="transition-[stroke-dashoffset] duration-1000" />
+      </svg>
+      {children}
+    </span>
+  )
+}
 
 export function QuickStats() {
   const { userData, interviewSessions, loading } = useDashboardData()
   const { readiness } = useReadiness()
+  const trend = useReadinessHistory()
   const containerRef = useRef<HTMLDivElement>(null)
 
   const totalRequiredDocs = getRequiredDocuments(userData?.onboarding?.visaType).length;
@@ -68,6 +92,7 @@ export function QuickStats() {
         link: "/dashboard/application",
         linkText: metrics.uploadedDocs < totalRequiredDocs ? "Upload next" : "View documents",
         icon: FileText,
+        tone: "green" as const,
     },
     {
         title: "AI review",
@@ -77,6 +102,7 @@ export function QuickStats() {
         link: "/dashboard/application",
         linkText: metrics.reviewsCount > 0 ? "View details" : "Start review",
         icon: Bot,
+        tone: "sky" as const,
     },
     {
         title: "Interview readiness",
@@ -86,38 +112,43 @@ export function QuickStats() {
         link: "/dashboard/ai-mock-interview",
         linkText: metrics.interviewsCount > 0 ? "Practise again" : "Begin practice",
         icon: Mic,
+        tone: "violet" as const,
+        trend: true,
     },
   ]
 
   return (
     <div ref={containerRef} className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-      {stats.map((stat) => (
+      {stats.map((stat) => {
+        const tone = TONES[stat.tone]
+        return (
         <div
           key={stat.title}
-          className={cn("stat-card group flex flex-col p-5 transition-transform duration-300 motion-safe:hover:-translate-y-0.5", dashCard)}
+          className={cn("stat-card group relative flex flex-col overflow-hidden p-5 transition-transform duration-300 motion-safe:hover:-translate-y-0.5", dashCard)}
         >
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-sm font-medium text-lp-muted">{stat.title}</h3>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-lp-sky text-lp-azure">
+          {/* Coloured accent bar: one colour per metric. */}
+          <span className={cn("absolute inset-x-0 top-0 h-1", tone.bar)} aria-hidden="true" />
+          <div className="mb-3 flex items-start justify-between">
+            <h3 className="pt-1 text-sm font-medium text-lp-muted">{stat.title}</h3>
+            <ProgressRing value={stat.progress} className={tone.ring}>
               <stat.icon className="h-4 w-4" />
-            </div>
+            </ProgressRing>
           </div>
-          <div className="font-display text-3xl font-semibold tracking-[-0.04em] md:text-4xl">{stat.value}</div>
+          <div className="flex items-end justify-between gap-2">
+            <div className="font-display text-3xl font-semibold tracking-[-0.04em] md:text-4xl">{stat.value}</div>
+            {stat.trend && trend.hasTrend && <Sparkline points={trend.points} className={cn("mb-1 h-8 w-20", tone.text)} />}
+          </div>
           <p className="mb-4 text-sm text-lp-muted">{stat.label}</p>
-          <div className="mt-auto space-y-3">
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-lp-sky" aria-hidden="true">
-              <div className="h-full rounded-full bg-lp-azure transition-all duration-1000 ease-out" style={{ width: `${Math.min(100, stat.progress)}%` }} />
-            </div>
-            <Link
-              href={stat.link}
-              className="group/link inline-flex items-center gap-1.5 rounded-sm text-sm font-medium text-lp-azure transition-colors hover:text-lp-azure-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-azure"
-            >
-              {stat.linkText}
-              <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover/link:translate-x-1" aria-hidden="true" />
-            </Link>
-          </div>
+          <Link
+            href={stat.link}
+            className={cn("group/link mt-auto inline-flex items-center gap-1.5 rounded-sm text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-azure", tone.text)}
+          >
+            {stat.linkText}
+            <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover/link:translate-x-1" aria-hidden="true" />
+          </Link>
         </div>
-      ))}
+        )
+      })}
     </div>
   )
 }

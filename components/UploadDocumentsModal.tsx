@@ -50,7 +50,10 @@ const triggerVariants: Record<TriggerVariant, { button: string; chip: string }> 
 // `replaceKey` opens the modal for that one document even if it's already
 // uploaded, so the user can send a new version (e.g. after the Elora team
 // asked for changes).
-export function UploadDocumentsModal({ variant = "navy", className, replaceKey }: { variant?: TriggerVariant; className?: string; replaceKey?: string } = {}) {
+// `children`, when given, replaces the built-in trigger button (it must be a
+// single element that accepts a ref, e.g. a <button>), so callers like the
+// dashboard's Quick actions can style the trigger their own way.
+export function UploadDocumentsModal({ variant = "navy", className, replaceKey, children }: { variant?: TriggerVariant; className?: string; replaceKey?: string; children?: React.ReactElement } = {}) {
     const [user, setUser] = useState<any>(null)
     const [currentStep, setCurrentStep] = useState(0)
     const [availableSteps, setAvailableSteps] = useState<any[]>([])
@@ -206,12 +209,12 @@ export function UploadDocumentsModal({ variant = "navy", className, replaceKey }
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <button type="button" className={cn(triggerBase, trigger.button, className)}>
+                {children ?? <button type="button" className={cn(triggerBase, trigger.button, className)}>
                     <span className={cn("flex shrink-0 items-center justify-center", trigger.chip)} aria-hidden="true">
                         <Upload className={cn("transition-transform duration-300 group-hover:-translate-y-0.5", variant === "tile" ? "h-6 w-6" : "h-4 w-4")} />
                     </span>
                     {replaceKey ? "Upload New Version" : "Upload Document"}
-                </button>
+                </button>}
             </DialogTrigger>
             <DialogContent className="rounded-[1.5rem] border-lp-line bg-lp-card text-lp-fg sm:max-w-[460px]">
                 {availableSteps.length > 0 && currentDocument ? (

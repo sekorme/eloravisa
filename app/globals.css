@@ -567,3 +567,16 @@
     .dashboard-theme :is([data-slot="input"], [data-slot="textarea"], [data-slot="select-trigger"]):not([class*="rounded-"]) { border-radius: 0.75rem; }
     .dashboard-theme :is([data-slot="input"], [data-slot="textarea"], [data-slot="select-trigger"]):focus-visible { border-color: var(--lp-azure); }
 }
+
+/* Dashboard journey: the connecting line fills in up to the current step. */
+@keyframes lp-line-fill {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+}
+.lp-line-fill {
+    transform-origin: left center;
+    animation: lp-line-fill 0.7s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+    .lp-line-fill { animation: none; }
+}

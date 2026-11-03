@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils"
 import { getRequiredDocuments } from "@/utils/documentConfig"
-import { Check as CheckIcon, Lock } from "lucide-react"
+import { Check as CheckIcon, ClipboardList, FolderOpen, Lock, Mic, Sparkles, Stamp } from "lucide-react"
 import { useDashboardData } from "@/context/DashboardDataContext"
 import { useReadiness } from "@/hooks/useReadiness"
 import { dashCard, dashCardSubtitle, dashCardTitle } from "./dashboardStyles"
@@ -68,6 +68,7 @@ export function ProgressTracker() {
   const steps = [
     {
       title: "Visa Requirements",
+      icon: ClipboardList,
       description: completedOnboarding ? `You've reviewed all requirements for your visa` : "Complete the onboarding process to unlock this step.",
       completed: completedOnboarding,
       inProgress: !completedOnboarding,
@@ -75,6 +76,7 @@ export function ProgressTracker() {
     },
     {
       title: "Documents Preparation",
+      icon: FolderOpen,
       description: "Upload your supporting documents",
       completed: docsCompleted,
       inProgress: !docsCompleted,
@@ -83,6 +85,7 @@ export function ProgressTracker() {
     },
     {
       title: "AI Intelligence Check",
+      icon: Sparkles,
       description: "Automated error detection & scoring",
       completed: reviewsCompleted,
       inProgress: docsCompleted && !reviewsCompleted,
@@ -91,6 +94,7 @@ export function ProgressTracker() {
     },
     {
       title: "Mock Interview",
+      icon: Mic,
       description: "Practice with AI-powered sessions",
       completed: interviewsCompleted,
       inProgress: reviewsCompleted && !interviewsCompleted,
@@ -98,6 +102,7 @@ export function ProgressTracker() {
     },
     {
       title: "Visa Application",
+      icon: Stamp,
       description: "Submit to the embassy",
       completed: applicationSubmitted,
       inProgress: interviewsCompleted && !applicationSubmitted,
@@ -124,10 +129,10 @@ export function ProgressTracker() {
             return (
               <li key={step.title} className="relative flex flex-col items-center text-center">
                 {i > 0 && (
-                  <span
-                    className={cn("absolute right-1/2 top-5 h-0.5 w-full -translate-y-1/2", steps[i - 1].completed ? "bg-lp-azure" : "bg-lp-line")}
-                    aria-hidden="true"
-                  />
+                  <span className="absolute right-1/2 top-5 h-0.5 w-full -translate-y-1/2 overflow-hidden rounded-full bg-lp-line" aria-hidden="true">
+                    {/* Fills in left to right, one segment after another. */}
+                    {steps[i - 1].completed && <span className="lp-line-fill block h-full w-full bg-lp-azure" style={{ animationDelay: `${i * 150}ms` }} />}
+                  </span>
                 )}
                 <span
                   className={cn(
@@ -135,7 +140,7 @@ export function ProgressTracker() {
                     step.completed ? "bg-lp-azure text-white" : current ? "bg-lp-card text-lp-azure ring-2 ring-lp-azure" : "border border-lp-line bg-lp-card text-lp-muted"
                   )}
                 >
-                  {step.completed ? <CheckIcon className="h-5 w-5 stroke-[3]" /> : i + 1}
+                  {step.completed ? <CheckIcon className="h-5 w-5 stroke-[3]" /> : <step.icon className="h-[18px] w-[18px]" aria-hidden="true" />}
                 </span>
                 <span className={cn("mt-2 px-1 text-xs font-medium leading-tight", step.completed || current ? "text-lp-fg" : "text-lp-muted")}>{step.title}</span>
                 <span className="sr-only">{step.completed ? "completed" : current ? "in progress" : "not started"}</span>
@@ -161,7 +166,7 @@ export function ProgressTracker() {
       <ol className="relative space-y-2 lg:hidden">
         <div className="absolute bottom-8 left-[35px] top-8 w-px bg-lp-line" aria-hidden="true"></div>
 
-        {steps.map((step, i) => {
+        {steps.map((step) => {
           const current = !step.completed && step.inProgress
           const dimmed = !step.completed && step.locked
           return (
@@ -183,7 +188,7 @@ export function ProgressTracker() {
                       : "border border-lp-line bg-lp-card text-lp-muted"
                 )}
               >
-                {step.completed ? <CheckIcon className="h-5 w-5 stroke-[3]" /> : <span>{String(i + 1).padStart(2, "0")}</span>}
+                {step.completed ? <CheckIcon className="h-5 w-5 stroke-[3]" /> : <step.icon className="h-[18px] w-[18px]" aria-hidden="true" />}
               </div>
               <div className="min-w-0 flex-1 pt-1">
                 <div className="mb-1 flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
