@@ -13,12 +13,16 @@ import { celebrate } from "./delight/celebrate"
 
 type Status = "approved" | "refused" | "waiting"
 
+const STATUS_LABEL: Record<Status, string> = { approved: "Approved", refused: "Refused", waiting: "Still waiting" }
+
 /**
  * "How did it go?" after the embassy appointment. Records the outcome
  * (/api/outcome), and offers a testimonial on approval, the question bank
  * either way, and refusal recovery on a refusal. Needs DashboardDataProvider.
+ * `always` (the Share your outcome page) shows it with or without a past
+ * appointment, so anyone can report an outcome or add a testimonial later.
  */
-export function OutcomeCard() {
+export function OutcomeCard({ always = false }: { always?: boolean } = {}) {
   const { appointment, userData, now } = useReadiness()
   const [choice, setChoice] = useState<Status | null>(null)
   const [testimonial, setTestimonial] = useState("")
@@ -31,7 +35,7 @@ export function OutcomeCard() {
   const answeredForThis = outcome && outcome.appointmentAt === appointment?.atMs
   // Ask once the appointment has passed; keep asking while it's "waiting".
   const show = appointment && appointment.atMs < now && (!answeredForThis || outcome?.status === "waiting")
-  if (!show && !done) return null
+  if (!always && !show && !done) return null
 
   const submit = async (status: Status) => {
     const user = auth.currentUser
@@ -83,7 +87,11 @@ export function OutcomeCard() {
     )
   }
   if (done === "waiting") {
-    return shell(<p className="text-sm">Thanks. We&apos;ll ask again in a little while. Fingers crossed!</p>)
+    return shell(
+      <p className="text-sm">
+        {always ? "Thanks. Come back and update this when you hear. Fingers crossed!" : "Thanks. We'll ask again in a little while. Fingers crossed!"}
+      </p>,
+    )
   }
 
   const questionsBox = (
@@ -97,8 +105,17 @@ export function OutcomeCard() {
   return shell(
     <>
       <div>
-        <p className="font-display text-lg font-semibold">How did your visa interview go?</p>
-        <p className="text-sm text-lp-muted">{appointment?.embassy}, {new Date(appointment!.atMs).toLocaleDateString()}</p>
+        <p className="font-display text-lg font-semibold">How did your visa application go?</p>
+        <p className="text-sm text-lp-muted">
+          {appointment && (always ? appointment.atMs < now : true)
+            ? `${appointment.embassy}, ${new Date(appointment.atMs).toLocaleDateString()}`
+            : "Approved, refused or still waiting? Let us know."}
+        </p>
+        {always && outcome && !choice && (
+          <p className="mt-2 text-sm">
+            You last told us: <span className="font-semibold">{STATUS_LABEL[outcome.status]}</span>. Pick again to update it{outcome.status === "approved" ? " or add your story" : ""}.
+          </p>
+        )}
       </div>
       {!choice ? (
         <div className="flex flex-wrap gap-2">

@@ -13,6 +13,7 @@ import {
     Users,
     Video,
     CalendarClock,
+    PartyPopper,
     Wallet,
     HeartHandshake,
     UsersRound,
@@ -58,6 +59,7 @@ const groups: { label: string; items: { title: string; url: string; icon: typeof
         label: "Your interview",
         items: [
             { title: "Embassy Appointment", url: "/dashboard/appointment", icon: CalendarClock },
+            { title: "Share Your Outcome", url: "/dashboard/outcome", icon: PartyPopper },
             { title: "Refusal Recovery", url: "/dashboard/refusal", icon: HeartHandshake },
         ],
     },
