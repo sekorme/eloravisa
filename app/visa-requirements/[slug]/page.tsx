@@ -12,10 +12,16 @@ type Props = { params: Promise<{ slug: string }> }
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const entry = await getPublishedRequirement((await params).slug)
   if (!entry) return { title: "Visa requirements" }
+  const title = `${entry.country} ${entry.visaType} Visa Requirements`
+  const description = entry.summary || `Fees, documents, proof of funds and embassy details for a ${entry.country} ${entry.visaType.toLowerCase()} visa.`
+  const url = `/visa-requirements/${entry.slug}`
   return {
-    title: `${entry.country} ${entry.visaType} Visa Requirements`,
-    description: entry.summary || `Fees, documents, proof of funds and embassy details for a ${entry.country} ${entry.visaType.toLowerCase()} visa.`,
-    alternates: { canonical: `/visa-requirements/${entry.slug}` },
+    title,
+    description,
+    alternates: { canonical: url },
+    // Image comes from the sibling opengraph-image.tsx.
+    openGraph: { type: "article", siteName: "Elora Visa", locale: "en_US", url, title, description },
+    twitter: { card: "summary_large_image", title, description },
   }
 }
 

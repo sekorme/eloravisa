@@ -19,6 +19,11 @@ const nextConfig = {
         ignoreDuringBuilds: true,
     },
     turbopack: {},
+    // lib/og.tsx reads these from disk when rendering share images at request
+    // time, so make sure they ship with the serverless functions.
+    outputFileTracingIncludes: {
+        '/**/opengraph-image': ['./assets/og/**', './public/eloravisa.PNG'],
+    },
     async headers() {
         return [
             {

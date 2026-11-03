@@ -9,51 +9,6 @@ import {TrackVisit} from "@/components/TrackVisit";
 import { LenisProvider } from "@/components/LenisProvider";
 
 
-
-
-const images = [
-    {
-        url: "https://eloravisa.com/elora1.jpeg",
-        width: 1200,
-        height: 630,
-        alt: "Elora Visa one"
-    },
-    {
-        url: "https://eloravisa.com/elora2.jpeg",
-        width: 1200,
-        height: 630,
-        alt: "Elora Visa Two",
-    },
-    {
-        url: "https://eloravisa.com/elora3.jpeg",
-        width: 1200,
-        height: 630,
-        alt: "Elora Visa Three",
-    },
-
-    {
-        url: "https://eloravisa.com/elora4.jpeg",
-        width: 1200,
-        height: 630,
-        alt: "Elora Visa Four",
-    },
-    {
-        url: "https://eloravisa.com/elora5.jpeg",
-        width: 1200,
-        height: 630,
-        alt: "Elora Visa Five",
-    },
-    {
-        url: "https://eloravisa.com/elora6.jpeg",
-        width: 1200,
-        height: 630,
-        alt: "Elora Visa Six",
-    },
-];
-
-const randomIndex = Math.floor(Math.random() * images.length);
-const selected = images[randomIndex];
-
 const geistSans = Inter({
     variable: "--font-inter",
     subsets: ["latin"],
@@ -97,7 +52,7 @@ export const metadata: Metadata = {
     publisher: "Elora Visa",
     icons: {
         icon: "https://eloravisa.com/eloravisa.PNG",
-        apple: "https://eloravisal.com/apple-touch-icon.png",
+        apple: "https://eloravisa.com/apple-touch-icon.png",
     },
     robots: {
         index: true,
@@ -118,15 +73,12 @@ export const metadata: Metadata = {
         title: "Elora Visa - Your AI Visa Companion",
         description: "Simplify your visa journey with AI. Document analysis, interview prep, and expert guidance all in one place.",
         siteName: "Elora Visa",
-        images: [
-            selected
-        ],
+        // Image comes from app/opengraph-image.tsx (pages can override with their own).
     },
     twitter: {
         card: "summary_large_image",
         title: "Elora Visa - AI Visa Application Assistant",
         description: "Boost your visa approval chances with AI-powered reviews and mock interviews.",
-        images: ["https://eloravisa.com/OG.png"], // Same as OG image
         creator: "@eloravisa", // Replace with actual handle
     },
     metadataBase: new URL("https://eloravisa.com"), // Replace with actual domain

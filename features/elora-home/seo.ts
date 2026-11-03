@@ -11,13 +11,7 @@ import type { Metadata } from "next"
 
 export const SITE_URL = "https://eloravisa.com"
 
-/** Share image. 1200×630 is the size both Open Graph and X expect. */
-const OG_IMAGE = {
-    url: `${SITE_URL}/OG.png`,
-    width: 1200,
-    height: 630,
-    alt: "Elora Visa: an AI-powered visa preparation workspace",
-}
+/* Share image: app/opengraph-image.tsx (1200×630, used by Open Graph and X). */
 
 const TITLE = "Elora Visa | Prepare smarter. Apply with confidence."
 
@@ -44,13 +38,11 @@ export const homeMetadata: Metadata = {
         url: SITE_URL,
         title: TITLE,
         description: DESCRIPTION,
-        images: [OG_IMAGE],
     },
     twitter: {
         card: "summary_large_image",
         title: TITLE,
         description: DESCRIPTION,
-        images: [OG_IMAGE.url],
     },
     robots: {
         index: true,
