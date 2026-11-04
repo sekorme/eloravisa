@@ -41,6 +41,11 @@ async function buildProfileBlock(uid: string, userData?: FirebaseFirestore.Docum
     add("Destination country", onboarding.destination);
     add("Visa type", onboarding.visaType);
     add("Application status", onboarding.appStatus);
+    if (onboarding.refused === "yes") add("Previous visa refusal", [onboarding.refusalCountry, onboarding.refusalYear].filter(Boolean).join(" ") || "yes");
+    if (onboarding.overstayed === "yes") add("Has overstayed a visa before", "yes");
+    add("Trip paid for by", onboarding.sponsor);
+    add("Funds ready", onboarding.funds);
+    if (Array.isArray(onboarding.concerns) && onboarding.concerns.length) add("Biggest worries", onboarding.concerns.join(", "));
     add("Plan", data.planId);
     if (typeof data.tokens === "number") lines.push(`- Token balance: ${data.tokens}`);
 

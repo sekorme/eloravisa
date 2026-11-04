@@ -1,615 +1,357 @@
-"use client";
+"use client"
 
-import { useState, useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { gsap } from "gsap";
-import countries from "world-countries";
-import confetti from "canvas-confetti";
-import { CheckCircle2, Loader2 } from "lucide-react";
-import { ClientOnly } from "@/components/ClientOnly";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
-import { db, auth } from "@/firebase/client";
-import { useRouter } from "next/navigation";
-import { onAuthStateChanged } from "firebase/auth";
+import { useEffect, useMemo, useRef, useState } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { onAuthStateChanged, signOut } from "firebase/auth"
+import { deleteField, doc, getDoc, updateDoc } from "firebase/firestore"
+import { gsap } from "gsap"
+import confetti from "canvas-confetti"
+import countries from "world-countries"
+import { AlertCircle, ArrowRight, CheckCircle2, Loader2 } from "lucide-react"
+import { toast } from "sonner"
+import { auth, db } from "@/firebase/client"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+import { CountryPicker } from "@/components/onboarding/CountryPicker"
+import {
+  APP_STATUSES,
+  CONCERNS,
+  EMPTY_ANSWERS,
+  FUNDS_STATUS,
+  ONBOARDING_STEPS,
+  SPONSORS,
+  VISA_TYPES,
+  startingSteps,
+  stepError,
+  type OnboardingAnswers,
+  type StartStep,
+} from "@/lib/onboarding"
 
-const steps = 7;
+const COUNTRY_NAMES = countries.map((c) => c.name.common).sort((a, b) => a.localeCompare(b))
+const isCountry = (name: string) => COUNTRY_NAMES.includes(name)
+const POPULAR_HOME = ["Ghana", "Nigeria", "Kenya", "South Africa", "Cameroon", "Côte d'Ivoire"]
+const POPULAR_DESTINATIONS = ["United Kingdom", "United States", "Canada", "Germany", "Australia", "Ireland", "Netherlands", "France"]
 
-// Sorted list of countries for the dropdowns
-const countryList = countries
-    .map(c => ({
-        name: c.name.common,
-        code: c.cca2,
-        nationality: c.demonyms?.eng?.m || c.name.common
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+const STEP_TITLES = [
+  { title: "Let's start with you", subtitle: "So we can match the right embassy rules." },
+  { title: "Your visa goal", subtitle: "This sets your document checklist and funds target." },
+  { title: "History and money", subtitle: "Honest answers help us spot risks before an officer does." },
+  { title: "Last step", subtitle: "Tell us what worries you, and confirm a few things." },
+]
+
+type Update = <K extends keyof OnboardingAnswers>(key: K, value: OnboardingAnswers[K]) => void
+
+/** One-tap choice buttons (a radio group). */
+function Choice<T extends string>({ label, value, options, onChange, columns = 2 }: {
+  label: string
+  value: string
+  options: readonly { value: T; label: string }[]
+  onChange: (v: T) => void
+  columns?: 1 | 2
+}) {
+  return (
+    <fieldset className="space-y-2">
+      <legend className="mb-2 text-sm font-medium">{label}</legend>
+      <div className={cn("grid gap-2", columns === 2 ? "grid-cols-2" : "grid-cols-1")} role="radiogroup">
+        {options.map((o) => {
+          const selected = value === o.value
+          return (
+            <button
+              key={o.value}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => onChange(o.value)}
+              className={cn(
+                "min-h-11 rounded-xl border px-3 py-2 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-azure/40",
+                selected ? "border-lp-azure bg-lp-sky font-medium text-lp-fg" : "border-lp-line bg-lp-card hover:border-lp-azure/50",
+              )}
+            >
+              {o.label}
+            </button>
+          )
+        })}
+      </div>
+    </fieldset>
+  )
+}
+
+const asOptions = (list: readonly string[]) => list.map((v) => ({ value: v, label: v }))
+const YES_NO = [{ value: "no", label: "No" }, { value: "yes", label: "Yes" }] as const
 
 export default function OnboardingForm() {
-    const router = useRouter();
-    const [step, setStep] = useState(1);
-    const [isFinished, setIsFinished] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
-    const containerRef = useRef<HTMLDivElement>(null);
-    
-    // Form state
-    const [formData, setFormData] = useState({
-        residence: "",
-        nationality: "",
-        ageRange: "",
-        education: "",
-        destination: "",
-        visaType: "",
-        appStatus: "",
-        refused: "",
-        refusalCountry: "",
-        refusalYear: "",
-        overstayed: "",
-        sponsor: "",
-        funds: "",
-        confidence: "",
-        concerns: [] as string[],
-        guidance: "",
-        notifications: "",
-        legal1: false,
-        legal2: false,
-        legal3: false,
-    });
+  const router = useRouter()
+  const [uid, setUid] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [step, setStep] = useState(1)
+  const [answers, setAnswers] = useState<OnboardingAnswers>(EMPTY_ANSWERS)
+  const [error, setError] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [finished, setFinished] = useState<StartStep[] | null>(null)
+  const stepRef = useRef<HTMLDivElement>(null)
+  const headingRef = useRef<HTMLHeadingElement>(null)
+  const leavingRef = useRef(false)
 
-    // Load initial data from Firestore
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                try {
-                    const userDoc = await getDoc(doc(db, "users", user.uid));
-                    if (userDoc.exists()) {
-                        const data = userDoc.data();
-                        // Pre-fill fields if they exist in the user profile
-                        setFormData(prev => ({
-                            ...prev,
-                            residence: data.country || prev.residence, // Use signup country as default residence
-                        }));
-                    }
-                } catch (error) {
-                    console.error("Error fetching user data:", error);
-                }
-            } else {
-                // Redirect to login if not authenticated? 
-                // For now, we'll let them stay but they won't be able to save.
-                // Ideally: router.push('/');
-            }
-        });
+  const update: Update = (key, value) => {
+    setAnswers((a) => ({ ...a, [key]: value }))
+    setError(null)
+  }
 
-        return () => unsubscribe();
-    }, []);
+  // Resume where the user left off.
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        if (!leavingRef.current) router.replace("/login")
+        return
+      }
+      setUid(user.uid)
+      try {
+        const data = (await getDoc(doc(db, "users", user.uid))).data() ?? {}
+        const saved = data.onboarding ?? {}
+        setAnswers({
+          ...EMPTY_ANSWERS,
+          ...Object.fromEntries(Object.entries(saved).filter(([k]) => k in EMPTY_ANSWERS)),
+          residence: saved.residence || (isCountry(data.country) ? data.country : ""),
+          nationality: saved.nationality || (isCountry(data.country) ? data.country : ""),
+          concerns: Array.isArray(saved.concerns) ? saved.concerns : [],
+        })
+        const resumeAt = Number(data.onboardingStep)
+        if (resumeAt >= 1 && resumeAt <= ONBOARDING_STEPS) setStep(resumeAt)
+      } catch {
+        // Start blank; saving will surface any real problem.
+      } finally {
+        setLoading(false)
+      }
+    })
+    return () => unsub()
+  }, [router])
 
-    useEffect(() => {
-        if (isFinished) {
-            confetti({
-                particleCount: 150,
-                spread: 70,
-                origin: { y: 0.6 },
-                zIndex: 100,
-            });
-            saveData();
-        }
+  useEffect(() => {
+    if (!stepRef.current) return
+    gsap.fromTo(stepRef.current, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" })
+    headingRef.current?.focus()
+  }, [step, finished, loading])
 
-        if (containerRef.current) {
-            gsap.fromTo(
-                containerRef.current,
-                { opacity: 0, y: 20 },
-                { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
-            );
-        }
-    }, [step, isFinished]);
-
-    const saveData = async () => {
-        setIsSaving(true);
-        try {
-            const user = auth.currentUser;
-            if (!user) {
-                console.error("No authenticated user found");
-                return;
-            }
-
-            const finalData = {
-                onboarding: formData,
-                completedOnboarding: true,
-                updatedAt: new Date().toISOString(),
-            };
-
-            // Update the existing user document
-            await updateDoc(doc(db, "users", user.uid), finalData);
-            
-        } catch (error) {
-            console.error("Error saving onboarding data:", error);
-        } finally {
-            setIsSaving(false);
-        }
-    };
-
-    const next = () => {
-        if (step === steps) {
-            setIsFinished(true);
-        } else {
-            setStep((s) => Math.min(s + 1, steps));
-        }
-    };
-    const back = () => setStep((s) => Math.max(s - 1, 1));
-
-    const updateForm = (key: string, value: any) => {
-        setFormData(prev => ({ ...prev, [key]: value }));
-    };
-
-    if (isFinished) {
-        return (
-            <ClientOnly>
-                <main className="min-h-screen flex items-center justify-center px-4 bg-slate-50 dark:bg-slate-950 py-12">
-                    <Card ref={containerRef} className="w-full max-w-md p-8 space-y-6 shadow-xl border-t-4 border-t-emerald-500">
-                        <div className="text-center space-y-4">
-                            <div className="flex justify-center">
-                                <CheckCircle2 className="w-16 h-16 text-emerald-500" />
-                            </div>
-                            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Welcome aboard!</h1>
-                            <p className="text-slate-600 dark:text-slate-400">
-                                We've personalized your roadmap for your <strong>{formData.destination} {formData.visaType} Visa</strong>.
-                            </p>
-                        </div>
-
-                        <div className="bg-slate-100 dark:bg-slate-900 p-4 rounded-xl space-y-2">
-                            <h3 className="font-semibold text-sm uppercase tracking-wider text-slate-500">Your Goal</h3>
-                            <p className="text-lg font-medium">
-                                {formData.destination} — {formData.visaType}
-                            </p>
-                            <p className="text-sm text-slate-600 dark:text-slate-400">
-                                Current Status: {formData.appStatus}
-                            </p>
-                        </div>
-
-                        <Button 
-                            className="w-full h-12 text-lg bg-blue-600 hover:bg-blue-700 text-white transition-all"
-                            onClick={() => router.push('/dashboard')}
-                            disabled={isSaving}
-                        >
-                            {isSaving ? (
-                                <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                    Saving Profile...
-                                </>
-                            ) : (
-                                "Go to My Dashboard"
-                            )}
-                        </Button>
-                    </Card>
-                </main>
-            </ClientOnly>
-        );
+  /** Writes the answers so far. Returns false (and shows why) if it fails. */
+  const persist = async (extra: Record<string, unknown>) => {
+    if (!uid) return false
+    setSaving(true)
+    try {
+      const fields: Record<string, unknown> = { updatedAt: new Date().toISOString(), ...extra }
+      // Field paths, so answers from older versions of this form are kept.
+      for (const [k, v] of Object.entries(answers)) fields[`onboarding.${k}`] = typeof v === "string" ? v.trim() : v
+      await updateDoc(doc(db, "users", uid), fields)
+      return true
+    } catch {
+      setError("We couldn't save your answers. Check your connection and try again.")
+      return false
+    } finally {
+      setSaving(false)
     }
+  }
 
-    return (
-        <ClientOnly>
-            <main className="min-h-screen flex items-center justify-center px-4 bg-slate-50 dark:bg-slate-950 py-12">
-                <Card className="w-full max-w-md p-6 space-y-6 shadow-lg border-none">
-                    {/* Progress */}
-                    <div className="space-y-3">
-                        <div className="flex justify-between items-end">
-                            <span className="text-xs font-bold uppercase tracking-widest text-blue-600 dark:text-blue-400">Step {step} of {steps}</span>
-                            <span className="text-xs text-slate-400">{Math.round((step / steps) * 100)}% Complete</span>
-                        </div>
-                        <Progress value={(step / steps) * 100} className="h-1.5" />
-                    </div>
+  const next = async () => {
+    const problem = stepError(step, answers, isCountry)
+    if (problem) return setError(problem)
+    if (step < ONBOARDING_STEPS) {
+      if (await persist({ onboardingStep: step + 1 })) setStep(step + 1)
+      return
+    }
+    const ok = await persist({
+      completedOnboarding: true,
+      onboardingCompletedAt: new Date().toISOString(),
+      termsAcceptedAt: new Date().toISOString(),
+      onboardingStep: deleteField(),
+    })
+    if (!ok) return
+    const data = uid ? (await getDoc(doc(db, "users", uid)).catch(() => null))?.data() : null
+    setFinished(startingSteps(data ?? { onboarding: answers }))
+    confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 }, zIndex: 100, disableForReducedMotion: true })
+  }
 
-                    {/* Content */}
-                    <div ref={containerRef} className="min-h-[350px]">
-                        {step === 1 && <StepOne data={formData} update={updateForm} />}
-                        {step === 2 && <StepTwo data={formData} update={updateForm} />}
-                        {step === 3 && <StepThree data={formData} update={updateForm} />}
-                        {step === 4 && <StepFour data={formData} update={updateForm} />}
-                        {step === 5 && <StepFive data={formData} update={updateForm} />}
-                        {step === 6 && <StepSix data={formData} update={updateForm} />}
-                        {step === 7 && <StepSeven data={formData} update={updateForm} />}
-                    </div>
+  const back = () => {
+    setError(null)
+    setStep((s) => Math.max(1, s - 1))
+  }
 
-                    {/* Navigation */}
-                    <div className="flex flex-col gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
-                        <div className="flex items-center justify-between gap-4">
-                            <Button 
-                                variant="ghost" 
-                                onClick={back} 
-                                disabled={step === 1}
-                                className="flex-1 h-11"
-                            >
-                                Back
-                            </Button>
-                            <Button 
-                                onClick={next}
-                                className="flex-[2] h-11 bg-blue-600 hover:bg-blue-700 text-white"
-                            >
-                                {step === steps ? "Finish" : "Continue"}
-                            </Button>
-                        </div>
-                        <button className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors mx-auto">
-                            Save and continue later
-                        </button>
-                    </div>
-                </Card>
-            </main>
-        </ClientOnly>
-    );
-}
+  const saveForLater = async () => {
+    if (await persist({ onboardingStep: step })) {
+      leavingRef.current = true
+      // Signed-in users on "/" are sent back here, so leaving means signing out.
+      toast.success("Saved. Sign in any time to pick up where you left off.")
+      await signOut(auth).catch(() => {})
+      router.push("/")
+    }
+  }
 
-/* ------------------ STEPS ------------------ */
+  const shell = (children: React.ReactNode) => (
+    <main className="flex min-h-screen items-center justify-center bg-lp-page px-4 py-12 text-lp-fg">
+      <div className="pointer-events-none fixed inset-x-0 top-0 h-[420px] bg-gradient-to-b from-lp-sky via-lp-sky/30 to-transparent" aria-hidden="true" />
+      <div className="relative w-full max-w-lg rounded-[1.5rem] border border-lp-line bg-lp-card p-6 shadow-[0_1px_2px_rgba(8,32,26,0.04),0_8px_24px_-16px_rgba(8,32,26,0.18)] md:p-8">
+        {children}
+      </div>
+    </main>
+  )
 
-function StepOne({ data, update }: any) {
-    return (
-        <div className="space-y-5">
-            <div className="space-y-2">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Let’s start with you</h2>
-                <p className="text-slate-500 text-sm">Help us understand your background.</p>
-            </div>
-            
-            <div className="space-y-4">
-                <div className="space-y-2">
-                    <Label>Country of residence</Label>
-                    <Select value={data.residence} onValueChange={(v) => update("residence", v)}>
-                        <SelectTrigger><SelectValue placeholder="Select country" /></SelectTrigger>
-                        <SelectContent>
-                            {countryList.map(c => (
-                                <SelectItem key={c.code} value={c.name}>{c.name}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
+  const progress = useMemo(() => Math.round(((step - 1) / ONBOARDING_STEPS) * 100), [step])
 
-                <div className="space-y-2">
-                    <Label>Nationality</Label>
-                    <Select value={data.nationality} onValueChange={(v) => update("nationality", v)}>
-                        <SelectTrigger><SelectValue placeholder="Select nationality" /></SelectTrigger>
-                        <SelectContent>
-                            {countryList.map(c => (
-                                <SelectItem key={c.code + "-nat"} value={c.name}>{c.name}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
+  if (loading) return shell(<div className="flex h-64 items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-lp-azure" /></div>)
 
-                <div className="space-y-3">
-                    <Label>Age range</Label>
-                    <RadioGroup value={data.ageRange} onValueChange={(v) => update("ageRange", v)} className="grid grid-cols-2 gap-3">
-                        {["18–24", "25–34", "35–44", "45+"].map((age) => (
-                            <Label key={age} className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 dark:has-[:checked]:bg-blue-900/20">
-                                <RadioGroupItem value={age} /> {age}
-                            </Label>
-                        ))}
-                    </RadioGroup>
-                </div>
-
-                <div className="space-y-2">
-                    <Label>Highest level of education</Label>
-                    <Select value={data.education} onValueChange={(v) => update("education", v)}>
-                        <SelectTrigger><SelectValue placeholder="Select education" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="shs">High School</SelectItem>
-                            <SelectItem value="diploma">Diploma</SelectItem>
-                            <SelectItem value="degree">Bachelor’s Degree</SelectItem>
-                            <SelectItem value="masters">Master’s</SelectItem>
-                            <SelectItem value="phd">PhD</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-            </div>
+  if (finished) {
+    return shell(
+      <div ref={stepRef} className="space-y-6">
+        <div className="space-y-2 text-center">
+          <CheckCircle2 className="mx-auto h-12 w-12 text-lp-azure" />
+          <h1 ref={headingRef} tabIndex={-1} className="font-display text-3xl font-semibold tracking-[-0.04em] outline-none">You&apos;re all set</h1>
+          <p className="text-lp-muted">
+            Your {answers.destination} {answers.visaType.toLowerCase()} visa plan is ready. Start here:
+          </p>
         </div>
-    );
-}
+        <ol className="space-y-2">
+          {finished.map((s, i) => (
+            <li key={s.key}>
+              <Link href={s.href} className="group flex gap-3 rounded-xl border border-lp-line p-4 transition-colors hover:border-lp-azure/60 hover:bg-lp-sky/50">
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-lp-sky font-display text-sm font-semibold text-lp-azure">{i + 1}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block font-medium">{s.title}</span>
+                  <span className="block text-sm text-lp-muted">{s.why}</span>
+                </span>
+                <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-lp-muted transition-transform group-hover:translate-x-1" />
+              </Link>
+            </li>
+          ))}
+        </ol>
+        <Button className="h-11 w-full rounded-full" onClick={() => router.push("/dashboard")}>Go to my dashboard</Button>
+        <p className="text-center text-xs text-lp-muted">You can change your destination and visa type any time in your profile.</p>
+      </div>,
+    )
+  }
 
-function StepTwo({ data, update }: any) {
-    return (
-        <div className="space-y-5">
-            <div className="space-y-2">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Your visa goal</h2>
-                <p className="text-slate-500 text-sm">Where are you headed?</p>
-            </div>
+  const { title, subtitle } = STEP_TITLES[step - 1]
 
-            <div className="space-y-4">
-                <div className="space-y-2">
-                    <Label>Destination country</Label>
-                    <Select value={data.destination} onValueChange={(v) => update("destination", v)}>
-                        <SelectTrigger><SelectValue placeholder="Select Destination" /></SelectTrigger>
-                        <SelectContent>
-                            {countryList.map(c => (
-                                <SelectItem key={c.code + "-nat"} value={c.name}>{c.name}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                <div className="space-y-2">
-                    <Label>Visa type</Label>
-                    <Select value={data.visaType} onValueChange={(v) => update("visaType", v)}>
-                        <SelectTrigger><SelectValue placeholder="Select visa type" /></SelectTrigger>
-                        <SelectContent>
-                            {["Study", "Visit", "Work", "Family"].map((v) => (
-                                <SelectItem key={v} value={v}>{v}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                <div className="space-y-2">
-                    <Label>Application status</Label>
-                    <Select value={data.appStatus} onValueChange={(v) => update("appStatus", v)}>
-                        <SelectTrigger><SelectValue placeholder="Current status" /></SelectTrigger>
-                        <SelectContent>
-                            {["Not started", "In progress", "Appointment booked", "Previously refused"].map((s) => (
-                                <SelectItem key={s} value={s}>{s}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-            </div>
+  return shell(
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <div className="flex items-end justify-between text-xs">
+          <span className="font-display font-medium uppercase tracking-[0.16em] text-lp-azure">Step {step} of {ONBOARDING_STEPS}</span>
+          <span className="text-lp-muted">About {Math.max(1, ONBOARDING_STEPS - step + 1)} min left</span>
         </div>
-    );
-}
-
-function StepThree({ data, update }: any) {
-    const refusalRef = useRef(null);
-
-    useEffect(() => {
-        if (data.refused === "yes") {
-            gsap.fromTo(refusalRef.current, { height: 0, opacity: 0 }, { height: "auto", opacity: 1, duration: 0.3 });
-        }
-    }, [data.refused]);
-
-    return (
-        <div className="space-y-5">
-            <div className="space-y-2">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Visa history</h2>
-                <p className="text-slate-500 text-sm">This helps us gauge your risk profile.</p>
-            </div>
-
-            <div className="space-y-6">
-                <div className="space-y-3">
-                    <Label className="text-base">Have you ever been refused a visa?</Label>
-                    <RadioGroup value={data.refused} onValueChange={(v) => update("refused", v)} className="flex gap-4">
-                        <Label className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer flex-1 hover:bg-slate-50 dark:hover:bg-slate-900 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 dark:has-[:checked]:bg-blue-900/20">
-                            <RadioGroupItem value="yes" /> Yes
-                        </Label>
-                        <Label className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer flex-1 hover:bg-slate-50 dark:hover:bg-slate-900 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 dark:has-[:checked]:bg-blue-900/20">
-                            <RadioGroupItem value="no" /> No
-                        </Label>
-                    </RadioGroup>
-                </div>
-
-                {data.refused === "yes" && (
-                    <div ref={refusalRef} className="space-y-4 pt-2">
-                        <div className="space-y-2">
-                            <Label>Which country?</Label>
-                            <Input 
-                                placeholder="e.g. USA"
-                                style={{ fontSize: "16px" }}
-                                value={data.refusalCountry} 
-                                onChange={(e) => update("refusalCountry", e.target.value)} 
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>What year? (Optional)</Label>
-                            <Input 
-                                type="number" 
-                                placeholder="2023"
-                                style={{ fontSize: "16px" }}
-                                value={data.refusalYear} 
-                                onChange={(e) => update("refusalYear", e.target.value)} 
-                            />
-                        </div>
-                    </div>
-                )}
-
-                <div className="space-y-3">
-                    <Label className="text-base">Have you ever overstayed a visa?</Label>
-                    <RadioGroup value={data.overstayed} onValueChange={(v) => update("overstayed", v)} className="flex gap-4">
-                        <Label className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer flex-1 hover:bg-slate-50 dark:hover:bg-slate-900 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 dark:has-[:checked]:bg-blue-900/20">
-                            <RadioGroupItem value="yes" /> Yes
-                        </Label>
-                        <Label className="flex items-center gap-2 p-3 border rounded-lg cursor-pointer flex-1 hover:bg-slate-50 dark:hover:bg-slate-900 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 dark:has-[:checked]:bg-blue-900/20">
-                            <RadioGroupItem value="no" /> No
-                        </Label>
-                    </RadioGroup>
-                </div>
-            </div>
+        <div className="h-1.5 overflow-hidden rounded-full bg-lp-sky" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100} aria-label="Onboarding progress">
+          <div className="h-full rounded-full bg-lp-azure transition-[width] duration-500" style={{ width: `${Math.max(progress, 4)}%` }} />
         </div>
-    );
-}
+      </div>
 
-function StepFour({ data, update }: any) {
-    return (
-        <div className="space-y-5">
-            <div className="space-y-2">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Financial picture</h2>
-                <p className="text-slate-500 text-sm">Visas often require proof of funds.</p>
-            </div>
+      <div ref={stepRef} className="space-y-5">
+        <div className="space-y-1">
+          <h1 ref={headingRef} tabIndex={-1} className="font-display text-2xl font-semibold tracking-[-0.04em] outline-none">{title}</h1>
+          <p className="text-sm text-lp-muted">{subtitle}</p>
+        </div>
 
-            <div className="space-y-4">
+        {step === 1 && (
+          <>
+            <CountryPicker id="ob-residence" label="Country you live in" value={answers.residence} onChange={(v) => update("residence", v)} options={COUNTRY_NAMES} popular={POPULAR_HOME} />
+            <CountryPicker id="ob-nationality" label="Nationality (as on your passport)" value={answers.nationality} onChange={(v) => update("nationality", v)} options={COUNTRY_NAMES} popular={POPULAR_HOME} />
+          </>
+        )}
+
+        {step === 2 && (
+          <>
+            <CountryPicker id="ob-destination" label="Where do you want to go?" value={answers.destination} onChange={(v) => update("destination", v)} options={COUNTRY_NAMES} popular={POPULAR_DESTINATIONS} />
+            <Choice label="Visa type" value={answers.visaType} options={asOptions(VISA_TYPES)} onChange={(v) => update("visaType", v)} />
+            <Choice label="Where are you with your application?" value={answers.appStatus} options={asOptions(APP_STATUSES)} onChange={(v) => update("appStatus", v)} />
+          </>
+        )}
+
+        {step === 3 && (
+          <>
+            <Choice label="Have you ever been refused a visa?" value={answers.refused} options={YES_NO} onChange={(v) => update("refused", v)} />
+            {answers.refused === "yes" && (
+              <div className="grid grid-cols-[1fr_7rem] gap-3">
+                <CountryPicker id="ob-refusal-country" label="Which country?" value={answers.refusalCountry} onChange={(v) => update("refusalCountry", v)} options={COUNTRY_NAMES} popular={POPULAR_DESTINATIONS} />
                 <div className="space-y-2">
-                    <Label>Who is sponsoring your trip?</Label>
-                    <Select value={data.sponsor} onValueChange={(v) => update("sponsor", v)}>
-                        <SelectTrigger><SelectValue placeholder="Select sponsor" /></SelectTrigger>
-                        <SelectContent>
-                            {["Self", "Parent", "Relative", "Scholarship"].map((s) => (
-                                <SelectItem key={s} value={s}>{s}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                  <label htmlFor="ob-refusal-year" className="text-sm font-medium">Year</label>
+                  <input
+                    id="ob-refusal-year"
+                    inputMode="numeric"
+                    maxLength={4}
+                    placeholder="2025"
+                    value={answers.refusalYear}
+                    onChange={(e) => update("refusalYear", e.target.value.replace(/\D/g, ""))}
+                    className="h-11 w-full rounded-xl border border-lp-line bg-lp-card px-3 text-base outline-none focus:border-lp-azure focus:ring-2 focus:ring-lp-azure/20"
+                  />
                 </div>
+              </div>
+            )}
+            <Choice label="Have you ever stayed longer than a visa allowed?" value={answers.overstayed} options={YES_NO} onChange={(v) => update("overstayed", v)} />
+            <Choice label="Who is paying for the trip?" value={answers.sponsor} options={asOptions(SPONSORS)} onChange={(v) => update("sponsor", v)} />
+            <Choice label="Is the money for the trip ready?" value={answers.funds} options={FUNDS_STATUS} onChange={(v) => update("funds", v)} columns={1} />
+          </>
+        )}
 
-                <div className="space-y-2">
-                    <Label>Do you have the required funds?</Label>
-                    <Select value={data.funds} onValueChange={(v) => update("funds", v)}>
-                        <SelectTrigger><SelectValue placeholder="Select status" /></SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="yes">Yes, I have them ready</SelectItem>
-                            <SelectItem value="partial">Partially</SelectItem>
-                            <SelectItem value="no">Not yet</SelectItem>
-                        </SelectContent>
-                    </Select>
+        {step === 4 && (
+          <>
+            <fieldset className="space-y-2">
+              <legend className="mb-2 text-sm font-medium">What worries you most? <span className="font-normal text-lp-muted">(optional, pick any)</span></legend>
+              <div className="grid grid-cols-2 gap-2">
+                {CONCERNS.map((c) => {
+                  const on = answers.concerns.includes(c.id)
+                  return (
+                    <button
+                      key={c.id}
+                      type="button"
+                      aria-pressed={on}
+                      onClick={() => update("concerns", on ? answers.concerns.filter((x) => x !== c.id) : [...answers.concerns, c.id])}
+                      className={cn(
+                        "min-h-11 rounded-xl border px-3 py-2 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-azure/40",
+                        on ? "border-lp-azure bg-lp-azure font-medium text-white" : "border-lp-line bg-lp-card hover:border-lp-azure/50",
+                      )}
+                    >
+                      {c.label}
+                    </button>
+                  )
+                })}
+              </div>
+            </fieldset>
+
+            <div className="space-y-3 rounded-xl border border-lp-line bg-lp-card-2 p-4">
+              {([
+                ["legal1", "I understand Elora gives guidance, not a guaranteed visa."],
+                ["legal2", "I'm responsible for my own application and the documents I submit."],
+                ["legal3", "AI feedback is for learning and preparation only."],
+              ] as const).map(([key, text]) => (
+                <div key={key} className="flex items-start gap-3">
+                  <Checkbox id={`ob-${key}`} checked={answers[key]} onCheckedChange={(v) => update(key, !!v)} className="mt-0.5" />
+                  <label htmlFor={`ob-${key}`} className="cursor-pointer text-sm leading-snug">{text}</label>
                 </div>
+              ))}
+              <p className="pt-1 text-xs text-lp-muted">
+                Elora teaches you to apply on your own. We don&apos;t give legal advice or act as your agent. See our{" "}
+                <Link href="/legal/privacy-policy" className="underline">privacy policy</Link>.
+              </p>
             </div>
+          </>
+        )}
+      </div>
+
+      {error && (
+        <p role="alert" className="flex items-start gap-2 rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-800 dark:text-red-300">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" /> {error}
+        </p>
+      )}
+
+      <div className="space-y-3 border-t border-lp-line pt-5">
+        <div className="flex gap-3">
+          <Button variant="ghost" onClick={back} disabled={step === 1 || saving} className="h-11 flex-1 rounded-full">Back</Button>
+          <Button onClick={next} disabled={saving} className="h-11 flex-[2] rounded-full">
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : step === ONBOARDING_STEPS ? "Finish" : "Continue"}
+          </Button>
         </div>
-    );
-}
-
-function StepFive({ data, update }: any) {
-    const concerns = [
-        { id: "sop", label: "Statement of Purpose" },
-        { id: "bank", label: "Bank Statement" },
-        { id: "interview", label: "Mock Interview" },
-        { id: "refusal", label: "Refusal Risk" },
-        { id: "docs", label: "Missing Documents" },
-        { id: "timeline", label: "Processing Time" }
-    ];
-
-    return (
-        <div className="space-y-5">
-            <div className="space-y-2">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Experience & Concerns</h2>
-                <p className="text-slate-500 text-sm">We&#39;re here to ease your mind.</p>
-            </div>
-
-            <div className="space-y-6">
-                <div className="space-y-3">
-                    <Label>Confidence level</Label>
-                    <RadioGroup value={data.confidence} onValueChange={(v) => update("confidence", v)} className="space-y-2">
-                        {[
-                            "Very confident",
-                            "Somewhat confident",
-                            "A bit unsure",
-                            "Completely new"
-                        ].map((c) => (
-                            <Label key={c} className="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 dark:has-[:checked]:bg-blue-900/20">
-                                <RadioGroupItem value={c} /> {c}
-                            </Label>
-                        ))}
-                    </RadioGroup>
-                </div>
-
-                <div className="space-y-3">
-                    <Label>What are your biggest concerns?</Label>
-                    <div className="grid grid-cols-2 gap-2">
-                        {concerns.map((c) => (
-                            <div 
-                                key={c.id} 
-                                onClick={() => {
-                                    const nextConcerns = data.concerns.includes(c.id)
-                                        ? data.concerns.filter((id: string) => id !== c.id)
-                                        : [...data.concerns, c.id];
-                                    update("concerns", nextConcerns);
-                                }}
-                                className={`p-2 text-xs border rounded-md cursor-pointer text-center transition-all ${
-                                    data.concerns.includes(c.id) 
-                                        ? "bg-blue-600 border-blue-600 text-white" 
-                                        : "hover:border-blue-300"
-                                }`}
-                            >
-                                {c.label}
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function StepSix({ data, update }: any) {
-    return (
-        <div className="space-y-5">
-            <div className="space-y-2">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Support Preferences</h2>
-                <p className="text-slate-500 text-sm">How do you prefer to be guided?</p>
-            </div>
-
-            <div className="space-y-4">
-                <div className="space-y-2">
-                    <Label>Preferred guidance style</Label>
-                    <Select value={data.guidance} onValueChange={(v) => update("guidance", v)}>
-                        <SelectTrigger><SelectValue placeholder="Select style" /></SelectTrigger>
-                        <SelectContent>
-                            {["Checklist", "AI-only", "Telegram", "Combination"].map((g) => (
-                                <SelectItem key={g} value={g}>{g}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                <div className="space-y-2">
-                    <Label>Notifications</Label>
-                    <Select value={data.notifications} onValueChange={(v) => update("notifications", v)}>
-                        <SelectTrigger><SelectValue placeholder="How should we reach you?" /></SelectTrigger>
-                        <SelectContent>
-                            {["Email", "WhatsApp", "Telegram", "None"].map((n) => (
-                                <SelectItem key={n} value={n}>{n}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function StepSeven({ data, update }: any) {
-    return (
-        <div className="space-y-5">
-            <div className="space-y-2">
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Legal Confirmation</h2>
-                <p className="text-slate-500 text-sm">A few final agreements.</p>
-            </div>
-
-            <div className="space-y-4 bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
-                <div className="flex items-start gap-3">
-                    <Checkbox 
-                        id="legal1" 
-                        checked={data.legal1} 
-                        onCheckedChange={(v) => update("legal1", !!v)} 
-                        className="mt-1" 
-                    />
-                    <Label htmlFor="legal1" className="text-sm font-normal leading-tight cursor-pointer">
-                        I understand this platform provides guidance, not visa guarantees.
-                    </Label>
-                </div>
-                
-                <div className="flex items-start gap-3">
-                    <Checkbox 
-                        id="legal2" 
-                        checked={data.legal2} 
-                        onCheckedChange={(v) => update("legal2", !!v)} 
-                        className="mt-1" 
-                    />
-                    <Label htmlFor="legal2" className="text-sm font-normal leading-tight cursor-pointer">
-                        I am responsible for submitting my own application.
-                    </Label>
-                </div>
-
-                <div className="flex items-start gap-3">
-                    <Checkbox 
-                        id="legal3" 
-                        checked={data.legal3} 
-                        onCheckedChange={(v) => update("legal3", !!v)} 
-                        className="mt-1" 
-                    />
-                    <Label htmlFor="legal3" className="text-sm font-normal leading-tight cursor-pointer">
-                        AI feedback is for educational purposes only.
-                    </Label>
-                </div>
-            </div>
-
-            <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-blue-800 dark:text-blue-300 text-xs leading-relaxed">
-                Note: This platform teaches you how to apply for visas by yourself. We do not provide legal advice or act as agents.
-            </div>
-        </div>
-    );
+        <button type="button" onClick={saveForLater} disabled={saving} className="mx-auto block text-xs text-lp-muted underline-offset-4 hover:text-lp-fg hover:underline">
+          Save and finish later
+        </button>
+      </div>
+    </div>,
+  )
 }

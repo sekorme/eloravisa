@@ -15,6 +15,7 @@ import {
     CalendarClock,
     PartyPopper,
     Wallet,
+    Landmark,
     HeartHandshake,
     UsersRound,
 } from "lucide-react";
@@ -43,6 +44,7 @@ const groups: { label: string; items: { title: string; url: string; icon: typeof
         label: "Prepare",
         items: [
             { title: "My Application", url: "/dashboard/application", icon: FileCheck },
+            { title: "Statement Builder", url: "/dashboard/statement-builder", icon: Landmark },
             { title: "Funds Check", url: "/dashboard/finances", icon: Wallet },
             { title: "AI Document Draft", url: "/dashboard/draft", icon: FileText },
             { title: "Visa Information", url: "/dashboard/information", icon: Info },

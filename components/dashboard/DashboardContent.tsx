@@ -9,6 +9,7 @@ import { QuickStats } from "./QuickStats"
 import { ReadinessPanel } from "./ReadinessPanel"
 import { ProgressTracker } from "./ProgressTracker"
 import { NextActionCard } from "./NextActionCard"
+import { StartHereCard } from "./StartHereCard"
 import { AlertsSection } from "./AlertsSection"
 import { ResourcesSection } from "./ResourcesSection"
 import { OutcomeCard } from "./OutcomeCard"
@@ -64,6 +65,7 @@ export function DashboardContent() {
                             </div>
                         </div>
                         <div className="space-y-6">
+                            <StartHereCard />
                             <div className="dashboard-section">
                                 <NextActionCard />
                             </div>
