@@ -48,7 +48,7 @@ export interface NextStep {
   id: string
   label: string
   detail: string
-  /** Rough points the score would gain; used to order steps. */
+  /** Rough points the score would gain; orders steps within a stage. */
   impact: number
   href: string
 }
@@ -64,6 +64,18 @@ export interface ReadinessResult {
 }
 
 const DAY = 24 * 60 * 60 * 1000
+
+/**
+ * The order an applicant should work in. Steps sort by stage first, so a new
+ * user is told to upload documents before a mock interview (which uses their
+ * reviewed documents), even though one interview adds more points than one
+ * upload. Unknown ids sort last.
+ */
+const STAGES = ["renew", "upload", "review", "improve", "check", "interview", "add"]
+const stageOf = (id: string) => {
+  const i = STAGES.indexOf(id.split("-")[0])
+  return i === -1 ? STAGES.length : i
+}
 const WEIGHTS = { documents: 0.35, review: 0.35, interview: 0.3 }
 const GOOD_SCORE = 70
 /** Points off the total per document that won't be valid in time. */
@@ -189,7 +201,7 @@ export function computeReadiness(input: ReadinessInput): ReadinessResult {
   return {
     score,
     parts: { documents: Math.round(documents), review: Math.round(review), interview: Math.round(interview) },
-    nextSteps: steps.sort((a, b) => b.impact - a.impact),
+    nextSteps: steps.sort((a, b) => stageOf(a.id) - stageOf(b.id) || b.impact - a.impact),
     validity,
     uploadedRequired: present.length,
     reviewedRequired: reviewed.length,
