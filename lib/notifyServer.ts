@@ -12,7 +12,7 @@ import { pushToUser } from "@/lib/push";
  * eloraadmin's lib/adminServer.ts, which sends the other session emails.
  */
 
-export const SITE_URL = "https://eloravisa.com";
+export const SITE_URL = "https://www.eloravisa.com";
 
 export interface NotifyOptions {
   title: string;

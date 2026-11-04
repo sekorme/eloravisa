@@ -408,7 +408,7 @@ async function sendSeatConfirmation(uid: string, meetingId: string) {
         title: meeting.title,
         description: meeting.description,
         scheduledAt: startsAt,
-        joinUrl: `https://eloravisa.com${joinPath}`,
+        joinUrl: `https://www.eloravisa.com${joinPath}`,
       }),
     },
   });

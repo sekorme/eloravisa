@@ -8,7 +8,7 @@ import { FAQS } from "./content"
  * content. Do not add entries here that a visitor cannot read on the page.
  */
 
-const SITE = "https://eloravisa.com"
+const SITE = "https://www.eloravisa.com"
 
 export function organizationSchema() {
   return {

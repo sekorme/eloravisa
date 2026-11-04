@@ -51,8 +51,8 @@ export const metadata: Metadata = {
     creator: "Elora Visa",
     publisher: "Elora Visa",
     icons: {
-        icon: "https://eloravisa.com/eloravisa.PNG",
-        apple: "https://eloravisa.com/apple-touch-icon.png",
+        icon: "https://www.eloravisa.com/eloravisa.PNG",
+        apple: "https://www.eloravisa.com/apple-touch-icon.png",
     },
     robots: {
         index: true,
@@ -69,7 +69,7 @@ export const metadata: Metadata = {
     openGraph: {
         type: "website",
         locale: "en_US",
-        url: "https://eloravisa.com", // Replace with actual domain
+        url: "https://www.eloravisa.com",
         title: "Elora Visa - Your AI Visa Companion",
         description: "Simplify your visa journey with AI. Document analysis, interview prep, and expert guidance all in one place.",
         siteName: "Elora Visa",
@@ -81,7 +81,7 @@ export const metadata: Metadata = {
         description: "Boost your visa approval chances with AI-powered reviews and mock interviews.",
         creator: "@eloravisa", // Replace with actual handle
     },
-    metadataBase: new URL("https://eloravisa.com"), // Replace with actual domain
+    metadataBase: new URL("https://www.eloravisa.com"),
     alternates: {
         canonical: "/",
     },

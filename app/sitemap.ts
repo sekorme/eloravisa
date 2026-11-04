@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { listPublishedRequirements } from '@/lib/countryRequirementsServer';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://eloravisa.com';
+  const baseUrl = 'https://www.eloravisa.com';
   
   const routes = [
     '',

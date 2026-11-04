@@ -12,11 +12,11 @@ export const metadata: Metadata = {
     openGraph: {
         title: "Elora Visa Affiliate Program - Partner with Us & Earn",
         description: "Earn 10% commission by helping others simplify their visa journey with Elora Visa's AI-powered platform.",
-        url: "https://eloravisa.com/affiliate",
+        url: "https://www.eloravisa.com/affiliate",
         siteName: "Elora Visa Affiliate",
         type: "website",
         images: [
-            "https://eloravisa.com/affiliateimage.png"
+            "https://www.eloravisa.com/affiliateimage.png"
         ],
     },
     twitter: {

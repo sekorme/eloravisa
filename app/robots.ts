@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/dashboard/', '/api/'],
     },
-    sitemap: 'https://eloravisa.com/sitemap.xml',
+    sitemap: 'https://www.eloravisa.com/sitemap.xml',
   };
 }

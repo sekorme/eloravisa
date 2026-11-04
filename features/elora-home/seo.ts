@@ -9,7 +9,7 @@ import type { Metadata } from "next"
  * chances". The description says what the product does.
  */
 
-export const SITE_URL = "https://eloravisa.com"
+export const SITE_URL = "https://www.eloravisa.com"
 
 /* Share image: app/opengraph-image.tsx (1200×630, used by Open Graph and X). */
 

@@ -39,7 +39,7 @@ export async function sendAffiliateWelcomeEmail({
   
   <div style="text-align: center; margin-bottom: 20px;">
     <img 
-      src="https://eloravisa.com/512.png" 
+      src="https://www.eloravisa.com/512.png" 
       alt="Elora Visa Logo" 
       style="width: 120px; height: auto; border-radius: 50%;"
     />
