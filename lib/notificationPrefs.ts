@@ -23,7 +23,7 @@ export const NOTIFICATION_CATEGORIES: CategoryInfo[] = [
   { id: "reminders", label: "Reminders", description: "Your embassy appointment, and live sessions you've booked (including when they go live)." },
   { id: "documents", label: "Document alerts", description: "Documents that are expiring or out of date, and review decisions from our team." },
   { id: "sessions", label: "Live session news", description: "New live sessions and replays." },
-  { id: "updates", label: "Tips and updates", description: "Follow-ups from our team, announcements and offers." },
+  { id: "updates", label: "Tips and updates", description: "News for your destination, follow-ups from our team, announcements and offers." },
   { id: "account", label: "Payments and bookings", description: "Receipts, booking confirmations and refunds.", emailRequired: true },
 ]
 

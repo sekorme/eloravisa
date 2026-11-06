@@ -13,6 +13,7 @@ import { StartHereCard } from "./StartHereCard"
 import { AlertsSection } from "./AlertsSection"
 import { ResourcesSection } from "./ResourcesSection"
 import { OutcomeCard } from "./OutcomeCard"
+import { InsightsCard } from "./InsightsCard"
 import { EnablePushPrompt } from "./EnablePushPrompt"
 import { SidePanel } from "./home/SidePanel"
 
@@ -76,6 +77,10 @@ export function DashboardContent() {
                                 <ComingUp />
                             </div>
                         </div>
+                    </div>
+
+                    <div className="dashboard-section">
+                        <InsightsCard />
                     </div>
 
                     <div className="dashboard-section">
