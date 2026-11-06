@@ -64,6 +64,10 @@ export function DashboardContent() {
                             <div className="dashboard-section">
                                 <ProgressTracker />
                             </div>
+                            {/* In the wide column so it fills the space beside the taller side column. */}
+                            <div className="dashboard-section">
+                                <InsightsCard />
+                            </div>
                         </div>
                         <div className="space-y-6">
                             <StartHereCard />
@@ -77,10 +81,6 @@ export function DashboardContent() {
                                 <ComingUp />
                             </div>
                         </div>
-                    </div>
-
-                    <div className="dashboard-section">
-                        <InsightsCard />
                     </div>
 
                     <div className="dashboard-section">
