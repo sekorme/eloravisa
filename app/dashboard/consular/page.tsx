@@ -16,7 +16,7 @@ import { toast } from "sonner";
 
 export default function App() {
     const videoRef = useRef<HTMLVideoElement>(null);
-    const transcriptEndRef = useRef<HTMLDivElement>(null);
+    const transcriptBoxRef = useRef<HTMLDivElement>(null);
     const [isCameraVisible, setIsCameraVisible] = useState(true);
     const [selectedCountry, setSelectedCountry] = useState<Country | null>(null);
     const { status, transcripts, error, connect, disconnect, setTranscripts, setError, destination, visaType, getSessionRecord } = useLiveAPI();
@@ -131,13 +131,16 @@ export default function App() {
     }, [status]);
 
     useEffect(() => {
-        if (transcriptEndRef.current) {
-            transcriptEndRef.current.scrollIntoView({ behavior: "smooth" });
-        }
+        // Scroll only the transcript box. scrollIntoView would also scroll the
+        // page, pushing the video up on every new line.
+        const box = transcriptBoxRef.current;
+        if (box) box.scrollTo({ top: box.scrollHeight, behavior: "smooth" });
     }, [transcripts]);
 
+    // On large screens the page is exactly the viewport under the 72px navbar, so the
+    // video and transcript share a fixed height and the transcript scrolls inside its box.
     return (
-        <div className="flex min-h-screen flex-col bg-lp-page py-4 text-lp-fg">
+        <div className="flex min-h-screen flex-col bg-lp-page py-4 text-lp-fg lg:h-[calc(100dvh-72px)] lg:min-h-0">
             <SystemErrorModal error={error} onClose={() => setError(null)} />
 
             <header className="mx-auto mb-4 flex h-auto w-full max-w-[1600px] shrink-0 flex-col items-center justify-between gap-4 px-4 sm:flex-row md:px-8">
@@ -182,7 +185,7 @@ export default function App() {
                 </div>
             </header>
 
-            <main className="mx-auto grid min-h-0 w-full max-w-[1600px] flex-1 grid-cols-1 gap-6 px-4 pb-4 md:px-8 lg:h-[calc(100vh-120px)] lg:grid-cols-[2fr_1fr] xl:grid-cols-[2.5fr_1fr]">
+            <main className="mx-auto grid min-h-0 w-full max-w-[1600px] flex-1 grid-cols-1 gap-6 px-4 pb-4 md:px-8 lg:grid-rows-[minmax(0,1fr)] lg:grid-cols-[2fr_1fr] xl:grid-cols-[2.5fr_1fr]">
 
                 {/* Left Col - Video and Controls */}
                 <section className="flex h-full min-h-0 flex-col gap-4 md:gap-6">
@@ -360,7 +363,7 @@ export default function App() {
                             </div>
                         </div>
 
-                        <div className="custom-scrollbar flex-1 space-y-4 overflow-y-auto pr-2">
+                        <div ref={transcriptBoxRef} className="custom-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto pr-2">
                             {transcripts.length === 0 ? (
                                 <div className="flex h-full flex-col items-center justify-center text-lp-muted">
                                     <span className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-lp-sky text-lp-azure">
@@ -395,7 +398,6 @@ export default function App() {
                                     </div>
                                 ))
                             )}
-                            <div ref={transcriptEndRef} />
                         </div>
                     </div>
 

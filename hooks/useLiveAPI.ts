@@ -178,7 +178,7 @@ export function useLiveAPI() {
             let userMessageId = Math.random().toString(36).substring(7);
             let currentAiText = "";
             let currentUserText = "";
-            const agentmodels = ["Zephyr", "Charan", "Callirrhoe","Leda","Sadaltager"];
+            const agentmodels = ["Zephyr", "Callirrhoe", "Leda", "Sadaltager"];
             const randomIndexModel = Math.floor(Math.random() * agentmodels.length);
             const selectedAgent = agentmodels[randomIndexModel];
             // 3. Connect to Gemini Live

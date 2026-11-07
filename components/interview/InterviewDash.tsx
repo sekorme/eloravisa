@@ -212,7 +212,7 @@ const InterviewDash = () => {
             const AudioCtxClass = win.AudioContext || win.webkitAudioContext || AudioContext;
             const audioContext = new AudioCtxClass();
             audioContextRef.current = audioContext;
-            const agentmodels = ["Zephyr", "Charan", "Callirrhoe","Leda","Sadaltager"];
+            const agentmodels = ["Zephyr", "Callirrhoe", "Leda", "Sadaltager"];
             const randomIndexModel = Math.floor(Math.random() * agentmodels.length);
             const selectedAgent = agentmodels[randomIndexModel];
 
