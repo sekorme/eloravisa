@@ -408,17 +408,24 @@ export default function SubscriptionPage() {
         </div>
       </div>
 
-      <div className="mt-16 rounded-[1.75rem] border border-lp-line bg-lp-card-2 p-6 md:p-8">
-        <h2 className="mb-6 text-center font-display text-[11px] font-medium uppercase tracking-[0.2em] text-lp-muted">Token Cost Guide</h2>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+      <div className="mt-16 rounded-[1.75rem] border border-lp-line bg-lp-card-2 p-4 sm:p-6 md:p-8">
+        <h2 className="mb-5 text-center font-display text-[11px] font-medium uppercase tracking-[0.2em] text-lp-muted sm:mb-6">Token Cost Guide</h2>
+        {/* Phones: two narrow cards per row, so the icon stacks above the text
+            and the label gets the full card width. From `sm` there's room for
+            icon and text side by side. `min-w-0` lets the text column shrink
+            and wrap instead of pushing out of the card. */}
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
           {costs.map((c) => (
-            <div key={c.label} className="flex items-center gap-4 rounded-2xl border border-lp-line bg-lp-card p-4">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-lp-sky text-lp-azure">
-                  <c.icon className="h-5 w-5" />
+            <div
+              key={c.label}
+              className="flex min-w-0 flex-col items-start gap-3 rounded-2xl border border-lp-line bg-lp-card p-3.5 sm:flex-row sm:items-center sm:gap-4 sm:p-4"
+            >
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-lp-sky text-lp-azure sm:h-11 sm:w-11">
+                  <c.icon className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
-              <div>
-                  <p className="font-display text-[10px] font-medium uppercase tracking-[0.16em] text-lp-muted">{c.label}</p>
-                  <p className="font-display text-lg font-semibold tracking-[-0.02em]">{c.value}</p>
+              <div className="min-w-0">
+                  <p className="font-display text-[10px] font-medium uppercase leading-snug tracking-[0.08em] text-lp-muted [overflow-wrap:anywhere] sm:tracking-[0.16em]">{c.label}</p>
+                  <p className="mt-0.5 font-display text-base font-semibold tracking-[-0.02em] sm:text-lg">{c.value}</p>
               </div>
             </div>
           ))}
