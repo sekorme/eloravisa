@@ -40,6 +40,7 @@ try {
   var m = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
   if (!m || !m.matches) {
     document.documentElement.setAttribute('data-eh-anim', 'ready');
+    window.__ehGate = true;
   }
 } catch (e) {}
 `.trim()

@@ -37,10 +37,13 @@ import { Footer } from "./scenes/Footer"
 export function SiteChrome({
     children,
     navTone = "light",
+    showGauge = false,
 }: {
     children: ReactNode
     /** What the transparent nav sits over. See `Navigation`. */
     navTone?: "light" | "dark"
+    /** Show the nav readiness gauge (homepage only). See `Navigation`. */
+    showGauge?: boolean
 }) {
     return (
         <div data-elora-home>
@@ -59,7 +62,7 @@ export function SiteChrome({
                 Skip to main content
             </a>
 
-            <Navigation tone={navTone} />
+            <Navigation tone={navTone} showGauge={showGauge} />
 
             <main id="eh-main" className="eh-main">
                 {children}

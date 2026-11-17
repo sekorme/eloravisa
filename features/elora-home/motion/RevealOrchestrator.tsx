@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useLayoutEffect } from "react"
 import { usePathname } from "next/navigation"
 import { gsap, ScrollTrigger, prefersReducedMotion, DUR, EASE, STAGGER } from "./useMotion"
 
@@ -67,8 +67,28 @@ const settle = (batch: Element[]) => () => {
     gsap.set(batch, { clearProps: "opacity,transform" })
 }
 
+type GateWindow = Window & { __ehGate?: boolean }
+
 export function RevealOrchestrator() {
     const pathname = usePathname()
+
+    /**
+     * Keep the gate open through a hydration failure.
+     *
+     * If hydration ever fails, React regenerates the tree on the client and
+     * resets <html>'s attributes to what it renders — dropping the
+     * `data-eh-anim` the inline gate script added. Every scroll animation
+     * (opening passport, flight route, reveals) then silently switches off.
+     * The script also leaves `window.__ehGate`, so the decision it made is
+     * restored here. A layout effect, so it lands before any component's
+     * passive effect reads the gate.
+     */
+    useLayoutEffect(() => {
+        const w = window as GateWindow
+        if (w.__ehGate && document.documentElement.dataset.ehAnim !== "ready") {
+            document.documentElement.setAttribute("data-eh-anim", "ready")
+        }
+    }, [])
 
     useEffect(() => {
         // Gate closed — no JS-driven hiding happened, so there is nothing to
@@ -217,6 +237,8 @@ export function RevealOrchestrator() {
             })
 
             if (strandedInView || strandedHeadline) {
+                // Closed for good: don't let the restore above reopen it.
+                ;(window as GateWindow).__ehGate = false
                 document.documentElement.removeAttribute("data-eh-anim")
             }
         }, 4000)

@@ -69,7 +69,7 @@ export async function EloraHome() {
     ])
 
     return (
-        <SiteChrome>
+        <SiteChrome showGauge>
             <StructuredData />
 
             <Hero />

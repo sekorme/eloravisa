@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { AnimatePresence, motion } from "motion/react"
 import { BrandLogo } from "../components/Primitives"
@@ -38,12 +37,24 @@ const SCROLL_THRESHOLD = 24
  * a dark hero. The tone only applies while transparent; once the bar condenses
  * into its white surface it reverts to the standard colours automatically.
  */
-export function Navigation({ tone = "light" }: { tone?: "light" | "dark" }) {
+export function Navigation({
+    tone = "light",
+    showGauge = false,
+}: {
+    tone?: "light" | "dark"
+    /**
+     * The readiness gauge tracks progress through the homepage's story only.
+     * Passed in by the page rather than derived from `usePathname()`: in the
+     * statically prerendered homepage the server's pathname didn't equal "/",
+     * so the server omitted the gauge, the client rendered it, and the
+     * hydration failure that followed reset <html>'s attributes — wiping the
+     * animation gate and with it every scroll animation on the page.
+     */
+    showGauge?: boolean
+}) {
     const [condensed, setCondensed] = useState(false)
     const [open, setOpen] = useState(false)
     const reduced = useReducedMotion()
-    // The readiness gauge tracks progress through the homepage's story only.
-    const onHome = usePathname() === "/"
 
     const triggerRef = useRef<HTMLButtonElement>(null)
     const panelRef = useRef<HTMLDivElement>(null)
@@ -158,7 +169,7 @@ export function Navigation({ tone = "light" }: { tone?: "light" | "dark" }) {
                     </ul>
 
                     <div className="eh-nav-actions">
-                        {onHome && <ReadinessGauge />}
+                        {showGauge && <ReadinessGauge />}
                         <Link
                             href={NAV_CTA.signIn.href}
                             className="eh-nav-link eh-nav-signin"
