@@ -56,6 +56,17 @@ const REVEAL_POP = ".eh-reveal-pop"
  */
 const HEADLINE = ".eh-line-inner:not(.eh-hero-line)"
 
+/**
+ * Marks a batch as arrived, then hands it back to CSS. The `.eh-in` class
+ * takes it out of the stylesheet's hidden state BEFORE the inline styles are
+ * cleared — clearing first would let the CSS start offset (e.g. 24px down)
+ * reapply, leaving the element permanently displaced.
+ */
+const settle = (batch: Element[]) => () => {
+    batch.forEach((el) => el.classList.add("eh-in"))
+    gsap.set(batch, { clearProps: "opacity,transform" })
+}
+
 export function RevealOrchestrator() {
     const pathname = usePathname()
 
@@ -82,7 +93,7 @@ export function RevealOrchestrator() {
                         stagger: STAGGER.normal,
                         // Hand the element back to CSS once it has arrived, so
                         // hover/focus transitions aren't fighting inline styles.
-                        clearProps: "transform",
+                        onComplete: settle(batch),
                     }),
             })
 
@@ -95,7 +106,7 @@ export function RevealOrchestrator() {
                         duration: DUR.lg,
                         ease: EASE.entrance,
                         stagger: STAGGER.tight,
-                        clearProps: "transform",
+                        onComplete: settle(batch),
                     }),
             })
 
@@ -108,7 +119,7 @@ export function RevealOrchestrator() {
                         duration: DUR.md,
                         ease: EASE.entrance,
                         stagger: STAGGER.tight,
-                        clearProps: "transform",
+                        onComplete: settle(batch),
                     }),
             })
 

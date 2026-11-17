@@ -10,6 +10,7 @@ import { InterviewScene } from "./scenes/InterviewScene"
 import { Roadmap } from "./scenes/Roadmap"
 import { GlobalGuidance } from "./scenes/GlobalGuidance"
 import { LiveClasses } from "./scenes/LiveClasses"
+import { Community } from "./scenes/Community"
 import { Ecosystem } from "./scenes/Ecosystem"
 import { Trust } from "./scenes/Trust"
 import { Voices } from "./scenes/Voices"
@@ -44,6 +45,7 @@ import { FinalCta } from "./scenes/FinalCta"
  *    5 Roadmap     Calm after the storm: it is a finite, ordered list.
  *    6 Destinations Made specific to where *you* are going.
  *    7 Classes     Humans, not only software.
+ *      Community   ...and other applicants, on Telegram.
  *    8 Ecosystem   How the pieces reinforce each other.
  *    9 Trust       You are handing over sensitive documents. Here's the deal.
  *   10 Voices      Only what can be verified.
@@ -77,6 +79,7 @@ export async function EloraHome() {
             <Roadmap />
             <GlobalGuidance />
             <LiveClasses classes={classes} />
+            <Community />
             <Ecosystem />
             <Trust />
             <Voices testimonials={testimonials} metrics={metrics} />

@@ -201,6 +201,19 @@ export const CLASSES = {
 } as const
 
 /* ------------------------------------------------------------------------ */
+/*  Community — public Telegram channel                                      */
+/* ------------------------------------------------------------------------ */
+
+export const COMMUNITY = {
+    eyebrow: "Join the community",
+    headline: "Visa updates and real conversations, on Telegram.",
+    body:
+        "Get visa news and preparation tips as they're shared, ask questions, and learn from other applicants going through the same process.",
+    cta: { label: "Join our Telegram channel", href: "https://t.me/+wWazCHK2wEMzMzdk" },
+    note: "Free to join. Opens in Telegram.",
+} as const
+
+/* ------------------------------------------------------------------------ */
 /*  Scene 8 — Ecosystem                                                      */
 /* ------------------------------------------------------------------------ */
 

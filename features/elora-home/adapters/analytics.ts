@@ -29,6 +29,7 @@ export type HomeEvent =
     | "sign_in"
     | "tool_focused"
     | "nav_cta"
+    | "community_joined"
 
 export interface HomeEventContext {
     /** Stable slug under our control. Never user input. */
@@ -57,6 +58,7 @@ const PROVIDER_EVENT: Record<HomeEvent, AnalyticsEvent> = {
     sign_in: "account_creation_started",
     tool_focused: "tool_card_interaction",
     nav_cta: "section_cta_click",
+    community_joined: "section_cta_click",
 }
 
 function dispatch(event: HomeEvent, ctx: HomeEventContext): void {

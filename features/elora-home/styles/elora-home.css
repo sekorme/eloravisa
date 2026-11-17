@@ -632,9 +632,14 @@
      reduced motion     -> selector never matches, content is visible. Always.
 
    This is why no scene ever hardcodes `opacity: 0`.
+
+   Once revealed, RevealOrchestrator adds `.eh-in`, which takes the element out
+   of these hidden states for good. Without it, clearing GSAP's inline styles
+   let the start offset (24px down / 16px left / 90% scale) reapply, leaving
+   eyebrows sitting on top of the headings beneath them.
    ========================================================================== */
 
-html[data-eh-anim="ready"] [data-elora-home] .eh-reveal {
+html[data-eh-anim="ready"] [data-elora-home] .eh-reveal:not(.eh-in) {
     opacity: 0;
     transform: translate3d(0, 24px, 0);
     /* Hint the compositor for the one property pair we animate, and no more —
@@ -643,14 +648,14 @@ html[data-eh-anim="ready"] [data-elora-home] .eh-reveal {
 }
 
 /* Variant: horizontal entrance, for rail items and document fans. */
-html[data-eh-anim="ready"] [data-elora-home] .eh-reveal-x {
+html[data-eh-anim="ready"] [data-elora-home] .eh-reveal-x:not(.eh-in) {
     opacity: 0;
     transform: translate3d(-16px, 0, 0);
     will-change: opacity, transform;
 }
 
 /* Variant: scale-in for markers and rings. */
-html[data-eh-anim="ready"] [data-elora-home] .eh-reveal-pop {
+html[data-eh-anim="ready"] [data-elora-home] .eh-reveal-pop:not(.eh-in) {
     opacity: 0;
     transform: scale(0.9);
     will-change: opacity, transform;
@@ -4668,4 +4673,75 @@ html[data-eh-curtain="skip"] [data-elora-home] .eh-curtain { display: none; }
    allowed to sit over the page indefinitely. */
 @media (prefers-reduced-motion: reduce) {
     [data-elora-home] .eh-curtain { display: none; }
+}
+
+/* ==========================================================================
+   Community — Telegram channel band
+   ========================================================================== */
+
+[data-elora-home] .eh-community {
+    padding-block: calc(var(--eh-scene-y) * 0.5);
+}
+
+[data-elora-home] .eh-community-card {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--eh-space-8);
+    padding: var(--eh-space-8) var(--eh-space-12);
+    background: var(--eh-panel);
+    border: 1px solid var(--eh-line);
+    border-radius: var(--eh-radius-2xl);
+    box-shadow: var(--eh-shadow-md);
+}
+
+[data-elora-home] .eh-community-mark {
+    display: grid;
+    place-items: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    /* Telegram blue, so the destination is recognisable before it's read. */
+    background: #229ED9;
+    color: #fff;
+}
+
+[data-elora-home] .eh-community-copy .eh-body {
+    max-width: 56ch;
+}
+
+[data-elora-home] .eh-community-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--eh-space-2);
+}
+
+[data-elora-home] .eh-community-btn {
+    white-space: nowrap;
+}
+
+[data-elora-home] .eh-community-note {
+    font-size: var(--eh-text-xs);
+    color: var(--eh-fg-muted);
+}
+
+[data-elora-home] .eh-community .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+@media (max-width: 899px) {
+    [data-elora-home] .eh-community-card {
+        grid-template-columns: 1fr;
+        gap: var(--eh-space-6);
+        padding: var(--eh-space-8) var(--eh-space-6);
+    }
+    [data-elora-home] .eh-community-action { align-items: stretch; }
+    [data-elora-home] .eh-community-btn { white-space: normal; width: 100%; }
+    [data-elora-home] .eh-community-note { text-align: center; }
 }
