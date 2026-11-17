@@ -129,6 +129,16 @@ export function FinalCta() {
                             ))}
                             <div className="eh-final-passport" aria-hidden="true">
                                 <Passport width={190} uid="final" />
+                                {/* The stamps collected along the page's flight
+                                    route (JourneyRoute). They ink in when the
+                                    route lands here. */}
+                                <span className="eh-final-stamps">
+                                    {["Docs", "Interview", "Roadmap", "Arrived"].map((label, i) => (
+                                        <span key={label} className="eh-final-stamp" data-i={i}>
+                                            {label}
+                                        </span>
+                                    ))}
+                                </span>
                             </div>
 
                             {/* The two photographs close the arc the hero

@@ -6,6 +6,7 @@ import { Cta } from "../components/Cta"
 import { ArrowRight } from "../components/Icon"
 import { Horizon, project } from "../components/Horizon"
 import { GlobeLayer } from "../components/GlobeLayer"
+import { FlapText } from "../components/FlapText"
 import Image from "next/image"
 import { GLOBAL } from "../data/content"
 import { DESTINATION_IMAGE } from "../data/media"
@@ -169,10 +170,12 @@ export function GlobalGuidance() {
                         aria-atomic="true"
                     >
                         <Board>
-                            {selected.code} · Destination preparation
+                            <FlapText text={`${selected.code} · Destination preparation`} />
                         </Board>
 
-                        <h3 className="eh-global-panel-title">{selected.name}</h3>
+                        <h3 className="eh-global-panel-title">
+                            <FlapText text={selected.name} />
+                        </h3>
 
                         <div className="eh-global-block">
                             <h4>Common visa categories</h4>

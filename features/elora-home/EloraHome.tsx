@@ -16,6 +16,7 @@ import { Trust } from "./scenes/Trust"
 import { Voices } from "./scenes/Voices"
 import { Pricing } from "./scenes/Pricing"
 import { FinalCta } from "./scenes/FinalCta"
+import { JourneyRoute } from "./components/JourneyRoute"
 
 /**
  * The Elora homepage.
@@ -72,6 +73,10 @@ export async function EloraHome() {
             <StructuredData />
 
             <Hero />
+            {/* The flight route threads every scene from here to the final
+                portfolio; it measures its own wrapper. */}
+            <div className="eh-route-wrap">
+            <JourneyRoute />
             <Journey />
             <Audiences />
             <DocumentIntelligence />
@@ -85,6 +90,7 @@ export async function EloraHome() {
             <Voices testimonials={testimonials} metrics={metrics} />
             <Pricing />
             <FinalCta />
+            </div>
         </SiteChrome>
     )
 }

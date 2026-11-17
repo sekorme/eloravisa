@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from "react"
-import { Passport } from "../components/Passport"
+import { OpeningPassport } from "../components/OpeningPassport"
 import { HeroMedia } from "../components/HeroMedia"
 import { ReadinessRing } from "../components/ReadinessRing"
 import { Cta } from "../components/Cta"
@@ -252,7 +252,7 @@ export function Hero() {
                     {/* Layer 3 — the passport, closest, largest parallax. */}
                     <div className="eh-hero-layer eh-hero-layer--near">
                         <div className="eh-hero-passport">
-                            <Passport width={300} uid="hero" />
+                            <OpeningPassport width={300} />
                         </div>
                     </div>
 

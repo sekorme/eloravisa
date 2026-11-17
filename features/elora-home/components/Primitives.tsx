@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 import Image from "next/image"
 import { BRAND } from "../data/content"
+import { FlapText } from "./FlapText"
 
 /**
  * Layout and typographic primitives.
@@ -44,8 +45,13 @@ export function Shell({ children, className = "" }: { children: ReactNode; class
 /*  Typography                                                                */
 /* -------------------------------------------------------------------------- */
 
+/** Section label. Plain-string labels flip in like a departure board. */
 export function Eyebrow({ children, className = "" }: { children: ReactNode; className?: string }) {
-    return <p className={`eh-eyebrow eh-reveal ${className}`}>{children}</p>
+    return (
+        <p className={`eh-eyebrow eh-reveal ${className}`}>
+            {typeof children === "string" ? <FlapText text={children} /> : children}
+        </p>
+    )
 }
 
 /** Departure-board lettering — gate numbers, coordinates, timestamps. */

@@ -1,10 +1,12 @@
 "use client"
 
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { AnimatePresence, motion } from "motion/react"
 import { BrandLogo } from "../components/Primitives"
 import { Cta } from "../components/Cta"
+import { ReadinessGauge } from "../components/ReadinessGauge"
 import { ArrowRight } from "../components/Icon"
 import { NAV_LINKS, NAV_CTA } from "../data/content"
 import { track } from "../adapters/analytics"
@@ -40,6 +42,8 @@ export function Navigation({ tone = "light" }: { tone?: "light" | "dark" }) {
     const [condensed, setCondensed] = useState(false)
     const [open, setOpen] = useState(false)
     const reduced = useReducedMotion()
+    // The readiness gauge tracks progress through the homepage's story only.
+    const onHome = usePathname() === "/"
 
     const triggerRef = useRef<HTMLButtonElement>(null)
     const panelRef = useRef<HTMLDivElement>(null)
@@ -154,6 +158,7 @@ export function Navigation({ tone = "light" }: { tone?: "light" | "dark" }) {
                     </ul>
 
                     <div className="eh-nav-actions">
+                        {onHome && <ReadinessGauge />}
                         <Link
                             href={NAV_CTA.signIn.href}
                             className="eh-nav-link eh-nav-signin"

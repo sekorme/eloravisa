@@ -4745,3 +4745,391 @@ html[data-eh-curtain="skip"] [data-elora-home] .eh-curtain { display: none; }
     [data-elora-home] .eh-community-btn { white-space: normal; width: 100%; }
     [data-elora-home] .eh-community-note { text-align: center; }
 }
+
+/* ==========================================================================
+   Split-flap text (FlapText)
+   ========================================================================== */
+
+/* Tabular figures keep flipping digits the same width as the settled ones. */
+[data-elora-home] .eh-flap {
+    font-variant-numeric: tabular-nums;
+}
+
+/* ==========================================================================
+   Flight route (JourneyRoute) + passport stamps
+   ========================================================================== */
+
+[data-elora-home] .eh-route-wrap {
+    position: relative;
+}
+
+[data-elora-home] .eh-route {
+    position: absolute;
+    inset: 0;
+    /* Above the scenes, below the nav; never intercepts a click. */
+    z-index: var(--eh-z-raised);
+    pointer-events: none;
+    overflow: clip;
+}
+
+[data-elora-home] .eh-route-svg {
+    position: absolute;
+    inset: 0 auto auto 0;
+    display: block;
+}
+
+[data-elora-home] .eh-route-ghost {
+    stroke: var(--eh-accent);
+    stroke-width: 2;
+    opacity: 0.16;
+}
+
+[data-elora-home] .eh-route-line {
+    stroke: var(--eh-accent);
+    stroke-width: 2.5;
+    opacity: 0.75;
+}
+
+[data-elora-home] .eh-route-plane {
+    fill: var(--eh-accent-soft);
+    stroke: var(--eh-bg, #fff);
+    stroke-width: 1.2;
+    stroke-linejoin: round;
+    transition: opacity var(--eh-dur-2) var(--eh-ease-out);
+    filter: drop-shadow(0 3px 4px rgb(10 39 32 / 0.25));
+}
+
+/* Stamps: positioned at their centre point. */
+[data-elora-home] .eh-route-stamp {
+    position: absolute;
+    translate: -50% -50%;
+}
+
+[data-elora-home] .eh-route-seal {
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 1px;
+    width: 104px;
+    height: 104px;
+    border-radius: 50%;
+    border: 2.5px solid currentColor;
+    /* Inner ring, as on a real rubber stamp. */
+    box-shadow: inset 0 0 0 4px var(--eh-bg, #fff), inset 0 0 0 5.5px currentColor;
+    background: color-mix(in srgb, var(--eh-bg, #fff) 82%, transparent);
+    color: var(--eh-accent);
+    font-family: var(--eh-font-mono);
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1.1;
+    rotate: -9deg;
+}
+
+[data-elora-home] .eh-route-tick {
+    display: grid;
+    place-items: center;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--eh-accent);
+    color: #fff;
+    box-shadow: 0 0 0 3px var(--eh-bg, #fff);
+}
+
+/* Unstamped (animated mode only): invisible, then lands with a thunk. */
+[data-elora-home] .eh-route[data-animated="true"] .eh-route-stamp > * {
+    transition:
+        opacity 120ms linear,
+        scale 420ms cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+[data-elora-home] .eh-route-stamp[data-stamped="false"] > * {
+    opacity: 0;
+    scale: 1.7;
+}
+[data-elora-home] .eh-route-stamp[data-stamped="true"] > * {
+    opacity: 0.92;
+    scale: 1;
+}
+
+/* Collected stamps on the final passport. */
+[data-elora-home] .eh-final-stamps {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+[data-elora-home] .eh-final-stamp {
+    position: absolute;
+    display: grid;
+    place-items: center;
+    width: 29%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 1.5px solid currentColor;
+    box-shadow: inset 0 0 0 3px transparent, inset 0 0 0 4px currentColor;
+    font-family: var(--eh-font-mono);
+    font-size: 7px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.88;
+}
+/* Kept inside the cover (x 8–97%, y 2–98% of the drawing), in its corners,
+   overlapping the emblem a little the way real entry stamps do. */
+[data-elora-home] .eh-final-stamp[data-i="0"] { left: 12%; top: 3%; color: var(--eh-green-300); rotate: -14deg; }
+[data-elora-home] .eh-final-stamp[data-i="1"] { right: 5%; top: 25%; color: var(--eh-gold-300); rotate: 11deg; }
+[data-elora-home] .eh-final-stamp[data-i="2"] { left: 13%; top: 58%; color: var(--eh-green-200); rotate: 7deg; }
+[data-elora-home] .eh-final-stamp[data-i="3"] { right: 4%; top: 71%; color: var(--eh-gold-200); rotate: -10deg; width: 33%; }
+
+/* With the route animating, the passport's stamps wait for it to land. */
+html[data-eh-anim="ready"] [data-elora-home] .eh-final:not([data-route-arrived="true"]) .eh-final-stamp {
+    opacity: 0;
+    scale: 1.8;
+}
+html[data-eh-anim="ready"] [data-elora-home] .eh-final[data-route-arrived="true"] .eh-final-stamp {
+    transition:
+        opacity 140ms linear,
+        scale 460ms cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+html[data-eh-anim="ready"] [data-elora-home] .eh-final[data-route-arrived="true"] .eh-final-stamp[data-i="1"] { transition-delay: 140ms; }
+html[data-eh-anim="ready"] [data-elora-home] .eh-final[data-route-arrived="true"] .eh-final-stamp[data-i="2"] { transition-delay: 280ms; }
+html[data-eh-anim="ready"] [data-elora-home] .eh-final[data-route-arrived="true"] .eh-final-stamp[data-i="3"] { transition-delay: 420ms; }
+
+@media (prefers-reduced-motion: reduce) {
+    [data-elora-home] .eh-route-stamp > *,
+    [data-elora-home] .eh-final-stamp { transition: none !important; }
+}
+
+/* ==========================================================================
+   Opening hero passport (OpeningPassport)
+   --------------------------------------------------------------------------
+   The cover drawing occupies x 8.1–97.5%, y 1.8–98.2% of the Passport SVG;
+   the data page and the inside of the cover sit on exactly that rectangle.
+   ========================================================================== */
+
+[data-elora-home] .eh-book {
+    --eh-scroll-open: 0;
+    --eh-hover-open: 0;
+    --eh-open-angle: -150deg;
+    position: relative;
+    perspective: 1600px;
+}
+
+[data-elora-home] .eh-book-cover {
+    position: relative;
+    transform-style: preserve-3d;
+    /* The spine: the cover's left edge. */
+    transform-origin: 8.1% 50%;
+    transform: rotateY(calc(max(var(--eh-scroll-open), var(--eh-hover-open)) * var(--eh-open-angle)));
+    transition: transform 520ms var(--eh-ease-out);
+    will-change: transform;
+}
+
+[data-elora-home] .eh-book-front {
+    backface-visibility: hidden;
+}
+
+[data-elora-home] .eh-book-back,
+[data-elora-home] .eh-book-page {
+    position: absolute;
+    left: 8.1%;
+    top: 1.8%;
+    width: 89.4%;
+    height: 96.4%;
+    border-radius: 4.5% / 3.2%;
+}
+
+[data-elora-home] .eh-book-back {
+    transform: rotateY(180deg);
+    backface-visibility: hidden;
+    background:
+        repeating-radial-gradient(circle at 50% 50%, rgb(255 244 214 / 0.06) 0 1px, transparent 1px 7px),
+        linear-gradient(120deg, #1B4A3E, #0B2A22);
+    box-shadow: inset -6px 0 14px rgb(0 0 0 / 0.35);
+}
+
+/* Hover peek: only where hovering is real, and only once the JS has decided
+   motion is allowed (data-live). */
+@media (hover: hover) and (pointer: fine) {
+    [data-elora-home] .eh-book[data-live="true"]:hover { --eh-hover-open: 1; }
+    [data-elora-home] .eh-hero-passport:has(.eh-book[data-live="true"]) { cursor: pointer; }
+}
+
+/* ---- the data page ---- */
+
+[data-elora-home] .eh-book-page {
+    container-type: inline-size;
+    overflow: hidden;
+    background:
+        repeating-linear-gradient(115deg, rgb(30 122 88 / 0.05) 0 1px, transparent 1px 9px),
+        repeating-linear-gradient(65deg, rgb(201 160 76 / 0.06) 0 1px, transparent 1px 11px),
+        linear-gradient(180deg, #FBF8EF, #F1EBDA);
+    box-shadow: inset 8px 0 16px -8px rgb(0 0 0 / 0.35);
+    color: #2B3F37;
+}
+
+[data-elora-home] .eh-book-page-inner {
+    position: relative;
+    height: 100%;
+    padding: 9cqw 8cqw 7cqw 11cqw;
+    display: flex;
+    flex-direction: column;
+    gap: 6cqw;
+}
+
+[data-elora-home] .eh-book-kicker {
+    font-family: var(--eh-font-mono);
+    font-size: 3.3cqw;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #557066;
+}
+
+[data-elora-home] .eh-book-id {
+    display: flex;
+    gap: 6cqw;
+    align-items: flex-start;
+}
+
+[data-elora-home] .eh-book-photo {
+    flex: none;
+    display: grid;
+    place-items: end center;
+    width: 27cqw;
+    aspect-ratio: 4 / 5;
+    border-radius: 2cqw;
+    overflow: hidden;
+    background: linear-gradient(180deg, #DCE8E1, #C4D6CB);
+    color: #8EA89B;
+}
+[data-elora-home] .eh-book-photo svg { width: 80%; }
+
+[data-elora-home] .eh-book-fields {
+    display: grid;
+    gap: 4cqw;
+    margin: 0;
+}
+[data-elora-home] .eh-book-fields dt {
+    font-family: var(--eh-font-mono);
+    font-size: 2.9cqw;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #6B8278;
+}
+[data-elora-home] .eh-book-fields dd {
+    margin: 0.5cqw 0 0;
+    font-family: var(--eh-font-display);
+    font-size: 6.2cqw;
+    line-height: 1.1;
+    color: #0A2720;
+}
+
+[data-elora-home] .eh-book-checks {
+    display: grid;
+    gap: 2.6cqw;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 4.3cqw;
+}
+[data-elora-home] .eh-book-checks li {
+    display: flex;
+    align-items: center;
+    gap: 3cqw;
+}
+[data-elora-home] .eh-book-mark {
+    flex: none;
+    width: 3.6cqw;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 0.6cqw solid #9AAFA5;
+}
+[data-elora-home] .eh-book-checks li[data-state="verified"] .eh-book-mark { background: var(--eh-green-600); border-color: var(--eh-green-600); }
+[data-elora-home] .eh-book-checks li[data-state="attention"] .eh-book-mark { border-color: var(--eh-gold-500); background: var(--eh-gold-200); }
+
+[data-elora-home] .eh-book-stamp {
+    position: absolute;
+    right: 7cqw;
+    bottom: 22cqw;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 1cqw;
+    width: 36cqw;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 0.9cqw solid currentColor;
+    box-shadow: inset 0 0 0 1.4cqw transparent, inset 0 0 0 1.9cqw currentColor;
+    color: rgb(30 122 88 / 0.78);
+    font-family: var(--eh-font-mono);
+    font-size: 3.4cqw;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-align: center;
+    line-height: 1.15;
+    rotate: -14deg;
+    mix-blend-mode: multiply;
+}
+[data-elora-home] .eh-book-stamp span:first-child { font-size: 5cqw; }
+[data-elora-home] .eh-book-stamp span:last-child { font-size: 2.6cqw; letter-spacing: 0.06em; }
+
+[data-elora-home] .eh-book-mrz {
+    margin-top: auto;
+    font-family: var(--eh-font-mono);
+    font-size: 3.15cqw;
+    letter-spacing: 0.05em;
+    line-height: 1.5;
+    color: #4A6157;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+/* Phones: a narrower swing, so the open cover stays on screen. */
+@media (max-width: 899px) {
+    [data-elora-home] .eh-book { --eh-open-angle: -112deg; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-elora-home] .eh-book-cover { transform: none; transition: none; }
+}
+
+/* ==========================================================================
+   Readiness gauge (nav)
+   ========================================================================== */
+
+[data-elora-home] .eh-gauge {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    flex: none;
+    border-radius: 50%;
+}
+[data-elora-home] .eh-gauge svg { position: absolute; inset: 0; }
+[data-elora-home] .eh-gauge-track { stroke: var(--eh-line-strong); }
+[data-elora-home] .eh-gauge-fill { stroke: var(--eh-accent); }
+[data-elora-home] .eh-gauge-num {
+    font-family: var(--eh-font-mono);
+    font-size: 9px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--eh-fg);
+}
+/* Over the dark hero band on the marketing pages' tone. */
+[data-elora-home] .eh-nav[data-tone="dark"][data-condensed="false"] .eh-gauge-track { stroke: rgb(255 255 255 / 0.3); }
+[data-elora-home] .eh-nav[data-tone="dark"][data-condensed="false"] .eh-gauge-num { color: #fff; }
+
+/* One pulse on reaching 100%. */
+[data-elora-home] .eh-gauge[data-done="true"] {
+    animation: eh-gauge-pulse 900ms var(--eh-ease-out) 1;
+}
+@keyframes eh-gauge-pulse {
+    0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--eh-accent) 55%, transparent); scale: 1; }
+    35% { scale: 1.18; }
+    100% { box-shadow: 0 0 0 14px transparent; scale: 1; }
+}
