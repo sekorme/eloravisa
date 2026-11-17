@@ -21,6 +21,9 @@ export function proxy(req: NextRequest) {
     return response;
 }
 
+// Every page route, so TrackVisit (in the root layout) has a country cookie
+// whichever page a visitor lands on first. Skips API routes, Next internals,
+// the Sentry tunnel and static files.
 export const config = {
-    matcher: ["/", "/courses", "/learn", "/dashboard"],
+    matcher: ["/((?!api|_next/static|_next/image|monitoring|.*\\.[\\w]+$).*)"],
 };
