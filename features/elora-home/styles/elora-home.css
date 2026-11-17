@@ -2619,10 +2619,18 @@ html[data-eh-anim="ready"] [data-elora-home] .eh-hero-cue {
     pointer-events: none;
 }
 
-[data-elora-home] .eh-global-marker[data-selected="true"] .eh-global-marker-label,
+[data-elora-home] .eh-global-marker:hover .eh-global-marker-label,
 [data-elora-home] .eh-global-marker:focus-visible .eh-global-marker-label {
     opacity: 1;
-    color: var(--eh-fg);
+    color: #DFF0E7;
+}
+[data-elora-home] .eh-global-marker[data-selected="true"] .eh-global-marker-label {
+    opacity: 1;
+    padding: 0.25rem 0.55rem;
+    border-radius: var(--eh-radius-pill);
+    background: rgb(6 26 20 / 0.82);
+    border: 1px solid rgb(232 199 102 / 0.55);
+    color: #F0E2B0;
 }
 
 /* ---------------------------------------------------------------- panel -- */
@@ -3714,10 +3722,8 @@ html[data-eh-anim="ready"] [data-elora-home] .eh-final-passport {
 
 [data-elora-home] .eh-globe-layer {
     position: absolute;
-    right: -18%;
-    bottom: -22%;
-    width: 118%;
-    aspect-ratio: 1 / 1;
+    /* Exactly over the SVG globe, so the crossfade doesn't jump. */
+    inset: 0;
     opacity: 0;
     transition: opacity 900ms var(--eh-ease-out);
     pointer-events: none;
@@ -3725,19 +3731,18 @@ html[data-eh-anim="ready"] [data-elora-home] .eh-final-passport {
 
 [data-elora-home] .eh-globe-layer[data-active="true"] { opacity: 1; }
 
-/* Crossfade: once the 3D globe is live, retire the SVG so the two don't
-   double-expose. `:has()` keeps this in CSS rather than lifting the globe's
-   readiness into React state purely to toggle a class.
-
-   Degradation is safe: in a browser without `:has()` the SVG simply stays
-   visible beneath the globe. Slightly denser, never broken. */
-[data-elora-home] .eh-hero-layer--far:has(.eh-globe-layer[data-active="true"]) > svg {
-    opacity: 0;
-    transition: opacity 700ms var(--eh-ease-out);
+/* Crossfade: once the 3D globe is live, retire the SVG globe and its marker
+   buttons (the 3D globe has its own) so the two never double-expose. In a
+   browser without `:has()` the SVG simply stays beneath. */
+[data-elora-home] .eh-global-horizon,
+[data-elora-home] .eh-global-markers {
+    transition: opacity 700ms var(--eh-ease-out), visibility 0s linear 0s;
 }
-
-[data-elora-home] .eh-hero-layer--far > svg {
-    transition: opacity 700ms var(--eh-ease-out);
+[data-elora-home] .eh-global-globe-inner:has(.eh-globe-layer[data-active="true"]) .eh-global-horizon,
+[data-elora-home] .eh-global-globe-inner:has(.eh-globe-layer[data-active="true"]) .eh-global-markers {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 700ms var(--eh-ease-out), visibility 0s linear 700ms;
 }
 
 /* --- destination selector -------------------------------------------------
@@ -4162,8 +4167,10 @@ html[data-eh-anim="ready"] [data-elora-home] .eh-final-photo { opacity: 0; }
     gap: 0.75rem;
     margin-top: var(--eh-space-12);
     /* Fixed height so the panels can change width without the section's height
-       moving — no reflow of anything below as you move across them. */
-    height: clamp(24rem, 20rem + 14vw, 32rem);
+       moving — no reflow of anything below as you move across them. Tall
+       enough at 900–1100px, where the open panel is narrowest and its copy
+       wraps most, to fit the preview above the copy. */
+    height: clamp(30rem, 25rem + 9vw, 33rem);
 }
 
 [data-elora-home] .eh-aud-panel {
@@ -5132,4 +5139,441 @@ html[data-eh-anim="ready"] [data-elora-home] .eh-final[data-route-arrived="true"
     0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--eh-accent) 55%, transparent); scale: 1; }
     35% { scale: 1.18; }
     100% { box-shadow: 0 0 0 14px transparent; scale: 1; }
+}
+
+
+/* ==========================================================================
+   3D globe labels + map credit
+   ========================================================================== */
+
+[data-elora-home] .eh-globe3d {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+[data-elora-home] .eh-globe3d-labels {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+[data-elora-home] .eh-globe3d-label {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: grid;
+    place-items: center;
+    width: 0;
+    height: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    will-change: transform, opacity;
+}
+
+[data-elora-home] .eh-globe3d-hit {
+    position: absolute;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+}
+
+[data-elora-home] .eh-globe3d-text {
+    position: absolute;
+    left: 12px;
+    top: -8px;
+    white-space: nowrap;
+    font-family: var(--eh-font-mono);
+    font-size: 0.5625rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #CFE9DC;
+    opacity: 0;
+    transition: opacity var(--eh-dur-2) var(--eh-ease-out);
+    pointer-events: none;
+}
+[data-elora-home] .eh-globe3d-label:hover .eh-globe3d-text { opacity: 1; }
+
+[data-elora-home] .eh-globe3d-label[data-selected="true"] .eh-globe3d-text,
+[data-elora-home] .eh-globe3d-origin .eh-globe3d-text {
+    opacity: 1;
+    padding: 0.25rem 0.55rem;
+    top: -12px;
+    border-radius: var(--eh-radius-pill);
+    background: rgb(6 26 20 / 0.82);
+    border: 1px solid rgb(232 199 102 / 0.55);
+    color: #F0E2B0;
+}
+[data-elora-home] .eh-globe3d-origin .eh-globe3d-text {
+    border-color: rgb(212 175 55 / 0.35);
+    color: #E8D6A0;
+}
+
+[data-elora-home] .eh-global-credit {
+    margin-top: 0.5rem;
+    text-align: center;
+    font-size: 0.6875rem;
+    color: var(--eh-fg-subtle);
+}
+[data-elora-home] .eh-global-credit a { text-decoration: underline; text-underline-offset: 2px; }
+
+/* ==========================================================================
+   Audience previews (AudiencePreview) — "Who is this for?"
+   --------------------------------------------------------------------------
+   The open panel becomes a column: preview at the top, copy at the bottom,
+   both in flow so they can never overlap. Final states are the base styles;
+   keyframes (fill: both) start from the "before" state and run only while
+   the panel is open AND the section has scrolled into view.
+   ========================================================================== */
+
+[data-elora-home] .eh-aud-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+[data-elora-home] .eh-aud-content {
+    position: relative;
+    inset: auto;
+    margin-top: auto;
+    flex-shrink: 0;
+}
+
+[data-elora-home] .eh-prev {
+    position: relative;
+    align-self: flex-end;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    width: min(16.5rem, calc(100% - 2.5rem));
+    margin: clamp(1rem, 0.75rem + 0.8vw, 1.5rem) clamp(1rem, 0.75rem + 0.8vw, 1.5rem) 0;
+    padding: 0.85rem 0.95rem 0.95rem;
+    border-radius: 14px;
+    background: rgb(6 26 20 / 0.8);
+    border: 1px solid rgb(232 199 102 / 0.28);
+    box-shadow: 0 18px 40px -18px rgb(0 0 0 / 0.7);
+    backdrop-filter: blur(10px);
+    color: #DCEBE3;
+    font-size: 0.75rem;
+    line-height: 1.3;
+    overflow: hidden;
+    flex-shrink: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 200ms linear, visibility 0s linear 200ms;
+}
+
+[data-elora-home] .eh-aud-panel[data-active="true"] .eh-prev {
+    opacity: 1;
+    visibility: visible;
+    transition: none;
+}
+
+/* Waiting for the section to scroll into view (JS sets data-inview). */
+[data-elora-home] .eh-aud-rail[data-inview="false"] .eh-prev { opacity: 0; }
+
+/* Shorthand for "animate this while open and in view". */
+[data-elora-home] .eh-aud-rail[data-inview="true"] .eh-aud-panel[data-active="true"] .eh-prev {
+    animation: eh-prev-in 600ms var(--eh-ease-entrance) 220ms both;
+}
+@keyframes eh-prev-in {
+    from { opacity: 0; transform: translate3d(0, 14px, 0) scale(0.97); }
+    to { opacity: 1; transform: none; }
+}
+
+[data-elora-home] .eh-prev-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+[data-elora-home] .eh-prev-kicker {
+    font-family: var(--eh-font-mono);
+    font-size: 0.59rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--eh-gold-200);
+}
+[data-elora-home] .eh-prev-tag {
+    font-family: var(--eh-font-mono);
+    font-size: 0.5rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.4rem;
+    border-radius: 999px;
+    border: 1px solid rgb(255 255 255 / 0.22);
+    color: rgb(220 235 227 / 0.75);
+}
+
+[data-elora-home] .eh-prev-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+[data-elora-home] .eh-prev-row {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-width: 0;
+}
+[data-elora-home] .eh-prev-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Status mark: a ring that fills green with a tick. */
+[data-elora-home] .eh-prev-mark {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1.5px solid rgb(255 255 255 / 0.3);
+}
+[data-elora-home] .eh-prev-mark svg { width: 10px; height: 10px; }
+
+[data-elora-home] .eh-prev-row[data-state="done"] .eh-prev-mark,
+[data-elora-home] .eh-prev-row--check .eh-prev-mark,
+[data-elora-home] .eh-prev-row--swap .eh-prev-mark {
+    background: var(--eh-green-500);
+    border-color: var(--eh-green-500);
+    color: #fff;
+}
+[data-elora-home] .eh-prev-row[data-state="now"] .eh-prev-mark { border-color: var(--eh-gold-300); }
+[data-elora-home] .eh-prev-row[data-state="now"] .eh-prev-label { color: #fff; }
+[data-elora-home] .eh-prev-row[data-state="next"] { opacity: 0.5; }
+
+[data-elora-home] .eh-prev-status {
+    margin-left: auto;
+    flex: none;
+    font-family: var(--eh-font-mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--eh-gold-200);
+}
+
+/* Progress bar. */
+[data-elora-home] .eh-prev-bar {
+    height: 4px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.12);
+    overflow: hidden;
+}
+[data-elora-home] .eh-prev-bar-fill {
+    display: block;
+    height: 100%;
+    width: var(--to, 60%);
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--eh-green-400), var(--eh-gold-300));
+}
+
+/* Swap: an old status and a new one in the same cell. */
+[data-elora-home] .eh-prev-swap {
+    display: grid;
+    margin-left: auto;
+    flex: none;
+    text-align: right;
+}
+[data-elora-home] .eh-prev-swap > * { grid-area: 1 / 1; white-space: nowrap; }
+[data-elora-home] .eh-prev-swap-old { opacity: 0; color: rgb(220 235 227 / 0.6); }
+[data-elora-home] .eh-prev-row--check .eh-prev-swap { font-family: var(--eh-font-mono); font-size: 0.56rem; letter-spacing: 0.08em; text-transform: uppercase; }
+[data-elora-home] .eh-prev-row--check .eh-prev-swap-new { color: var(--eh-green-300); }
+
+/* The agent rows: full-width text that gets struck through, then replaced. */
+[data-elora-home] .eh-prev-swap--line {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-left: 0;
+    text-align: left;
+}
+[data-elora-home] .eh-prev-swap--line > * { overflow: hidden; text-overflow: ellipsis; }
+[data-elora-home] .eh-prev-swap--line .eh-prev-swap-old {
+    color: #E7B2A6;
+    background: linear-gradient(currentColor, currentColor) no-repeat 0 55% / 100% 1.5px;
+}
+
+/* Reapplication scan line. */
+[data-elora-home] .eh-prev-scan {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 2.4rem;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--eh-gold-300), transparent);
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Route toggle. */
+[data-elora-home] .eh-prev-toggle {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 2px;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.1);
+    font-family: var(--eh-font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+[data-elora-home] .eh-prev-toggle-thumb {
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    left: 2px;
+    width: calc(50% - 2px);
+    border-radius: 999px;
+    background: var(--eh-gold-300);
+    transform: translateX(100%);
+}
+[data-elora-home] .eh-prev-toggle-opt {
+    position: relative;
+    padding: 0.3rem 0;
+    text-align: center;
+}
+[data-elora-home] .eh-prev-toggle-a { color: rgb(220 235 227 / 0.7); }
+[data-elora-home] .eh-prev-toggle-b { color: #0A2720; }
+
+[data-elora-home] .eh-prev-docs { display: grid; }
+[data-elora-home] .eh-prev-docset {
+    grid-area: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+[data-elora-home] .eh-prev-docset--a { opacity: 0; }
+[data-elora-home] .eh-prev-doc {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+/* A tiny document glyph. */
+[data-elora-home] .eh-prev-doc::before {
+    content: "";
+    flex: none;
+    width: 10px;
+    height: 13px;
+    border-radius: 2px;
+    border: 1.2px solid var(--eh-green-300);
+    background:
+        linear-gradient(var(--eh-green-300), var(--eh-green-300)) no-repeat 2px 4px / 4px 1px,
+        linear-gradient(var(--eh-green-300), var(--eh-green-300)) no-repeat 2px 7px / 4px 1px;
+}
+
+/* ---- the sequences -------------------------------------------------------- */
+
+/* "Run while open and in view" prefix, repeated per rule (CSS has no mixins). */
+[data-elora-home] .eh-aud-rail[data-inview="true"] .eh-aud-panel[data-active="true"] .eh-prev-row[data-state="done"] .eh-prev-mark {
+    animation: eh-prev-tick 520ms var(--eh-ease-out) var(--d) both;
+}
+[data-elora-home] .eh-aud-rail[data-inview="true"] .eh-aud-panel[data-active="true"] .eh-prev-row[data-state="done"] .eh-prev-mark svg {
+    animation: eh-prev-pop 520ms cubic-bezier(0.2, 1.6, 0.4, 1) var(--d) both;
+}
+[data-elora-home] .eh-aud-rail[data-inview="true"] .eh-aud-panel[data-active="true"] .eh-prev-row[data-state="now"] .eh-prev-mark {
+    animation: eh-prev-pulse 1.6s ease-in-out var(--d) infinite;
+}
+[data-elora-home] .eh-aud-rail[data-inview="true"] .eh-aud-panel[data-active="true"] .eh-prev-bar-fill {
+    animation: eh-prev-fill 1.6s var(--eh-ease-out) var(--d) both;
+}
+
+[data-elora-home] .eh-aud-rail[data-inview="true"] .eh-aud-panel[data-active="true"] .eh-prev-scan {
+    animation: eh-prev-scan 2.3s ease-in-out 350ms both;
+}
+[data-elora-home] .eh-aud-rail[data-inview="true"] .eh-aud-panel[data-active="true"] .eh-prev-row--check .eh-prev-mark,
+[data-elora-home] .eh-aud-rail[data-inview="true"] .eh-aud-panel[data-active="true"] .eh-prev-row--swap .eh-prev-mark {
+    animation: eh-prev-tick-late 1.2s var(--eh-ease-out) var(--d) both;
+}
+[data-elora-home] .eh-aud-rail[data-inview="true"] .eh-aud-panel[data-active="true"] .eh-prev-swap-old {
+    animation: eh-prev-old 1.2s var(--eh-ease-out) var(--d) both;
+}
+[data-elora-home] .eh-aud-rail[data-inview="true"] .eh-aud-panel[data-active="true"] .eh-prev-swap-new {
+    animation: eh-prev-new 1.2s var(--eh-ease-out) var(--d) both;
+}
+
+[data-elora-home] .eh-aud-rail[data-inview="true"] .eh-aud-panel[data-active="true"] .eh-prev-toggle-thumb {
+    animation: eh-prev-slide 520ms var(--eh-ease-entrance) var(--d) both;
+}
+[data-elora-home] .eh-aud-rail[data-inview="true"] .eh-aud-panel[data-active="true"] .eh-prev-toggle-a {
+    animation: eh-prev-text-off 520ms linear var(--d) both;
+}
+[data-elora-home] .eh-aud-rail[data-inview="true"] .eh-aud-panel[data-active="true"] .eh-prev-toggle-b {
+    animation: eh-prev-text-on 520ms linear var(--d) both;
+}
+[data-elora-home] .eh-aud-rail[data-inview="true"] .eh-aud-panel[data-active="true"] .eh-prev-docset--a {
+    animation: eh-prev-out 260ms linear var(--d) both;
+}
+[data-elora-home] .eh-aud-rail[data-inview="true"] .eh-aud-panel[data-active="true"] .eh-prev-doc {
+    animation: eh-prev-doc-in 420ms var(--eh-ease-entrance) var(--d) both;
+}
+
+@keyframes eh-prev-tick {
+    from { background: transparent; border-color: rgb(255 255 255 / 0.3); }
+}
+@keyframes eh-prev-pop {
+    from { transform: scale(0); }
+}
+@keyframes eh-prev-tick-late {
+    0%, 65% { background: transparent; border-color: rgb(255 255 255 / 0.3); color: transparent; }
+}
+@keyframes eh-prev-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgb(232 199 102 / 0.5); }
+    60% { box-shadow: 0 0 0 5px rgb(232 199 102 / 0); }
+}
+@keyframes eh-prev-fill {
+    from { width: 0; }
+}
+@keyframes eh-prev-scan {
+    0% { top: 2.4rem; opacity: 0; }
+    10% { opacity: 0.9; }
+    90% { opacity: 0.9; }
+    100% { top: calc(100% - 0.6rem); opacity: 0; }
+}
+@keyframes eh-prev-old {
+    0% { opacity: 1; background-size: 0% 1.5px; }
+    45% { opacity: 1; background-size: 100% 1.5px; }
+    62% { opacity: 1; }
+    76%, 100% { opacity: 0; background-size: 100% 1.5px; }
+}
+@keyframes eh-prev-new {
+    0%, 66% { opacity: 0; transform: translate3d(0, 5px, 0); }
+    100% { opacity: 1; transform: none; }
+}
+@keyframes eh-prev-slide {
+    from { transform: translateX(0); }
+}
+@keyframes eh-prev-text-off {
+    from { color: #0A2720; }
+}
+@keyframes eh-prev-text-on {
+    from { color: rgb(220 235 227 / 0.7); }
+}
+@keyframes eh-prev-out {
+    from { opacity: 1; }
+}
+@keyframes eh-prev-doc-in {
+    from { opacity: 0; transform: translate3d(-8px, 0, 0); }
+}
+
+/* Phones: the card is full width and its preview spans it. */
+@media (max-width: 899px) {
+    [data-elora-home] .eh-prev {
+        align-self: stretch;
+        width: auto;
+        margin: 0.9rem 0.9rem 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-elora-home] .eh-prev,
+    [data-elora-home] .eh-prev * {
+        animation: none !important;
+    }
 }

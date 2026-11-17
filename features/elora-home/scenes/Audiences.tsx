@@ -6,6 +6,7 @@ import { Shell, Heading, Eyebrow, Body } from "../components/Primitives"
 import { AUDIENCES } from "../data/audiences"
 import { AUDIENCE } from "../data/content"
 import { useReducedMotion } from "../motion/useMotion"
+import { AudiencePreview } from "../components/AudiencePreview"
 
 /**
  * "Who is this for" — the four applicant situations.
@@ -49,6 +50,28 @@ export function Audiences() {
     const railRef = useRef<HTMLDivElement>(null)
     const groupId = useId()
     const reduced = useReducedMotion()
+    // The previews play once the section is on screen, so the first panel's
+    // sequence isn't spent while it's still below the fold. `null` until
+    // mounted, so without JS the previews simply show complete.
+    const [inView, setInView] = useState<boolean | null>(null)
+
+    useEffect(() => {
+        const rail = railRef.current
+        if (!rail) return
+        const io = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setInView(true)
+                    io.disconnect()
+                } else {
+                    setInView(false)
+                }
+            },
+            { threshold: 0.35 }
+        )
+        io.observe(rail)
+        return () => io.disconnect()
+    }, [])
 
     /* Which layout is live. Kept in state rather than read inside handlers so
        the dots render only when they actually control something. */
@@ -128,6 +151,7 @@ export function Audiences() {
                 <div
                     ref={railRef}
                     className="eh-aud-rail"
+                    data-inview={inView === null ? undefined : inView ? "true" : "false"}
                     role="group"
                     aria-label="Applicant situations"
                 >
@@ -177,6 +201,10 @@ export function Audiences() {
                                     <span className="eh-aud-index">{a.index}</span>
                                     <span className="eh-aud-spine-title">{a.title}</span>
                                 </span>
+
+                                {/* How Elora helps this situation, as a short
+                                    illustrated sequence that plays on open. */}
+                                <AudiencePreview id={a.id} />
 
                                 <span className="eh-aud-content" id={panelId}>
                                     <span className="eh-aud-index-open" aria-hidden="true">

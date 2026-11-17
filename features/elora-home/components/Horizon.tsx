@@ -1,77 +1,106 @@
 /**
- * The world horizon.
+ * The SVG globe for the destination scene.
  *
- * This is the hero's structural visual and it is a *server-rendered* SVG, not a
- * canvas. That is a performance decision with teeth: it means the hero has its
- * full cinematic composition in the very first HTML response — no blank frame
- * while a 3D bundle downloads, no layout shift when it arrives, and a Largest
- * Contentful Paint that doesn't wait on JavaScript.
+ * Server-rendered and complete in the first HTML response: dotted continents,
+ * a true orthographic graticule, the flight routes from Accra, and the
+ * markers. On phones, under reduced motion, and on devices that don't get
+ * the Three.js globe, this is the whole show; where the 3D globe does load
+ * (GlobeLayer), it fades in exactly on top of this one.
  *
- * The R3F globe in `GlobeCanvas.tsx` layers *on top of* this when the device
- * can afford it. This one always renders, and on mobile and under reduced
- * motion it is the whole show.
- *
- * The graticule is drawn as true ellipses under a perspective-ish transform,
- * which is what makes the limb read as a sphere rather than as a circle with
- * lines on it.
+ * The globe is drawn from a `view` — the lat/lon at the centre of the disc.
+ * GlobalGuidance animates that view to frame whichever route is selected, so
+ * the globe turns to show it (and Australia, on the far side from the
+ * default view, becomes reachable).
  */
 
 import { DESTINATIONS, ORIGIN } from "../data/destinations"
+import { LAND_COARSE } from "../data/globeLand"
+import { greatCircle, projectView, r3, type View } from "./globeGeo"
 
-/**
- * Rounds a computed coordinate to 3 decimal places.
- *
- * ------------------------------------------------------------------------
- * THIS PREVENTS A HYDRATION MISMATCH
- * ------------------------------------------------------------------------
- * Every coordinate in this file comes out of `Math.sin` / `Math.cos`. Those are
- * not guaranteed to be bit-identical between the V8 that renders on the server
- * and the V8 in the visitor's browser — the last digit or two can differ. React
- * then serialises `cx="123.45600000000002"` on one side and
- * `cx="123.456"` on the other, and reports a hydration mismatch on the whole
- * subtree.
- *
- * Three decimals is far more precision than a 600-unit viewBox can render, so
- * this costs nothing visually and makes the markup deterministic.
- */
-const r3 = (n: number): number => Math.round(n * 1000) / 1000
+export const CX = 300
+export const CY = 300
+export const R = 232
 
-/**
- * Projects a lat/lon onto the visible face of the globe.
- *
- * Orthographic projection about a centre longitude. Returns `null` for points
- * on the far side, so markers correctly disappear round the limb instead of
- * ghosting through the sphere.
- */
-export function project(
-    lat: number,
-    lon: number,
-    cx: number,
-    cy: number,
-    r: number,
-    centreLon = -10,
-    centreLat = 22
-): { x: number; y: number; z: number } | null {
-    const φ = (lat * Math.PI) / 180
-    const λ = ((lon - centreLon) * Math.PI) / 180
-    const φ0 = (centreLat * Math.PI) / 180
-
-    const cosC = Math.sin(φ0) * Math.sin(φ) + Math.cos(φ0) * Math.cos(φ) * Math.cos(λ)
-    if (cosC < 0) return null // far side
-
-    const x = cx + r * Math.cos(φ) * Math.sin(λ)
-    const y = cy - r * (Math.cos(φ0) * Math.sin(φ) - Math.sin(φ0) * Math.cos(φ) * Math.cos(λ))
-    // Rounded so the rendered SVG attributes are byte-identical on server and
-    // client. See the note on `r3`.
-    return { x: r3(x), y: r3(y), z: r3(cosC) }
+/** Back-compat helper: project onto this globe's disc for a given view. */
+export function project(lat: number, lon: number, view: View) {
+    const p = projectView(lat, lon, CX, CY, R, view)
+    return p.z < 0 ? null : p
 }
 
-const CX = 300
-const CY = 300
-const R = 232
+/** Land dots as three SVG paths (by depth), each dot a zero-length round cap. */
+function landPaths(view: View): [string, string, string] {
+    const bands: [string[], string[], string[]] = [[], [], []]
+    for (let i = 0; i < LAND_COARSE.length; i += 2) {
+        const p = projectView(LAND_COARSE[i] / 10, LAND_COARSE[i + 1] / 10, CX, CY, R, view)
+        if (p.z <= 0.02) continue
+        const band = p.z > 0.55 ? 0 : p.z > 0.25 ? 1 : 2
+        bands[band].push(`M${p.x} ${p.y}h0`)
+    }
+    return [bands[0].join(""), bands[1].join(""), bands[2].join("")]
+}
 
-export function Horizon({ className = "" }: { className?: string }) {
-    const origin = project(ORIGIN.lat, ORIGIN.lon, CX, CY, R)
+/** Graticule lines, true to the projection, broken where they pass behind. */
+function graticule(view: View): string {
+    const segs: string[] = []
+    const line = (pts: { x: number; y: number; z: number }[]) => {
+        let d = ""
+        let pen = false
+        for (const p of pts) {
+            if (p.z < 0) {
+                pen = false
+                continue
+            }
+            d += `${pen ? "L" : "M"}${p.x} ${p.y}`
+            pen = true
+        }
+        if (d) segs.push(d)
+    }
+    for (let lat = -60; lat <= 60; lat += 30) {
+        const pts = []
+        for (let lon = -180; lon <= 180; lon += 6) pts.push(projectView(lat, lon, CX, CY, R, view))
+        line(pts)
+    }
+    for (let lon = -180; lon < 180; lon += 30) {
+        const pts = []
+        for (let lat = -84; lat <= 84; lat += 6) pts.push(projectView(lat, lon, CX, CY, R, view))
+        line(pts)
+    }
+    return segs.join("")
+}
+
+/** A flight arc as a path, lifted off the surface; only the visible part. */
+export function arcPath(dest: { lat: number; lon: number }, view: View): string {
+    let d = ""
+    let pen = false
+    for (const p of greatCircle(ORIGIN, dest, 40)) {
+        const q = projectView(p.lat, p.lon, CX, CY, R, view, p.lift)
+        // A lifted point is still visible a little past the limb.
+        if (q.z < -p.lift * 0.9) {
+            pen = false
+            continue
+        }
+        d += `${pen ? "L" : "M"}${q.x} ${q.y}`
+        pen = true
+    }
+    return d
+}
+
+export function Horizon({
+    view,
+    selectedId,
+    comet = true,
+    className = "",
+}: {
+    view: View
+    selectedId: string
+    /** Animate a glowing dot along the selected route. */
+    comet?: boolean
+    className?: string
+}) {
+    const [front, mid, limb] = landPaths(view)
+    const origin = projectView(ORIGIN.lat, ORIGIN.lon, CX, CY, R, view)
+    const selected = DESTINATIONS.find((d) => d.id === selectedId) ?? DESTINATIONS[0]
+    const selectedArc = arcPath(selected, view)
 
     return (
         <svg
@@ -82,188 +111,79 @@ export function Horizon({ className = "" }: { className?: string }) {
             style={{ width: "100%", height: "auto", overflow: "visible" }}
         >
             <defs>
-                {/* The sphere body — lit from upper-left, falling into the page. */}
-                <radialGradient id="eh-globe-body" cx="0.34" cy="0.28" r="0.85">
-                    <stop offset="0%" stopColor="#246152" />
-                    <stop offset="45%" stopColor="#123A30" />
-                    <stop offset="100%" stopColor="#061A14" />
+                {/* Body, lit from upper-left. */}
+                <radialGradient id="eh-globe-body" cx="0.36" cy="0.3" r="0.8">
+                    <stop offset="0%" stopColor="#1F5A4A" />
+                    <stop offset="50%" stopColor="#0F3329" />
+                    <stop offset="100%" stopColor="#051611" />
                 </radialGradient>
 
-                {/* Atmospheric rim — the glow that sells "planet". */}
+                {/* Atmosphere rim. */}
                 <radialGradient id="eh-globe-atmo" cx="0.5" cy="0.5" r="0.5">
-                    <stop offset="82%" stopColor="#2E9B72" stopOpacity="0" />
-                    <stop offset="94%" stopColor="#5DBF95" stopOpacity="0.38" />
+                    <stop offset="80%" stopColor="#2E9B72" stopOpacity="0" />
+                    <stop offset="91%" stopColor="#5DBF95" stopOpacity="0.32" />
+                    <stop offset="100%" stopColor="#5DBF95" stopOpacity="0" />
+                </radialGradient>
+
+                {/* Night side, to give the sphere volume. */}
+                <radialGradient id="eh-globe-shade" cx="0.32" cy="0.28" r="0.95">
+                    <stop offset="55%" stopColor="#020B08" stopOpacity="0" />
+                    <stop offset="100%" stopColor="#020B08" stopOpacity="0.7" />
+                </radialGradient>
+
+                <radialGradient id="eh-globe-comet">
+                    <stop offset="0%" stopColor="#FFF4D6" />
+                    <stop offset="35%" stopColor="#E8C766" stopOpacity="0.9" />
                     <stop offset="100%" stopColor="#D4AF37" stopOpacity="0" />
                 </radialGradient>
-
-                <linearGradient id="eh-arc-grad" x1="0" y1="1" x2="1" y2="0">
-                    <stop offset="0%" stopColor="#D4AF37" />
-                    <stop offset="55%" stopColor="#5DBF95" />
-                    <stop offset="100%" stopColor="#BFE2D1" />
-                </linearGradient>
-
-                {/* Terminator: the day/night boundary, as a soft mask. */}
-                <linearGradient id="eh-globe-shade" x1="0.15" y1="0.1" x2="1" y2="0.95">
-                    <stop offset="40%" stopColor="#03110D" stopOpacity="0" />
-                    <stop offset="100%" stopColor="#03110D" stopOpacity="0.8" />
-                </linearGradient>
 
                 <clipPath id="eh-globe-clip">
                     <circle cx={CX} cy={CY} r={R} />
                 </clipPath>
             </defs>
 
-            {/* Atmosphere sits behind and slightly larger than the body. */}
-            <circle cx={CX} cy={CY} r={R * 1.13} fill="url(#eh-globe-atmo)" />
-
-            {/* Body */}
+            <circle cx={CX} cy={CY} r={R * 1.12} fill="url(#eh-globe-atmo)" />
             <circle cx={CX} cy={CY} r={R} fill="url(#eh-globe-body)" />
 
             <g clipPath="url(#eh-globe-clip)">
-                {/* --- graticule: parallels ---------------------------------- */}
-                {[-60, -40, -20, 0, 20, 40, 60, 80].map((lat) => {
-                    // A parallel projects to an ellipse whose semi-minor axis is
-                    // the cosine of the viewing tilt.
-                    const φ = (lat * Math.PI) / 180
-                    const φ0 = (22 * Math.PI) / 180
-                    const ry = r3(Math.abs(R * Math.cos(φ) * Math.sin(φ0))) || 1
-                    const rx = r3(R * Math.cos(φ))
-                    const cy = r3(CY - R * Math.sin(φ) * Math.cos(φ0))
-                    return (
-                        <ellipse
-                            key={lat}
-                            cx={CX}
-                            cy={cy}
-                            rx={rx}
-                            ry={ry}
-                            fill="none"
-                            stroke="#8FCDAF"
-                            strokeOpacity={lat === 0 ? 0.3 : 0.14}
-                            strokeWidth={lat === 0 ? 1.1 : 0.7}
-                        />
-                    )
-                })}
+                <path d={graticule(view)} fill="none" stroke="#8FCDAF" strokeOpacity="0.1" strokeWidth="0.7" />
 
-                {/* --- graticule: meridians ---------------------------------- */}
-                {Array.from({ length: 12 }).map((_, i) => {
-                    const rx = r3(R * Math.abs(Math.cos((i * Math.PI) / 12)))
-                    return (
-                        <ellipse
-                            key={i}
-                            cx={CX}
-                            cy={CY}
-                            rx={rx}
-                            ry={R}
-                            fill="none"
-                            stroke="#8FCDAF"
-                            strokeOpacity="0.12"
-                            strokeWidth="0.7"
-                        />
-                    )
-                })}
+                {/* Continents: brighter toward the centre, fading at the limb. */}
+                <g fill="none" strokeLinecap="round">
+                    <path d={limb} stroke="#7FC4A4" strokeOpacity="0.28" strokeWidth="2.4" />
+                    <path d={mid} stroke="#8FCDAF" strokeOpacity="0.5" strokeWidth="2.9" />
+                    <path d={front} stroke="#A9DCC3" strokeOpacity="0.72" strokeWidth="3.2" />
+                </g>
 
-                {/* --- coordinate particles ---------------------------------- */}
-                {/* Deterministic pseudo-random placement: a fixed lattice jittered
-                    by a hash. Deterministic matters — Math.random() here would
-                    produce different markup on server and client and trip a
-                    hydration mismatch. */}
-                {Array.from({ length: 90 }).map((_, i) => {
-                    const gLat = ((i * 37) % 150) - 70
-                    const gLon = ((i * 53) % 300) - 150
-                    const p = project(gLat, gLon, CX, CY, R)
-                    if (!p) return null
-                    return (
-                        <circle
-                            key={i}
-                            cx={p.x}
-                            cy={p.y}
-                            r={r3(0.9 + p.z * 0.9)}
-                            fill="#BFE2D1"
-                            opacity={r3(0.10 + p.z * 0.42)}
-                        />
-                    )
-                })}
-
-                {/* Night side */}
                 <rect x="0" y="0" width="600" height="600" fill="url(#eh-globe-shade)" />
             </g>
 
-            {/* --- flight paths ---------------------------------------------- */}
-            {/* Drawn outside the clip so the arcs lift off the sphere, which is
-                what gives the composition its sense of altitude.
+            {/* Thin rim highlight. */}
+            <circle cx={CX} cy={CY} r={R - 0.5} fill="none" stroke="#8FCDAF" strokeOpacity="0.22" strokeWidth="1" />
 
-                Each arc carries `pathLength={100}`, normalising every path to the
-                same nominal length. That lets one GSAP tween draw all six at an
-                identical rate regardless of their real geometric length, and lets
-                the CSS start state be written as a plain `stroke-dashoffset: 100`
-                without measuring anything at runtime. */}
-            <g>
-                {DESTINATIONS.map((d, i) => {
-                    const to = project(d.lat, d.lon, CX, CY, R)
-                    if (!to || !origin) return null
-
-                    // Great-circle-ish arc: a quadratic whose control point is
-                    // pushed away from the globe centre, so the path bows
-                    // outward like a real flight track.
-                    const mx = (origin.x + to.x) / 2
-                    const my = (origin.y + to.y) / 2
-                    const dx = mx - CX
-                    const dy = my - CY
-                    const len = Math.hypot(dx, dy) || 1
-                    const lift = 46 + i * 8
-                    const qx = r3(mx + (dx / len) * lift)
-                    const qy = r3(my + (dy / len) * lift)
-
-                    return (
-                        <path
-                            key={d.id}
-                            className="eh-arc"
-                            data-arc={d.id}
-                            d={`M ${origin.x} ${origin.y} Q ${qx} ${qy} ${to.x} ${to.y}`}
-                            fill="none"
-                            stroke="url(#eh-arc-grad)"
-                            strokeWidth="1.3"
-                            strokeOpacity="0.62"
-                            strokeLinecap="round"
-                            pathLength={100}
-                            strokeDasharray="3 4"
-                        />
-                    )
-                })}
+            {/* The selected route, in gold. (Only that one: routes running
+                round the back of the globe read as stray lines.) */}
+            <g fill="none" strokeLinecap="round">
+                <path d={selectedArc} stroke="#D4AF37" strokeOpacity="0.25" strokeWidth="6" />
+                <path d={selectedArc} stroke="#E8C766" strokeWidth="1.8" />
             </g>
 
-            {/* --- destination markers ---------------------------------------- */}
-            {DESTINATIONS.map((d) => {
-                const p = project(d.lat, d.lon, CX, CY, R)
-                if (!p) return null
-                return (
-                    <g key={d.id} data-marker={d.id}>
-                        <circle cx={p.x} cy={p.y} r="8" fill="#2E9B72" opacity="0.2" />
-                        <circle cx={p.x} cy={p.y} r="3" fill="#BFE2D1" />
-                        <text
-                            x={p.x + 11}
-                            y={p.y + 3.5}
-                            fill="#8FCDAF"
-                            style={{
-                                fontFamily: "var(--eh-font-mono), monospace",
-                                fontSize: 9.5,
-                                letterSpacing: "0.14em",
-                            }}
-                        >
-                            {d.code}
-                        </text>
-                    </g>
-                )
-            })}
+            {comet && selectedArc && (
+                <circle r="7" fill="url(#eh-globe-comet)">
+                    {/* Restarts when the destination changes (new key); while the
+                        globe turns, the path updates in place. */}
+                    <animateMotion key={selected.id} dur="2.8s" repeatCount="indefinite" path={selectedArc} keyPoints="0;1" keyTimes="0;1" calcMode="linear" />
+                </circle>
+            )}
 
-            {/* --- origin marker ---------------------------------------------- */}
-            {origin ? (
+            {/* Origin: Accra. */}
+            {origin.z > 0 && (
                 <g>
-                    <circle cx={origin.x} cy={origin.y} r="5.5" fill="#D4AF37" />
+                    <circle cx={origin.x} cy={origin.y} r="5" fill="#D4AF37" />
                     <circle
                         cx={origin.x}
                         cy={origin.y}
-                        r="5.5"
+                        r="5"
                         fill="none"
                         stroke="#D4AF37"
                         strokeWidth="1.2"
@@ -274,19 +194,15 @@ export function Horizon({ className = "" }: { className?: string }) {
                         }}
                     />
                     <text
-                        x={origin.x + 12}
-                        y={origin.y + 4}
+                        x={r3(origin.x + 11)}
+                        y={r3(origin.y + 4)}
                         fill="#F0E2B0"
-                        style={{
-                            fontFamily: "var(--eh-font-mono), monospace",
-                            fontSize: 10,
-                            letterSpacing: "0.16em",
-                        }}
+                        style={{ fontFamily: "var(--eh-font-mono), monospace", fontSize: 10, letterSpacing: "0.16em" }}
                     >
-                        {ORIGIN.code}
+                        ACCRA
                     </text>
                 </g>
-            ) : null}
+            )}
         </svg>
     )
 }

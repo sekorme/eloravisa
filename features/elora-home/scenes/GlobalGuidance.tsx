@@ -1,10 +1,12 @@
 "use client"
 
-import { useId, useState } from "react"
+import { useEffect, useId, useRef, useState } from "react"
 import { Shell, Heading, Eyebrow, Body, Caveat, Board } from "../components/Primitives"
 import { Cta } from "../components/Cta"
 import { ArrowRight } from "../components/Icon"
 import { Horizon, project } from "../components/Horizon"
+import { viewFor, lonDelta, type View } from "../components/globeGeo"
+import { useReducedMotion } from "../motion/useMotion"
 import { GlobeLayer } from "../components/GlobeLayer"
 import { FlapText } from "../components/FlapText"
 import Image from "next/image"
@@ -35,15 +37,38 @@ import { track } from "../adapters/analytics"
  * fees or eligibility. See `../data/destinations.ts`.
  */
 
-const CX = 300
-const CY = 300
-const R = 232
-
 export function GlobalGuidance() {
     const [selectedId, setSelectedId] = useState(DESTINATIONS[0].id)
     const panelId = useId()
 
     const selected = DESTINATIONS.find((d) => d.id === selectedId) ?? DESTINATIONS[0]
+    const reduced = useReducedMotion()
+
+    // The globe's view turns to frame the selected route. Tweened here so the
+    // SVG globe, its marker buttons and the 3D globe all share one view.
+    const [view, setView] = useState<View>(() => viewFor(DESTINATIONS[0]))
+    const viewRef = useRef(view)
+    useEffect(() => {
+        const target = viewFor(selected)
+        const from = viewRef.current
+        const dLon = lonDelta(from.lon, target.lon)
+        const dLat = target.lat - from.lat
+        if (Math.abs(dLon) < 0.01 && Math.abs(dLat) < 0.01) return
+        // Reduced motion: jump straight there on the next frame.
+        const duration = reduced ? 0 : 900 + Math.min(700, Math.abs(dLon) * 4)
+        const start = performance.now()
+        let raf = 0
+        const step = (now: number) => {
+            const t = duration ? Math.min(1, (now - start) / duration) : 1
+            const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2
+            const next = { lon: from.lon + dLon * e, lat: from.lat + dLat * e }
+            viewRef.current = next
+            setView(next)
+            if (t < 1) raf = requestAnimationFrame(step)
+        }
+        raf = requestAnimationFrame(step)
+        return () => cancelAnimationFrame(raf)
+    }, [selected, reduced])
 
     const select = (id: string, name: string) => {
         setSelectedId(id)
@@ -70,13 +95,22 @@ export function GlobalGuidance() {
                     {/* --------------------------------------------- globe */}
                     <div className="eh-global-globe">
                         <div className="eh-global-globe-inner">
-                            <Horizon className="eh-global-horizon" />
+                            <Horizon
+                                className="eh-global-horizon"
+                                view={view}
+                                selectedId={selectedId}
+                                comet={!reduced}
+                            />
                             {/* The Three.js globe crossfades over the SVG on
                                 capable desktops, after idle. This is the scene
                                 where real depth earns its bundle: markers must
                                 occlude behind the limb and arcs must lift off a
                                 curved surface. See GlobeLayer for the gate. */}
-                            <GlobeLayer />
+                            <GlobeLayer
+                                view={view}
+                                selectedId={selectedId}
+                                onSelect={(id) => select(id, id)}
+                            />
 
                             {/* Marker layer — a REDUNDANT pointer affordance.
                                 Orthographic projection hides whatever is on the
@@ -91,7 +125,7 @@ export function GlobalGuidance() {
                                 get to click the globe; nobody depends on it. */}
                             <div className="eh-global-markers" aria-hidden="true">
                                 {DESTINATIONS.map((d) => {
-                                    const p = project(d.lat, d.lon, CX, CY, R)
+                                    const p = project(d.lat, d.lon, view)
                                     if (!p) return null
                                     const isSelected = d.id === selectedId
                                     return (
@@ -110,12 +144,24 @@ export function GlobalGuidance() {
                                         >
                                             <span className="eh-global-marker-hit" />
                                             <span className="eh-global-marker-ring" />
-                                            <span className="eh-global-marker-label">{d.name}</span>
+                                            <span className="eh-global-marker-label">
+                                                {isSelected ? d.name : d.code}
+                                            </span>
                                         </button>
                                     )
                                 })}
                             </div>
                         </div>
+
+                        {/* Required credit for the ODbL-licensed outlines the
+                            continents are drawn from (see data/globeLand.ts). */}
+                        <p className="eh-global-credit">
+                            Map data:{" "}
+                            <a href="https://github.com/mledoze/countries" target="_blank" rel="noopener noreferrer">
+                                world-countries
+                            </a>
+                            , ODbL
+                        </p>
 
                         {/* The actual control. Every destination, always
                             present, keyboard-complete, 44px targets. */}

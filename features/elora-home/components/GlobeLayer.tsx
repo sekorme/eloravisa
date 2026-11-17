@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic"
 import { useEffect, useRef, useState } from "react"
 import { useReducedMotion } from "../motion/useMotion"
+import type { View } from "./globeGeo"
 
 /**
  * The capability gate in front of the Three.js globe.
@@ -42,15 +43,27 @@ const GlobeCanvas = dynamic(() => import("./GlobeCanvas"), {
 })
 
 interface GlobeLayerProps {
+    /** The shared view (see globeGeo) — the same one the SVG globe draws. */
+    view: View
+    selectedId: string
+    onSelect: (id: string) => void
     /** Minimum viewport width before 3D is considered worthwhile. */
     minWidth?: number
 }
 
-export function GlobeLayer({ minWidth = 1024 }: GlobeLayerProps) {
+export function GlobeLayer({ view, selectedId, onSelect, minWidth = 1024 }: GlobeLayerProps) {
     const hostRef = useRef<HTMLDivElement>(null)
     const pointer = useRef({ x: 0, y: 0 })
+    // The view tweens every frame; a ref lets the canvas read it without
+    // re-rendering the 3D scene 60 times a second.
+    const viewRef = useRef(view)
+    useEffect(() => {
+        viewRef.current = view
+    }, [view])
     const [eligible, setEligible] = useState(false)
     const [visible, setVisible] = useState(false)
+    // True once the canvas has drawn a frame; the SVG only fades out then.
+    const [ready, setReady] = useState(false)
     const reduced = useReducedMotion()
 
     /* ------------------------------------------------- capability + idle -- */
@@ -101,7 +114,12 @@ export function GlobeLayer({ minWidth = 1024 }: GlobeLayerProps) {
         if (!el) return
 
         const io = new IntersectionObserver(
-            ([entry]) => setVisible(entry.isIntersecting),
+            ([entry]) => {
+                setVisible(entry.isIntersecting)
+                // The canvas unmounts offscreen; it must prove a frame again
+                // before the SVG hides.
+                if (!entry.isIntersecting) setReady(false)
+            },
             { rootMargin: "120px" }
         )
         io.observe(el)
@@ -129,13 +147,20 @@ export function GlobeLayer({ minWidth = 1024 }: GlobeLayerProps) {
         <div
             ref={hostRef}
             className="eh-globe-layer"
-            data-active={active ? "true" : "false"}
-            // Purely decorative: the SVG horizon beneath carries the same
-            // information, and the destination markers are real buttons
-            // elsewhere in the scene.
+            data-active={active && ready ? "true" : "false"}
+            // Decorative: the SVG globe beneath carries the same information,
+            // and the destination buttons below are the real control.
             aria-hidden="true"
         >
-            {active ? <GlobeCanvas pointer={pointer} /> : null}
+            {active ? (
+                <GlobeCanvas
+                    pointer={pointer}
+                    viewRef={viewRef}
+                    selectedId={selectedId}
+                    onSelect={onSelect}
+                    onReady={() => setReady(true)}
+                />
+            ) : null}
         </div>
     )
 }
