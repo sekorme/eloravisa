@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Manrope, Geist_Mono, Fraunces } from "next/font/google";
 import "./globals.css";
 import {ThemeProvider} from "@/components/theme-provider";
@@ -40,6 +40,15 @@ const displaySerif = Fraunces({
     axes: ["SOFT", "WONK", "opsz"],
     display: "swap",
 });
+
+/**
+ * Brand navy green (`--eh-ng-850`, the nav and app-popup colour). Colours the
+ * phone's status bar and browser bar: Android Chrome, and the installed app on
+ * Android and iPhone (manifest.json `theme_color` matches).
+ */
+export const viewport: Viewport = {
+    themeColor: "#0A2720",
+};
 
 export const metadata: Metadata = {
     title: {
