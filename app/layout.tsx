@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/sonner";
 import Script from "next/script";
 import {TrackVisit} from "@/components/TrackVisit";
 import { LenisProvider } from "@/components/LenisProvider";
+import { InstallAppPrompt, CAPTURE_INSTALL_EVENT_SCRIPT } from "@/components/InstallAppPrompt";
 
 
 const geistSans = Inter({
@@ -66,6 +67,13 @@ export const metadata: Metadata = {
         },
     },
     manifest: "/manifest.json",
+    // Opens full screen (no Safari bars) when launched from an iPhone/iPad
+    // Home Screen, with the right name under the icon.
+    appleWebApp: {
+        capable: true,
+        title: "Elora Visa",
+        statusBarStyle: "default",
+    },
     openGraph: {
         type: "website",
         locale: "en_US",
@@ -121,6 +129,9 @@ export default function RootLayout({
   gtag('config', 'AW-17910098280'); // Google Ads
 `}
             </Script>
+            {/* Chrome fires its install event once, possibly before React
+                loads. Keep it so InstallAppPrompt's button can use it. */}
+            <script dangerouslySetInnerHTML={{ __html: CAPTURE_INSTALL_EVENT_SCRIPT }} />
             <meta name="google-site-verification" content="WaPSANjh4xYxdDhEX_bIetVlh6Z5gUkcaesHbibqXtE" />
         </head>
         <body
@@ -138,6 +149,7 @@ export default function RootLayout({
                     {children}
                 </AuthProvider>
             </LenisProvider>
+            <InstallAppPrompt />
             <Toaster />
         </ThemeProvider>
         </body>

@@ -24,7 +24,44 @@ const messaging = firebase.messaging();
 /* Replace the previously shipped broken worker (old SDK + wrong project)
    as soon as this one installs, instead of waiting for every tab to close. */
 self.addEventListener('install', () => self.skipWaiting());
-self.addEventListener('activate', (event) => event.waitUntil(clients.claim()));
+self.addEventListener('activate', (event) => event.waitUntil((async () => {
+    // Lets page loads start on the network while the worker boots, so
+    // handling navigations below adds no delay.
+    if (self.registration.navigationPreload) {
+        await self.registration.navigationPreload.enable();
+    }
+    await clients.claim();
+})()));
+
+/* 0️⃣  Offline page.
+   This worker is registered on every page (components/InstallAppPrompt.tsx)
+   so the site is installable as an app. Page loads go straight to the
+   network as before; only when that fails (no connection) is this small
+   offline page shown instead of the browser's error. Nothing is cached, so
+   there's no risk of serving stale pages. Other requests aren't touched. */
+const OFFLINE_HTML = `<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>You're offline · Elora Visa</title>
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0A2720;color:#fff;font:16px/1.5 system-ui,-apple-system,sans-serif;text-align:center;padding:24px;box-sizing:border-box}
+h1{font-size:1.5rem;margin:0 0 8px}p{margin:0 0 24px;color:#BFE2D1}
+button{font:inherit;font-weight:600;border:0;border-radius:999px;padding:12px 28px;background:#D4AF37;color:#0A2720;cursor:pointer}</style></head>
+<body><main><h1>You're offline</h1><p>Elora Visa needs a connection. Check your internet and try again.</p>
+<button onclick="location.reload()">Try again</button></main></body></html>`;
+
+self.addEventListener('fetch', (event) => {
+    if (event.request.mode !== 'navigate') return;
+    event.respondWith((async () => {
+        try {
+            const preloaded = await event.preloadResponse;
+            if (preloaded) return preloaded;
+            return await fetch(event.request);
+        } catch {
+            return new Response(OFFLINE_HTML, {
+                status: 503,
+                headers: { 'Content-Type': 'text/html; charset=utf-8' },
+            });
+        }
+    })());
+});
 
 /* 1️⃣  Background messages.
    Messages with a webpush `notification` (everything lib/push.ts sends) are

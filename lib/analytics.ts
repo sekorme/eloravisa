@@ -33,6 +33,12 @@ export type AnalyticsEvent =
   | "account_creation_completed"
   /** Secondary: a section's CTA that isn't one of the above. */
   | "section_cta_click"
+  /** The "install the app" popup was shown. `label` is the install path (native, ios, android, in-app, mac-safari). */
+  | "app_install_prompt_shown"
+  /** The popup's Install button was tapped. */
+  | "app_install_click"
+  /** The browser reported the app as installed. */
+  | "app_installed"
 
 /**
  * Coarse, non-identifying context only. `label` should be a stable slug you
